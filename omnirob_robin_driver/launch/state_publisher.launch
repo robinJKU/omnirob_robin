@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	
+  <!-- load the joint state publisher -->      
+  <node name="joint_state_publisher" pkg="omnirob_robin_driver" type="omnirob_joint_state_publisher" respawn="false"
+        output="screen" ns="/omnirob_robin/driver"/>
+</launch>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  	<!-- load hardware interface here -->
+	<include file="$(find omnirob_robin_hardware_interface)/launch/hardware_interface.launch"></include>
+  
+        <include file="$(find omnirob_robin_control)/launch/lwa_control.launch"></include>   
+	
+        <!-- <include file="$(find omnirob_robin_driver)/launch/all_interfaces.launch"></include>   
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">
+		<param name="publish_frequency" type="double" value="30.0"/>
+	</node>-->
+
+</launch>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/omnirob_robin_simulated.urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+  
+  <!-- Gazebo model spawner -->
+  <node name="spawn_omnirob_model" pkg="gazebo_ros" type="spawn_model"
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description 
+        -x 0
+        -y 0
+        -z 0.01   
+        -model omnirob"/>   
+</launch>

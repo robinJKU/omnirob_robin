@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/pg70/pg70.gazebo.xacro" />
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/pg70/pg70.transmission.xacro" />
+
+  <xacro:macro name="schunk_pg70" params="parent name *origin">
+
+    <joint name="${name}/palm_joint" type="fixed" >
+      <parent link="${parent}" />
+      <child link="${name}/palm_link" />
+      <xacro:insert_block name="origin" />
+    </joint>
+
+    <link name="${name}/palm_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <mesh filename="package://omnirob_robin_description/meshes/pg70/pg70.dae" />
+        </geometry>
+        <material name="Schunk/DarkGolden" />
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://omnirob_robin_description/meshes/pg70/pg70.dae" />
+        </geometry>        
+      </collision>
+    </link>
+    
+    <joint name="${name}/center_joint" type="fixed" >
+      <parent link="${name}/palm_link" />
+      <child link="${name}/center_link" />
+      <origin xyz="0 0 ${0.092+0.087}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="${name}/center_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>     
+    </link>
+
+
+    <joint name="${name}/finger_left_joint" type="prismatic" >
+      <parent link="${name}/palm_link" />
+      <child link="${name}/finger_left_link" />
+      <limit effort="500" lower="0.0" upper="0.035" velocity="2.0"/>
+      <origin xyz="0 0.005 ${0.078+0.09}" rpy="0 0 0"/>
+      <axis xyz="0 1 0" />
+    </joint>
+
+    <link name="${name}/finger_left_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="0.03 0.01 0.18"/>
+        </geometry>
+        <material name="white">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.01 0.18"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>30.0</mu>
+              <mu2>30.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+
+    <joint name="${name}/finger_right_joint" type="prismatic" >
+      <parent link="${name}/palm_link" />
+      <child link="${name}/finger_right_link" />
+      <limit effort="500" lower="0.0" upper="0.035" velocity="2.0"/>
+      <origin xyz="0 -0.005 ${0.078+0.09}" rpy="0 0 0"/>
+      <axis xyz="0 -1 0" />
+    </joint>
+
+    <link name="${name}/finger_right_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="0.03 0.01 0.18"/>
+        </geometry>
+        <material name="white">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.01 0.18"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>30.0</mu>
+              <mu2>30.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+  <!-- extensions for simulation -->
+  <xacro:if value="${simulated}">
+    <xacro:schunk_pg70_gazebo name="${name}" />
+    <xacro:schunk_pg70_transmission name="${name}" />
+  </xacro:if>
+
+
+  </xacro:macro>
+</robot>
+

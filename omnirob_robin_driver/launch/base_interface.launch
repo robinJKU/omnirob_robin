@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+ 
+  <!-- load the base interface node -->   
+   
+  <node name="base_interface" pkg="omnirob_robin_driver" type="base_interface" respawn="false"
+    output="screen" ns="omnirob_robin"/>
+     
+
+</launch>

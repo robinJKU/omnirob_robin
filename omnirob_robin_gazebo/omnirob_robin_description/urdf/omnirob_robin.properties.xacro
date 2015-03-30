@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="camera_mast_origin">
+    <!-- verweiste auf die mitte des senkrechten mastes
+         x = länge des profils am roboter/2 - versatz des arms zum zentrum - winkellänge - halbe profilbreite des mastes
+         y = abstand zur außenkante/2 - halbe profilbreite des mastes
+         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhöhe + profilhöhe -->   
+    <origin xyz="${0.150-0.020-0.080-0.020} ${-(0.7/2-0.02)} ${0.254/2+0.09+0.457+0.04}" rpy="0 0 0"/> 
+  </xacro:property>
+  
+  <xacro:property name="pan_tilt_origin">
+    <!-- von camera mast origin zu pan_tilt_origin -->
+    <origin xyz="0 0 0.669" rpy="0 0 0"/>
+  </xacro:property>  
+  
+  <property name="arm_1_ref" value="0"/>
+  <property name="arm_2_ref" value="0"/>
+  <property name="arm_3_ref" value="0"/>
+  <property name="arm_4_ref" value="0"/>
+  <property name="arm_5_ref" value="0"/>
+  <property name="arm_6_ref" value="0"/>
+  <property name="arm_7_ref" value="0"/> 
+  
+  <xacro:property name="lwa_origin">
+    <!-- verweiste auf die mitte des lwa unterhalb der befestigungsplatte
+         x = roboterlänge / 2 - plattenlänge halbe - versatz
+         y = mittig
+         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhöhe + profilhöhe -->   
+    <origin xyz="${0.7/2-0.355/2-0.094} 0 ${0.254/2+0.09+0.457+0.04}" rpy="${M_PI} 0 0"/> 
+  </xacro:property>
+  
+  <xacro:property name="gripper_origin"> 
+    <origin xyz="0 0 -0.02" rpy="${M_PI} 0 0"/> 
+  </xacro:property>
+  
+  
+  
+  <!-- camera rgb frame position von pan_tilt_tilt zentrum gemessen -->  
+  <xacro:property name="kinect2_origin"> 
+    <origin xyz="0 0 0.011" rpy="0 0 0"/> 
+  </xacro:property>
+  
+  <!-- laser scanner position von base_link gemessen 
+    x = roboterlänge / 2 + 3mm Abstandplatte + Scan Ebenen Ursprung von Gehäuse
+    y = 0 Scanner sollte mittig sein
+    z = Höhe von Boden zum Gehäuse + Scan Ebenen Ursprung von Gehäuse  
+  -->
+  <xacro:property name="laserscanner_origin"> 
+    <origin xyz="${0.7/2.0+0.003+0.0597} 0 ${0.293+0.116}" rpy="${M_PI} 0 0"/> 
+  </xacro:property>
+  
+</robot>

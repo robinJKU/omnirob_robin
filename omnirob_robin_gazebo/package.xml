@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>omnirob_robin_gazebo</name>
+  <version>0.0.0</version>
+  <description>The omnirob_robin_gazebo package</description>
+
+ 
+  <maintainer email="lukas@todo.todo">lukas</maintainer>
+
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <export>
+     GAZEBO_MODEL_PATH="${prefix}/models"
+  </export>
+</package>

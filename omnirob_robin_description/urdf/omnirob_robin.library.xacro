@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+  The complete omnirob library of xacros for easy reference
+ -->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- General -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.common.xacro"/>
+  
+  <!-- load gazebo plugins only for simulation -->
+  <xacro:if value="${simulated}">
+    <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.gazebo.xacro"/>
+  </xacro:if>  
+  <!-- Propertiers -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.properties.xacro"/>
+  <!-- Base -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_base/base.urdf.xacro"/>
+  <!-- Camera Mast -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_camera_mast/camera_mast.urdf.xacro"/>
+  <!-- Schunk Pan Tilt -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/schunk_pan_tilt/schunk_pan_tilt.urdf.xacro"/>  
+  <!-- lwa -->  
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/lwa/lwa.urdf.xacro"/>  
+  <!-- gripper -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/pg70/pg70.urdf.xacro"/> 
+    
+  
+  <!-- 3D Sensors -->  
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/sensors/kinect2.urdf.xacro"/>
+  
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/sensors/sick3000.urdf.xacro"/>
+  
+  
+  
+</robot>

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+	
+	<xacro:macro name="camera_mast" params="parent *origin">
+		
+		<joint name="base_to_camera_mast" type="fixed" >
+			<insert_block name="origin" />
+			<parent link="${parent}" />
+			<child link="camera_mast_origin_link" />			
+		</joint>
+		
+
+		<link name="camera_mast_origin_link">
+			<inertial>
+				<mass value="1" />
+				<origin xyz="0 0 0.66" />
+				<inertia ixx="0.01" ixy="0.0" ixz="0.0"
+					iyy="0.01" iyz="0.0" izz="0.5" />
+			</inertial>     
+      
+      <!-- camera-mast-origin is the center of the vertical post -->
+
+			<visual>
+				<origin xyz="-0.02 -0.02 0.66" rpy="${M_PI} 0 ${M_PI/2}" />
+				<geometry>
+					<mesh filename="package://omnirob_robin_description/meshes/kameramast.stl" scale="0.001 0.001 0.001"/>
+				</geometry>
+        <material name="Green">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+			</visual>
+
+			<collision>
+				<origin xyz="0.0 0.0 0.33" rpy="0 0 0" />
+				<geometry>
+					<cylinder length="0.66" radius="0.1"/>
+				</geometry>
+			</collision>
+		</link>
+    
+   </xacro:macro>
+</robot>

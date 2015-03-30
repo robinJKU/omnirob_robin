@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.properties.xacro"/>
+  
+  <xacro:if value="${simulated}">
+    <xacro:include filename="$(find omnirob_robin_description)/urdf/sensors/sick3000.gazebo.xacro"/>
+  </xacro:if>
+  
+  <!-- Parameterised in part by the values in omnirob_robin.properties.xacro -->
+  
+  <xacro:macro name="sensor_sick3000" params="parent">
+    
+    <joint name="laser_scanner_joint" type="fixed">
+      <insert_block name="laserscanner_origin" />
+      <parent link="${parent}"/>
+      <child link="laser_scanner_link" />
+    </joint>
+    
+    <link name="laser_scanner_link">
+       <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>       
+
+      <visual>
+        <!-- -offset from scan plane + half of the z height -->
+        <origin xyz="0 0 ${+0.116-0.152/2.0}" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.106 0.102 0.152"/>
+        </geometry>
+      </visual>
+      
+      <collision>
+        <origin xyz="0 0 ${-0.116+0.152/2.0}" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.106 0.102 0.152"/>
+          </geometry>
+      </collision>
+            
+    </link>	  
+	
+  </xacro:macro>
+</robot>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  	<!-- load hardware interface here -->
+	<include file="$(find kinect2_bridge)/launch/kinect2.launch"></include>
+
+</launch>

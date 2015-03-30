@@ -1,0 +1,11 @@
+omnirob_robin:
+  pan_tilt:
+    pan_position_controller:
+      type: position_controllers/JointPositionController
+      joint: pan_tilt/pan_joint
+      pid: {p: 1.0, i: 0.01, d: 0.0, i_clamp: 10.0}
+    
+    tilt_position_controller:
+      type: position_controllers/JointPositionController
+      joint: pan_tilt/tilt_joint
+      pid: {p: 1.0, i: 0.01, d: 0.0, i_clamp: 10.0}
