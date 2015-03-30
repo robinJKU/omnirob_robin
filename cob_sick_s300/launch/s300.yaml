@@ -1,0 +1,14 @@
+port: /dev/ttyUSB0
+baud: 250000
+scan_duration: 0.025 #no info about that in SICK-docu, but 0.025 is believable and looks good in rviz
+scan_cycle_time: 0.040 #SICK-docu says S300 scans every 40ms
+inverted: false
+scan_id: 7
+frame_id: /laser_scanner_link
+scan_intervals: [[-1.74532925, 1.74532925]] #[rad] these intervals are included to the scan
+fields: 
+  '1':
+    scale: 0.01
+    start_angle: -1.74532925
+    stop_angle: 1.74532925
+debug: false

@@ -1,9 +1,14 @@
 <?xml version="1.0"?>
 <launch>
 
-  	<!-- load hardware interface here -->
+	<!-- load hardware interface and controler here -->
 	<include file="$(find omnirob_robin_driver)/launch/hardware_interface.launch"></include>
-  
-    <include file="$(find omnirob_robin_control)/launch/lwa_control.launch"></include>
+	<include file="$(find omnirob_robin_control)/launch/lwa_control.launch"></include>
+	<include file="$(find omnirob_robin_driver)/launch/state_publisher.launch"></include>
+
+	<!-- laser scanner -->
+	<include file="$(find cob_sick_s300)/launch/s300.xml.launch"></include>
+
+	<!-- todo kinect -->
 
 </launch>
