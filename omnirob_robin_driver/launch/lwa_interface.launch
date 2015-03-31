@@ -9,7 +9,7 @@
 
   <!-- load hardware interface, only interfacing LWA3 -->
   <group ns="omnirob_robin">
-    <node pkg="omnirob_robin_driver" type="omnirob_robin_hardware_interface_node" name="omnirob_robin_hardware_interface_node"></node>
+    <node pkg="omnirob_robin_driver" type="omnirob_robin_lwa_interface" name="omnirob_robin_lwa_interface"></node>
   </group>
 
 </launch>

@@ -5,7 +5,7 @@
   
   	 
 	<include file="$(find omnirob_robin_control)/launch/all_controllers.launch"></include>   
-	<include file="$(find omnirob_robin_driver)/launch/all_interfaces.launch"></include>   
+	<include file="$(find omnirob_robin_driver)/launch/simulated_interfaces.launch"></include>   
 	 
  
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">

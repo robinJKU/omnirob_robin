@@ -40,5 +40,8 @@ target_link_libraries(base_interface ${catkin_LIBRARIES})
 add_executable(gripper_interface src/gripper_interface.cpp)
 target_link_libraries(gripper_interface ${catkin_LIBRARIES})
 
-add_executable(omnirob_robin_hardware_interface_node src/omnirob_robin_hardware_interface_node.cpp)
-target_link_libraries(omnirob_robin_hardware_interface_node ${catkin_LIBRARIES})
+add_executable(pan_tilt_interface src/pan_tilt_interface.cpp)
+target_link_libraries(pan_tilt_interface ${catkin_LIBRARIES})
+
+add_executable(omnirob_robin_lwa_interface src/omnirob_robin_lwa_interface.cpp)
+target_link_libraries(omnirob_robin_lwa_interface ${catkin_LIBRARIES})

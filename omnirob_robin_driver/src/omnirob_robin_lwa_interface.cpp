@@ -104,7 +104,7 @@ void jointState_callback(const sensor_msgs::JointState msg)
 int main(int argc, char** argv)
 {
   // Init the ROS node
-  ros::init(argc, argv, "omnirob_robin_hardware_interface_node");
+  ros::init(argc, argv, "omnirob_robin_lwa_interface");
 
   ros::NodeHandle n;
   ros::Rate loop_rate(100);	// 100 Hz => consistent to sampleTime
