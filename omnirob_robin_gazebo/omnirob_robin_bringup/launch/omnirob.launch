@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  	<!-- load hardware interface here -->
-	<include file="$(find omnirob_robin_driver)/launch/hardware_interface.launch"></include>
-  
-    <include file="$(find omnirob_robin_control)/launch/lwa_control.launch"></include>
-
-</launch>
