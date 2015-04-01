@@ -11,13 +11,23 @@
 #include "std_msgs/Float64MultiArray.h"
 #include "std_srvs/Empty.h"
 #include "sensor_msgs/JointState.h"
+#include "geometry_msgs/Twist.h"
 
+double x = 0.0;
+double y = 0.0;
+double yaw = 0.0;
+double vx = 0.0;
+double vy = 0.0;
+double omegaz = 0.0;
 
 sensor_msgs::JointState lwa_joint_state;
 sensor_msgs::JointState pan_tilt_joint_state;
 sensor_msgs::JointState gripper_joint_state;
+sensor_msgs::JointState base_joint_state;
 
 ros::Publisher joint_state_publisher;
+
+ros::Time current_time, last_time;
 
 void lwa_callback( std_msgs::Float64MultiArray joint_state_array ){
 	lwa_joint_state.header.stamp = ros::Time::now();
@@ -61,6 +71,40 @@ void gripper_callback( std_msgs::Float64MultiArray joint_state_array ){
 	joint_state_publisher.publish( gripper_joint_state);
 	
 	return;
+}
+
+void base_callback( const geometry_msgs::Twist base_vel ){
+	base_joint_state.header.stamp 	= ros::Time::now();
+	last_time = current_time;
+	current_time = base_joint_state.header.stamp;
+	
+	// fill joint state
+	vx = base_vel.linear.x;
+	vy = base_vel.linear.y;
+	omegaz = base_vel.angular.z;  
+	
+	double dt = (current_time - last_time).toSec();
+    double I_vx = (vx * cos(yaw) - vy * sin(yaw));
+    double I_vy = (vx * sin(yaw) + vy * cos(yaw));
+    
+    double delta_x = I_vx * dt;
+    double delta_y = I_vy * dt;
+    double delta_yaw = omegaz * dt;
+    
+    x += delta_x ;
+    y += delta_y ;
+    yaw += delta_yaw;    
+    
+    base_joint_state.position[0] = x;
+	base_joint_state.position[1] = y;
+	base_joint_state.position[2] = yaw;
+	
+	base_joint_state.velocity[0] = I_vx;
+	base_joint_state.velocity[1] = I_vy;
+	base_joint_state.velocity[2] = omegaz;
+ 	
+ 	return;
+ 	
 }
 
 int main(int argc, char **argv)
@@ -108,8 +152,29 @@ int main(int argc, char **argv)
   
   ros::Subscriber gripper_subscriber = n.subscribe("/omnirob_robin/gripper/state/joint_state_array", 1000, gripper_callback);
   
+  std::string base_prefix = "base/";
+  base_joint_state.name.resize(3);
+  base_joint_state.name[0] = base_prefix + "x_joint";
+  base_joint_state.name[1] = base_prefix + "y_joint";
+  base_joint_state.name[2] = base_prefix + "yaw_joint";
+  
+  // read parameters
+  if(  n.hasParam( "/omnirob_robin/base/odometry/x0" ) ){
+	n.getParam( "/omnirob_robin/base/odometry/x0", x);
+  }
+  if(  n.hasParam( "/omnirob_robin/base/odometry/y0" ) ){
+	n.getParam( "/omnirob_robin/base/odometry/y0", y);
+  }
+  if(  n.hasParam( "/omnirob_robin/base/odometry/yaw0" ) ){
+	n.getParam( "/omnirob_robin/base/odometry/yaw0", yaw);
+  }
+  
+  ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/vel", 1000, base_callback );
+
   // init publisher and start loop
   joint_state_publisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
+  
+  current_time = ros::Time::now();
   
   ros::spin();
 
