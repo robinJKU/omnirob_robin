@@ -45,3 +45,6 @@ target_link_libraries(pan_tilt_interface ${catkin_LIBRARIES})
 
 add_executable(omnirob_robin_lwa_interface src/omnirob_robin_lwa_interface.cpp)
 target_link_libraries(omnirob_robin_lwa_interface ${catkin_LIBRARIES})
+
+add_executable(state_machine_interface src/state_machine_interface.cpp)
+target_link_libraries(state_machine_interface ${catkin_LIBRARIES})
