@@ -29,15 +29,15 @@ bool startMotionCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Res
 int main(int argc, char** argv)
 {
   // Init the ROS node
-  ros::init(argc, argv, "omnirob_robin_pan_tilt_interface");
+  ros::init(argc, argv, "pan_tilt_interface");
 
   ros::NodeHandle n;   
   
   pan_pub = n.advertise<std_msgs::Float64>("pan_tilt/pan_position_controller/command", 50);
   tilt_pub = n.advertise<std_msgs::Float64>("pan_tilt/tilt_position_controller/command", 50);    
   
-  ros::Subscriber sub = n.subscribe("/pant_tilt/control/commanded_joint_state", 1, positionCallback);  
-  ros::ServiceServer move_pan_tilt_service = n.advertiseService("/pan_tilt/control/start_motion", startMotionCallback);
+  ros::Subscriber sub = n.subscribe("pant_tilt/control/commanded_joint_state", 1, positionCallback);  
+  ros::ServiceServer move_pan_tilt_service = n.advertiseService("pan_tilt/control/start_motion", startMotionCallback);
 
   ros::spin();
   

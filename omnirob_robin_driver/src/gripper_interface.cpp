@@ -151,28 +151,28 @@ int main( int argc, char** argv) {
   
   ros::NodeHandle n;  
   
-  ros::service::waitForService("gazebo/get_model_state");
+  ros::service::waitForService("/gazebo/get_model_state");
   
-  getModelState_client = n.serviceClient<gazebo_msgs::GetModelState>("gazebo/get_model_state");
-  setModelState_client = n.serviceClient<gazebo_msgs::SetModelState>("gazebo/set_model_state");
+  getModelState_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
+  setModelState_client = n.serviceClient<gazebo_msgs::SetModelState>("/gazebo/set_model_state");
   
-  closeGripper_server = n.advertiseService("omnirob_robin/gripper/close_srv", closeGripperCallback);
-  openGripper_server = n.advertiseService("omnirob_robin/gripper/open_srv", openGripperCallback);
+  closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
+  openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);
   
-  pub_finger1 = n.advertise<std_msgs::Float64>("omnirob_robin/gripper/left_position_controller/command", 50);
-  pub_finger2 = n.advertise<std_msgs::Float64>("omnirob_robin/gripper/right_position_controller/command", 50);
+  pub_finger1 = n.advertise<std_msgs::Float64>("gripper/left_position_controller/command", 50);
+  pub_finger2 = n.advertise<std_msgs::Float64>("gripper/right_position_controller/command", 50);
   
   tf::TransformListener listener;
   
-  ros::param::get("objects/cylinder/length", cylinder_length);
-  ros::param::get("objects/cylinder/radius", cylinder_radius);
+  ros::param::get("/objects/cylinder/length", cylinder_length);
+  ros::param::get("/objects/cylinder/radius", cylinder_radius);
   
   ros::Rate r(200.0);
   while (n.ok()) {
       
       
       try{
-         listener.lookupTransform("/world", "gripper/palm_link", ros::Time(0), gripper_transform);
+         listener.lookupTransform("world", "gripper/palm_link", ros::Time(0), gripper_transform);
       }  catch (tf::TransformException ex){
           
       }      
