@@ -1,0 +1,6 @@
+omnirob_robin/base/odometry/x0: 0.0
+omnirob_robin/base/odometry/y0: 0.0
+omnirob_robin/base/odometry/yaw0: 0.0
+omnirob_robin/base/odometry/pose_covariance: [1000.0, 0, 0, 0, 0, 0,   0, 1000.0, 0, 0, 0, 0,  0, 0, 1000000.0, 0, 0, 0,  0, 0, 0, 1000000.0, 0, 0,  0, 0, 0, 0, 1000000.0, 0,  0, 0, 0, 0, 0, 0.001]
+omnirob_robin/base/odometry/twist_covariance: [1000.0, 0, 0, 0, 0, 0,   0, 1000.0, 0, 0, 0, 0,  0, 0, 1000000.0, 0, 0, 0,  0, 0, 0, 1000000.0, 0, 0,  0, 0, 0, 0, 1000000.0, 0,  0, 0, 0, 0, 0, 0.001]
+
