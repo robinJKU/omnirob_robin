@@ -274,6 +274,20 @@ class Modules{
 			return true;
 			
 		}// stop motion
+		
+	bool emergency_stop( std_srvs::Empty::Request &req, std_srvs::Empty::Response &res ){
+		for( unsigned int module=0; module<nr_of_modules; module++ ){
+			module_is_ready[module] = false;
+			break_activated[module] = true;
+			module_in_motion[module] = false;
+			
+			// error state
+			module_has_errors[module] = true;
+			module_is_in_emergency_stop[module] = true;
+			
+		}
+		
+	}// do emergency stop
 	
 	// topics
 		
@@ -288,10 +302,56 @@ int main( int argc, char** argv) {
 	ros::NodeHandle handle;
 
 	Modules lwa(7);
-	// subscribe to topics
-	
-	// advertise topics
-	
-	// advertise services
+	std::string lwa_namespace = "/omnirob_robin/lwa/";
+		// subscribe to topics
+		
+		// advertise topics
+		ros::Publisher lwa_commanded_joint_state_pub = handle.advertise<std_msgs::Float64MultiArray>( lwa_namespace + "control/" + "commanded_joint_state", 1000);
+		/*
+		joint_state_array
+
+		initialization_error
+		module_has_errors
+		module_has_low_voltage		
+		module_is_in_emergency_stop
+		module_not_referenced
+		move_blocked
+		tow_error
+		
+		break_activated
+		continuos_position_tracking_mode_enabled
+		point_to_point_motion_enabled
+		module_has_warnings
+		module_in_motion
+		module_is_enabled
+		module_is_ready
+		position_reached
+		
+/omnirob_robin/gripper/state/error/module_not_referenced    		[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/error/move_blocked    					[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/error/tow_error    					[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/break_activated			    	[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/continuos_position_tracking_mode_enabled     [std_msgs/Bool]
+/omnirob_robin/gripper/state/info/point_to_point_motion_enabled     		   [std_msgs/Bool]
+/omnirob_robin/gripper/state/info/module_has_warnings	    		[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/module_in_motion    				[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/module_is_enabled    				[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/module_is_ready	    			[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/info/position_reached   				[std_msgs/Float64MultiArray]
+/omnirob_robin/gripper/state/joint_state_array	   					[std_msgs/Float64MultiArray]
+		
+		
+		// advertise services
+		ros::ServiceServer lwa_enable_continuos_position_tracking_service = handle.advertiseService( lwa_namespace + "control/" + "enable_continuos_position_tracking",  1000, &Modules::enable_continuos_position_tracking	, &lwa);
+		ros::ServiceServer lwa_enable_point_to_point_motion_service = handle.advertiseService( lwa_namespace + "control/" + "enable_point_to_point_motion", 1000, &Modules::enable_point_to_point_motion	, &lwa);
+		ros::ServiceServer lwa_initialize_modules_service = handle.advertiseService( lwa_namespace + "control/" + "initialize_modules",  1000, &Modules::initialize_modules	, &lwa);
+		ros::ServiceServer lwa_reboot_modules_service = handle.advertiseService( lwa_namespace + "control/" + "reboot_modules",  1000, &Modules::reboot_modules	, &lwa);
+		ros::ServiceServer lwa_reference_modules_service = handle.advertiseService( lwa_namespace + "control/" + "reference_module",  1000, &Modules::reference_module	, &lwa);
+		ros::ServiceServer lwa_send_acknowledge_to_modules_service = handle.advertiseService( lwa_namespace + "control/" + "send_acknowledge_to_modules",  1000, &Modules::send_acknowledge_to_modules	, &lwa);
+		ros::ServiceServer lwa_start_motion_service = handle.advertiseService( lwa_namespace + "control/" + "start_motion",  1000, &Modules::start_motion	, &lwa);
+		ros::ServiceServer lwa_stop_motion_service = handle.advertiseService( lwa_namespace + "control/" + "stop_motion",  1000, &Modules::stop_motion	, &lwa);
+		
+		*/
+		
 	
 }

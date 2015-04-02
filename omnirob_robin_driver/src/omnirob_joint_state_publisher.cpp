@@ -12,6 +12,7 @@
 #include "std_srvs/Empty.h"
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/Twist.h"
+#include "nav_msgs/Odometry.h"
 
 double x = 0.0;
 double y = 0.0;
@@ -102,6 +103,8 @@ void base_callback( const geometry_msgs::Twist base_vel ){
 	base_joint_state.velocity[0] = I_vx;
 	base_joint_state.velocity[1] = I_vy;
 	base_joint_state.velocity[2] = omegaz;
+ 	
+ 	nav_msgs::Odometry odom;
  	
  	return;
  	

@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   controller_manager
   hardware_interface
+  nav_msgs
 )
 
 ## Generate used messages and services
