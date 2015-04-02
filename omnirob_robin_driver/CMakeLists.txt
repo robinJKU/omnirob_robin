@@ -49,3 +49,7 @@ target_link_libraries(omnirob_robin_lwa_interface ${catkin_LIBRARIES})
 
 add_executable(state_machine_interface src/state_machine_interface.cpp)
 target_link_libraries(state_machine_interface ${catkin_LIBRARIES})
+
+
+add_executable(omnirob_odometry_publisher_simulation_only src/omnirob_odometry_publisher_simulation_only.cpp)
+target_link_libraries(omnirob_odometry_publisher_simulation_only ${catkin_LIBRARIES})
