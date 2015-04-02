@@ -9,6 +9,19 @@
 		
 
     <link name="world" />
+    
+    <joint name="odom_joint" type="fixed">
+			<parent link="world"/>
+			<child link="odom" />
+		</joint>
+    
+    <link name="odom">
+      <inertial>
+				<mass value="1" />
+				<origin xyz="0 0 0.0" />
+				<inertia ixx="0.1" ixy="0.0" ixz="0.0"	iyy="0.1" iyz="0.0" izz="0.1" />
+			</inertial> 
+    </link>
 		
     
     <joint name="base/x_joint" type="prismatic">
@@ -17,7 +30,7 @@
       <calibration rising="0.0"/> 
       <dynamics damping="0.0" friction="0.0" />
       <limit effort="10" velocity="1.0" lower="-100" upper="100" />   
-			<parent link="world"/>
+			<parent link="odom"/>
 			<child link="base/x_link" />
 		</joint>
     
@@ -26,7 +39,7 @@
 				<mass value="1" />
 				<origin xyz="0 0 0.0" />
 				<inertia ixx="0.1" ixy="0.0" ixz="0.0"	iyy="0.1" iyz="0.0" izz="0.1" />
-			</inertial>   
+			</inertial>         
     </link>
     
     <joint name="base/y_joint" type="prismatic">

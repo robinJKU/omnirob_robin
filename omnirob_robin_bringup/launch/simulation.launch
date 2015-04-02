@@ -11,8 +11,6 @@
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">
 		<param name="publish_frequency" type="double" value="100.0"/>
 	</node>
-  
-  <node pkg="tf" type="static_transform_publisher" name="odom_broadcaster" args="0 0 0 0 0 0 1 world odom 100" />
-  
+      
 
 </launch>
