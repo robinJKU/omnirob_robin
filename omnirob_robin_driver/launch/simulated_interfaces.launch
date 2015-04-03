@@ -11,6 +11,10 @@
     
   <node name="pan_tilt_interface" pkg="omnirob_robin_driver" type="pan_tilt_interface" respawn="false"
     output="screen" ns="omnirob_robin"/>
+    
+  <node name="virtuell_robot_driver_interface" pkg="omnirob_robin_driver" type="virtuell_robot_driver_interface" respawn="false"
+    output="screen" ns="omnirob_robin"/>
+
       
 
 </launch>
