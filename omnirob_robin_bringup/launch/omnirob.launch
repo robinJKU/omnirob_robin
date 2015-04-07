@@ -9,6 +9,9 @@
 	<!-- laser scanner -->
 	<include file="$(find cob_sick_s300)/launch/s300.xml.launch"></include>
 
+	<!-- xsens -->
+	<include file="$(find xsens_bringup)/launch/xsens.launch"></include>
+	
 	<!-- todo kinect -->
 
 </launch>

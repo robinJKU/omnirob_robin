@@ -13,6 +13,7 @@
 #include "std_msgs/Bool.h"
 #include "std_srvs/Empty.h"
 #include "sensor_msgs/JointState.h"
+#include "sensor_msgs/Imu.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/Odometry.h"
 #include "tf/transform_datatypes.h"
@@ -20,9 +21,11 @@
 double x = 0.0;
 double y = 0.0;
 double yaw = 0.0;
+double yaw_imu = 0.0;
 double vx = 0.0;
 double vy = 0.0;
 double omegaz = 0.0;
+double omegaz_imu = 0.0;
 
 sensor_msgs::JointState lwa_joint_state;
 sensor_msgs::JointState pan_tilt_joint_state;
@@ -118,7 +121,7 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	odom.pose.pose.position.x = x;
  	odom.pose.pose.position.y = y;
  	odom.pose.pose.position.z = 0.0;
- 	odom.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw (0.0, 0.0, yaw);
+ 	odom.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw (0.0, 0.0, yaw_imu);
  	
  	odom.child_frame_id = "base_link";
  	odom.twist.twist.linear.x = vx;
@@ -126,7 +129,7 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	odom.twist.twist.linear.z = 0.0;
  	odom.twist.twist.angular.x = 0.0;
  	odom.twist.twist.angular.y = 0.0;
- 	odom.twist.twist.angular.z = omegaz;
+ 	odom.twist.twist.angular.z = omegaz_imu;
  	
  	odometry_publisher.publish( odom );
  	
@@ -150,7 +153,6 @@ void base_state_callback( std_msgs::Float64MultiArray state_word ){
 		}
 	}
 	
-	
 	// check if the motor has errors
 	bool fault;
 	for( unsigned int motor=0; motor<4; motor++){
@@ -166,6 +168,15 @@ void base_state_callback( std_msgs::Float64MultiArray state_word ){
 	base_state_fault_publisher.publish( fault_msgs);
 		
 }// base state callback
+
+void imu_callback( sensor_msgs::Imu data ){
+	tf::Quaternion qt;
+	tf::quaternionMsgToTF ( data.orientation, qt);
+	
+	yaw_imu = qt.getAngle();
+	omegaz_imu = data.angular_velocity.z;
+	
+}// imu callback
 
 
 int main(int argc, char **argv)
@@ -271,6 +282,7 @@ int main(int argc, char **argv)
   
   ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/state_word", 1000, base_state_callback );
   ros::Subscriber base_state_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/vel", 1000, base_callback );
+  ros::Subscriber imu_subscriber = n.subscribe( "/imu/data", 1000, imu_callback );
 
   // init publisher and start loop
   joint_state_publisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
