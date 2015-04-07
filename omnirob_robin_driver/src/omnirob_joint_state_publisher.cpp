@@ -20,12 +20,14 @@
 
 double x = 0.0;
 double y = 0.0;
-double yaw = 0.0;
-double yaw_imu = 0.0;
+double yaw = 0.0, yaw0;
+double yaw_imu = 0.0, offset_imu=0.0;
 double vx = 0.0;
 double vy = 0.0;
 double omegaz = 0.0;
 double omegaz_imu = 0.0;
+
+bool no_imu_data_received = true;
 
 sensor_msgs::JointState lwa_joint_state;
 sensor_msgs::JointState pan_tilt_joint_state;
@@ -108,11 +110,11 @@ void base_callback( const geometry_msgs::Twist base_vel ){
     
     base_joint_state.position[0] = x;
 	base_joint_state.position[1] = y;
-	base_joint_state.position[2] = yaw;
+	base_joint_state.position[2] = yaw_imu;
 	
 	base_joint_state.velocity[0] = I_vx;
 	base_joint_state.velocity[1] = I_vy;
-	base_joint_state.velocity[2] = omegaz;
+	base_joint_state.velocity[2] = omegaz_imu;
  	
  	// publish odometry for navigation stack
  	odom.header.stamp = current_time;
@@ -173,8 +175,15 @@ void imu_callback( sensor_msgs::Imu data ){
 	tf::Quaternion qt;
 	tf::quaternionMsgToTF ( data.orientation, qt);
 	
-	yaw_imu = qt.getAngle();
+	yaw_imu = qt.getAngle() + offset_imu;
 	omegaz_imu = data.angular_velocity.z;
+	
+	if( no_imu_data_received ){
+		// offset callibration
+		offset_imu =  yaw0 - yaw_imu;
+		yaw_imu = yaw0;
+		no_imu_data_received = true;
+	}
 	
 }// imu callback
 
@@ -245,7 +254,8 @@ int main(int argc, char **argv)
 	n.getParam( "/omnirob_robin/base/odometry/y0", y);
   }
   if(  n.hasParam( "/omnirob_robin/base/odometry/yaw0" ) ){
-	n.getParam( "/omnirob_robin/base/odometry/yaw0", yaw);
+	n.getParam( "/omnirob_robin/base/odometry/yaw0", yaw0);
+	yaw = yaw0;
   }
   
   std::vector<double> covariance;
