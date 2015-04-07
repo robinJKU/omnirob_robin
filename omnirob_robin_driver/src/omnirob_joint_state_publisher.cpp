@@ -1,4 +1,4 @@
-/**
+/*
  * @file   omnirob_joint_state_publisher.cpp
  * @Author Christoph Stöger
  * @date   März, 2015
@@ -297,8 +297,8 @@ int main(int argc, char **argv)
   // init publisher and start loop
   joint_state_publisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
   odometry_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
-  base_state_ready_publisher = n.advertise<std_msgs::Bool>("/base/drives/state/info/motors_ready_end_enabled", 1000);
-  base_state_fault_publisher = n.advertise<std_msgs::Bool>("/base/drives/state/error/motors_have_error", 1000);
+  base_state_ready_publisher = n.advertise<std_msgs::Bool>("/omnirob_robin/base/drives/state/info/motors_ready_end_enabled", 1000);
+  base_state_fault_publisher = n.advertise<std_msgs::Bool>("/omnirob_robin/base/drives/state/error/motors_have_error", 1000);
   
   current_time = ros::Time::now();
   

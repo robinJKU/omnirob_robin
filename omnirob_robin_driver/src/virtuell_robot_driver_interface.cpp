@@ -595,7 +595,7 @@ class BASE{
 			
 			// published topics
 			cmd_vel_publisher = handle.advertise<geometry_msgs::Twist>( group_name + "/cmd_vel", 10);
-			canserver_state_publisher = handle.advertise<std_msgs::Bool>( group_name + "/canserver/" + "state", 10);
+			canserver_state_publisher = handle.advertise<std_msgs::Bool>( group_name + "/canserver/" + "server_is_ready", 10);
 			base_state_ready_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/info/motors_ready_end_enabled", 1000);
 			base_state_fault_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/error/motors_have_error", 1000);
 		
