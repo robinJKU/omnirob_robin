@@ -8,7 +8,9 @@
  * the /joint_state topic.
  */
 #include "ros/ros.h"
+#include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
+#include "std_msgs/Bool.h"
 #include "std_srvs/Empty.h"
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/Twist.h"
@@ -30,6 +32,8 @@ nav_msgs::Odometry odom;
 
 ros::Publisher joint_state_publisher;
 ros::Publisher odometry_publisher;
+ros::Publisher base_state_ready_publisher;
+ros::Publisher base_state_fault_publisher;
 
 ros::Time current_time, last_time;
 
@@ -130,13 +134,47 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	
 }
 
+void base_state_callback( std_msgs::Float64MultiArray state_word ){
+	
+	// check if all motors are enabled and ready
+	unsigned int switched_on, opeartion_mode_enabled, voltage_enabled;
+	bool motors_enabled_and_ready = true;
+	for( unsigned int motor=0; motor<4; motor++){
+		switched_on = ( ((unsigned int) state_word.data[motor]) & 0x2);
+		opeartion_mode_enabled = ( ((unsigned int) state_word.data[motor]) & 0x4);
+		voltage_enabled = ( ((unsigned int) state_word.data[motor]) & 0x16);
+		
+		if( switched_on==0 || opeartion_mode_enabled==0 || voltage_enabled==0 ){
+			motors_enabled_and_ready = false;
+			break;
+		}
+	}
+	
+	
+	// check if the motor has errors
+	bool fault;
+	for( unsigned int motor=0; motor<4; motor++){
+		fault = fault || (( ((unsigned int) state_word.data[motor]) & 0x8)>0.0);
+	}
+	
+	// publish results
+	std_msgs::Bool motors_enabled_and_ready_msgs, fault_msgs;
+	motors_enabled_and_ready_msgs.data = motors_enabled_and_ready;
+	fault_msgs.data = fault;
+	
+	base_state_ready_publisher.publish(  motors_enabled_and_ready_msgs);
+	base_state_fault_publisher.publish( fault_msgs);
+		
+}// base state callback
+
+
 int main(int argc, char **argv)
 {
   //  init node
   ros::init(argc, argv, "omnirob_joint_state_publisher");
   ros::NodeHandle n;
   
-  // init subscriber and msg
+  // init subscriber and msg - LWA
   std::string lwa_prefix = "lwa/";
   lwa_joint_state.name.resize(7);
   lwa_joint_state.name[0] = lwa_prefix + "joint_1";
@@ -153,6 +191,7 @@ int main(int argc, char **argv)
   
   ros::Subscriber lwa_subscriber = n.subscribe("/omnirob_robin/lwa/state/joint_state_array", 1000, lwa_callback);
   
+  // init subscriber and msg - PAN TILT
   std::string pan_tilt_prefix = "pan_tilt/";
   pan_tilt_joint_state.name.resize(2);
   pan_tilt_joint_state.name[0] = pan_tilt_prefix + "pan_joint";
@@ -164,6 +203,7 @@ int main(int argc, char **argv)
   
   ros::Subscriber pan_tilt_subscriber = n.subscribe("/omnirob_robin/pan_tilt/state/joint_state_array", 1000, pan_tilt_callback);
   
+  // init subscriber and msg - GRIPPER
   std::string gripper_prefix = "gripper/";
   gripper_joint_state.name.resize(2);
   gripper_joint_state.name[0] = gripper_prefix + "finger_right_joint";
@@ -175,6 +215,7 @@ int main(int argc, char **argv)
   
   ros::Subscriber gripper_subscriber = n.subscribe("/omnirob_robin/gripper/state/joint_state_array", 1000, gripper_callback);
   
+  // init subscriber and msg - BASE
   std::string base_prefix = "base/";
   base_joint_state.name.resize(3);
   base_joint_state.name[0] = base_prefix + "x_joint";
@@ -228,11 +269,14 @@ int main(int argc, char **argv)
   }
  	
   
-  ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/vel", 1000, base_callback );
+  ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/state_word", 1000, base_state_callback );
+  ros::Subscriber base_state_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/vel", 1000, base_callback );
 
   // init publisher and start loop
   joint_state_publisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
   odometry_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
+  base_state_ready_publisher = n.advertise<std_msgs::Bool>("/base/drives/state/info/motors_ready_end_enabled", 1000);
+  base_state_fault_publisher = n.advertise<std_msgs::Bool>("/base/drives/state/error/motors_have_error", 1000);
   
   current_time = ros::Time::now();
   

@@ -559,7 +559,7 @@ class BASE{
 		// state
 		bool can_server_enabled;
 		bool drives_enabled;
-		std_msgs::Float64 state;
+		bool drives_have_error;
 		geometry_msgs::Twist cmd_vel;
 		
 		// advertised services
@@ -573,13 +573,15 @@ class BASE{
 		// published topics
 		ros::Publisher cmd_vel_publisher;
 		ros::Publisher canserver_state_publisher;
+		ros::Publisher base_state_ready_publisher;
+		ros::Publisher base_state_fault_publisher;
 
 	public:
 		BASE( ros::NodeHandle handle, std::string group_name, std::string emergency_stop_topic ){
 			// state
 			can_server_enabled = false;
 			drives_enabled = false;
-			state.data = 0.0;
+			drives_have_error = false;
 			
 			// advertised services
 			start_can_server_service = handle.advertiseService( group_name + "/canserver/" + "start",  &BASE::start_can_server, this);
@@ -593,7 +595,9 @@ class BASE{
 			
 			// published topics
 			cmd_vel_publisher = handle.advertise<geometry_msgs::Twist>( group_name + "/cmd_vel", 10);
-			canserver_state_publisher = handle.advertise<std_msgs::Float64>( group_name + "/canserver/" + "state", 10);
+			canserver_state_publisher = handle.advertise<std_msgs::Bool>( group_name + "/canserver/" + "state", 10);
+			base_state_ready_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/info/motors_ready_end_enabled", 1000);
+			base_state_fault_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/error/motors_have_error", 1000);
 		
 		}
 		
@@ -648,7 +652,16 @@ class BASE{
 		}
 		
 		void publish_state( void ){
+			std_msgs::Bool state;
+			state.data = can_server_enabled;
 			canserver_state_publisher.publish( state );
+			
+			state.data = drives_enabled;
+			base_state_ready_publisher.publish( state);
+			
+			state.data = drives_have_error;
+			base_state_fault_publisher.publish( state);
+			
 		}
 		
 	
