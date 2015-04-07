@@ -115,6 +115,8 @@ void base_callback( const geometry_msgs::Twist base_vel ){
 	base_joint_state.velocity[0] = I_vx;
 	base_joint_state.velocity[1] = I_vy;
 	base_joint_state.velocity[2] = omegaz_imu;
+
+	joint_state_publisher.publish( base_joint_state);
  	
  	// publish odometry for navigation stack
  	odom.header.stamp = current_time;
@@ -175,14 +177,14 @@ void imu_callback( sensor_msgs::Imu data ){
 	tf::Quaternion qt;
 	tf::quaternionMsgToTF ( data.orientation, qt);
 	
-	yaw_imu = qt.getAngle() + offset_imu;
+	yaw_imu = -qt.getAngle() + offset_imu;
 	omegaz_imu = data.angular_velocity.z;
 	
 	if( no_imu_data_received ){
 		// offset callibration
 		offset_imu =  yaw0 - yaw_imu;
 		yaw_imu = yaw0;
-		no_imu_data_received = true;
+		no_imu_data_received = false;
 	}
 	
 }// imu callback
