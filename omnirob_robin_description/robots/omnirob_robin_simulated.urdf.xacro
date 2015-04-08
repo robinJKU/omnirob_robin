@@ -4,62 +4,6 @@
 
   <xacro:property name="simulated" value="1" />
   
-  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.library.xacro" />
-
-  <!-- load the base of the robot -->
-  <xacro:base />
-  
-  
-  <xacro:camera_mast parent="base_link">
-    <!-- set in properties xacro -->
-    <insert_block name="camera_mast_origin" />
-  </xacro:camera_mast>
-  
- 
-  <xacro:schunk_pan_tilt parent="camera_mast_origin_link">   
-    <!-- set in properties xacro -->
-    <insert_block name="pan_tilt_origin" />
-  </xacro:schunk_pan_tilt>
-  
-  
-  <xacro:ultrasound_sensor parent="base_link" number="0">
-    <insert_block name="ultrasound_sensor0" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="1">
-    <insert_block name="ultrasound_sensor1" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="2">
-    <insert_block name="ultrasound_sensor2" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="3">
-    <insert_block name="ultrasound_sensor3" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="4">
-    <insert_block name="ultrasound_sensor4" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="5">
-    <insert_block name="ultrasound_sensor5" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="6">
-    <insert_block name="ultrasound_sensor6" />
-  </xacro:ultrasound_sensor>
-  <xacro:ultrasound_sensor parent="base_link" number="7">
-    <insert_block name="ultrasound_sensor7" />
-  </xacro:ultrasound_sensor>
-  
-  
-  <xacro:sensor_kinect parent="pan_tilt/tcp_link" />
-  
-  
-  <xacro:sensor_sick3000 parent="base_link" />  
-  
-  
-  <xacro:lwa parent="base_link" name="lwa">
-	  <insert_block name="lwa_origin"/>
-  </xacro:lwa>
-  
-  <xacro:schunk_pg70 parent="lwa/link_7" name="gripper">
-    <insert_block name="gripper_origin"/>
-  </xacro:schunk_pg70> 
+  <xacro:include filename="$(find omnirob_robin_description)/robots/omnirob.urdf.xacro" />
   
 </robot>

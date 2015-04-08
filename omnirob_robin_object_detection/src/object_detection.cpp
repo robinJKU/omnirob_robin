@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <sstream> 
 
 
 //pcl includes
@@ -143,71 +144,36 @@ void detectObjects(){
   robin_odlib::Segmentation(cloud, clusters);
   
       
-  //search for shape in the seperated clouds by shape       
-  robin_odlib::searchObject(cloud, clusters[0], objects[0], table_height);
+  //search for shape in the seperated clouds by shape  
+  std::vector <double> pose; 
+  pose.resize(6);
   
-  
-  //set transforms
-  tf::Transform transform;
-  transform.setOrigin(tf::Vector3(objects[0].getPosition()[0], objects[0].getPosition()[1], objects[0].getPosition()[2]));
-  tf::Quaternion quat;
-  quat.setRPY(objects[0].getOrientation()[0], objects[0].getOrientation()[1], objects[0].getOrientation()[2]);
-  transform.setRotation(quat);
   transforms.clear();
-  transforms.push_back(transform);
   transform_names.clear();
-  transform_names.push_back(objects[0].getName());
   
-  
-  visualization_msgs::Marker marker;
-  // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-  marker.header.frame_id = "/base_link";
-  marker.header.stamp = ros::Time::now();
-
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  // Any marker sent with the same namespace and id will overwrite the old one
-  marker.ns = "basic_shapes";
-  marker.id = 1;
-
-  // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-  marker.type = visualization_msgs::Marker::CUBE;
-
-  // Set the marker action.  Options are ADD and DELETE
-  marker.action = visualization_msgs::Marker::ADD;
-
-  // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-  marker.pose.position.x = objects[0].getPosition()[0];
-  marker.pose.position.y = objects[0].getPosition()[1];
-  marker.pose.position.z = objects[0].getPosition()[2];
-  
-  quat.setRPY(0,0, objects[0].getOrientation()[2]);
-  
-  marker.pose.orientation.x = quat.getX();
-  marker.pose.orientation.y = quat.getY();
-  marker.pose.orientation.z = quat.getZ();
-  marker.pose.orientation.w = quat.getW();
-
-  // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker.scale.x = objects[0].getSize()[0];
-  marker.scale.y = objects[0].getSize()[1];
-  marker.scale.z = objects[0].getSize()[2];
-    
-
-  // Set the color -- be sure to set alpha to something non-zero!
-  marker.color.r = 255;
-  marker.color.g = 0;
-  marker.color.b = 0;
-  marker.color.a = 0.4;
-
-  marker.lifetime = ros::Duration(1000.0);
-  
-  box_pub.publish(marker);
-    
-  
+  for(int i = 0; i < objects.size(); i++){
+    int count = 0;
+    for(int k = 0; k < clusters.size(); k++){
+      bool found = robin_odlib::searchObject(cloud, clusters[k], objects[i], pose, table_height);
+      if(found){
+        ROS_INFO("object %s found", objects[0].getName().c_str());
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
+        tf::Quaternion quat;
+        quat.setRPY(pose[3], pose[4], pose[5]);
+        transform.setRotation(quat);
+        transforms.push_back(transform);
+        std::stringstream s;
+        s << count;
+        transform_names.push_back(objects[0].getName() + s.str());
+        count++;
+      }
+    }    
+  }
 }
 
 bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
-  detecting = true;    
+   
   
   std_msgs::Float64MultiArray msg;
   std_srvs::Empty srv;
@@ -219,6 +185,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   pan_tilt_start_motion_srv.call(srv); 
   
   ros::Duration(5.0).sleep();
+  detecting = true;   
   
   detectObjects();
   
