@@ -19,6 +19,7 @@ class Object{
     //get Values
     std::string getName();
     std::vector <double> getSize();
+    std::vector <int> getHSV();
     
     //set Values
     void setSize(std::vector <double> size);

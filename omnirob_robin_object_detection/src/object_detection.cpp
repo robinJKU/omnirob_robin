@@ -195,7 +195,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response){
   int index = -1;
   for(int i = 0; i < transform_names.size(); i++){
-    if(transform_names[i].compare(request.name)){
+    if(transform_names[i].compare(request.name) == 0){
       index = i;
     }
   }  

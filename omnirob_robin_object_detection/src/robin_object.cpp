@@ -30,6 +30,10 @@ std::vector <double> Object::getSize(){
   return size;
 }
 
+std::vector <int> Object::getHSV(){
+  return HSVcolor;
+}
+
 void Object::printObject(){
   printf("Object name = %s \n", name.c_str());
   printf("Object color = %s \n", color.c_str());
