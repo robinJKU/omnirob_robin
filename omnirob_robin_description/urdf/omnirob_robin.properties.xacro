@@ -49,4 +49,33 @@
     <origin xyz="${0.7/2.0+0.003+0.0597} 0 ${0.293+0.116}" rpy="${M_PI} 0 0"/> 
   </xacro:property>
   
+  <property name="ultrasound_z" value="0.66"/>
+  <property name="ultrasound_offset" value="0.34"/>
+  <property name="sqrt2" value="1.414213562"/>
+  
+  <xacro:property name="ultrasound_sensor0">
+    <origin xyz="${ultrasound_offset} 0.0 ${ultrasound_z}" rpy="0 0 0"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor1">
+    <origin xyz="${ultrasound_offset*1/sqrt2} ${ultrasound_offset*1/sqrt2} ${ultrasound_z}" rpy="0 0 ${M_PI/4}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor2">
+    <origin xyz="0.0 ${ultrasound_offset} ${ultrasound_z}" rpy="0 0 ${M_PI/2}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor3">
+    <origin xyz="${ultrasound_offset*1/sqrt2*(-1)} ${ultrasound_offset*1/sqrt2} ${ultrasound_z}" rpy="0 0 ${3*M_PI/4}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor4">
+    <origin xyz="${ultrasound_offset*(-1)} 0.0 ${ultrasound_z+0.025}" rpy="0 0 ${M_PI}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor5">
+    <origin xyz="${ultrasound_offset*1/sqrt2*(-1)} ${ultrasound_offset*1/sqrt2*(-1)} ${ultrasound_z}" rpy="0 0 ${5*M_PI/4}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor6">
+    <origin xyz="0.0 ${ultrasound_offset*(-1)} ${ultrasound_z}" rpy="0 0 ${6*M_PI/4}"/>
+  </xacro:property>
+  <xacro:property name="ultrasound_sensor7">
+    <origin xyz="${ultrasound_offset*1/sqrt2} ${ultrasound_offset*1/sqrt2*(-1)} ${ultrasound_z}" rpy="0 0 ${7*M_PI/4}"/>
+  </xacro:property>
+  
 </robot>

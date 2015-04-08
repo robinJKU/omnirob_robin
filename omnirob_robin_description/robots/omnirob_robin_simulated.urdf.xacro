@@ -22,6 +22,32 @@
   </xacro:schunk_pan_tilt>
   
   
+  <xacro:ultrasound_sensor parent="base_link" number="0">
+    <insert_block name="ultrasound_sensor0" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="1">
+    <insert_block name="ultrasound_sensor1" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="2">
+    <insert_block name="ultrasound_sensor2" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="3">
+    <insert_block name="ultrasound_sensor3" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="4">
+    <insert_block name="ultrasound_sensor4" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="5">
+    <insert_block name="ultrasound_sensor5" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="6">
+    <insert_block name="ultrasound_sensor6" />
+  </xacro:ultrasound_sensor>
+  <xacro:ultrasound_sensor parent="base_link" number="7">
+    <insert_block name="ultrasound_sensor7" />
+  </xacro:ultrasound_sensor>
+  
+  
   <xacro:sensor_kinect parent="pan_tilt/tcp_link" />
   
   

@@ -29,6 +29,8 @@
   
   <xacro:include filename="$(find omnirob_robin_description)/urdf/sensors/sick3000.urdf.xacro"/>
   
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/sensors/Ultrasound.urdf.xacro"/>
+  
   
   
 </robot>
