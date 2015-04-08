@@ -1,4 +1,4 @@
-string object_name
+string name
 ---
-geometry_msgs/Pose object_pose
+geometry_msgs/Pose pose
 
