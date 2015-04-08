@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <arg name="x" default="1.2"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="1.5"/>
+  <arg name="x1" default="1.0"/>
+  <arg name="y1" default="0.1"/>
+  <arg name="z1" default="1.5"/>
+  <arg name="x2" default="1.1"/>
+  <arg name="y2" default="-0.15"/>
+  <arg name="z2" default="1.5"/>
+  
+  <arg name="cylinder_length" default="0.15"/>
+  <arg name="cylinder_radius" default="0.02"/>
+  <param name="objects/cylinder/length" type="double" value="$(arg cylinder_length)" />
+  <param name="objects/cylinder/radius" type="double" value="$(arg cylinder_radius)" />
+  <param name="objects/cylinder/color" type="string" value="orange" />
+    
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_gazebo)/objects/cylinder.urdf' length:=$(arg cylinder_length) radius:=$(arg cylinder_radius)" />
+  <param name="cylinder_description" command="$(arg urdf_file)" />
+  
+  <!-- Gazebo model spawner -->
+  <node name="spawn_cylinder_model" pkg="gazebo_ros" type="spawn_model"
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param cylinder_description 
+        -x $(arg x)
+        -y $(arg y)
+        -z $(arg z)   
+        -model cylinder"/>   
+  <!--      
+  <node name="spawn_cylinder_model2" pkg="gazebo_ros" type="spawn_model"
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param cylinder_description 
+        -x $(arg x1)
+        -y $(arg y1)
+        -z $(arg z1)   
+        -model cylinder2"/>  
+        
+  <node name="spawn_cylinder_model3" pkg="gazebo_ros" type="spawn_model"
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param cylinder_description 
+        -x $(arg x2)
+        -y $(arg y2)
+        -z $(arg z2)   
+        -model cylinder3"/>
+   -->     
+  
+</launch>

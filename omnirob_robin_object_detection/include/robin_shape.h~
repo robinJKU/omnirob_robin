@@ -1,0 +1,12 @@
+#ifndef SHAPE_H
+#define SHAPE_H
+
+//class Shape holds the complete description for each searchable Shape
+class RobinShape{
+	
+};
+#endif
+
+
+
+

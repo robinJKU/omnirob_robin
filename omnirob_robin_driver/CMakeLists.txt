@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Generate used messages and services
-generate_messages(DEPENDENCIES std_msgs sensor_msgs diagnostic_msgs)
+# generate_messages(DEPENDENCIES std_msgs sensor_msgs diagnostic_msgs)
 
 catkin_package(
 #  INCLUDE_DIRS include

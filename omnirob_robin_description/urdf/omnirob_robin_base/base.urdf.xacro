@@ -7,7 +7,7 @@
 	
 	<xacro:macro name="base" params="">
 		
-
+    
     <link name="world" />
     
     <joint name="odom_joint" type="fixed">

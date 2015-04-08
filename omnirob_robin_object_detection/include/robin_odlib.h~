@@ -1,0 +1,20 @@
+#ifndef ROBIN_ODLIB_H
+#define ROBIN_ODLIB_H
+
+//The Robin Object Detection Library is a collection of useful function to segment a pointlcloud into parts which than can be searched for Shapes of type Shape
+
+#include <pcl/common/common.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/crop_box.h>
+
+
+typedef pcl::PointXYZRGB PointType;
+typedef pcl::Normal NormalType;
+
+namespace robin_odlib{
+
+
+}
+
+
+#endif
