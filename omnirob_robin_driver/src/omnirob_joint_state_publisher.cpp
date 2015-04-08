@@ -178,7 +178,7 @@ void imu_callback( sensor_msgs::Imu data ){
 	tf::quaternionMsgToTF ( data.orientation, qt);
 	
 	yaw_imu = -qt.getAngle() + offset_imu;
-	omegaz_imu = data.angular_velocity.z;
+	omegaz_imu = -data.angular_velocity.z;
 	
 	if( no_imu_data_received ){
 		// offset callibration
