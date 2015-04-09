@@ -195,6 +195,12 @@ bool robin_odlib::searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poin
   
   fitBoundingBox(objectCloud, size, pose, table_height);
   
+  std::vector <double> rpy;
+  compareSize(size, object.getSize(), rpy);
+  pose[3] = rpy[0];
+  pose[4] = rpy[1];
+  pose[5] += rpy[2];
+  
     
   return true;
 }
@@ -275,6 +281,84 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
 //======================================================================================================================================  
 //======================================================================================================================================
 
+bool robin_odlib::compareSize(std::vector <double> size, std::vector <double> object_size, std::vector <double>& rpy){
+  double vol = size[0] * size[1] * size[2];
+  double object_vol = object_size[0] * object_size[1] * object_size[2];
+  
+  rpy.resize(3);
+  rpy[0] = 0;
+  rpy[1] = 0;
+  rpy[2] = 0;
+  
+   
+  if(fabs(vol - object_vol) < object_vol * 0.2){
+    printf("Checking Bounding Box orientation \n");    
+    
+   int i;
+   double error = 10;
+   int index;
+   std::vector <double> final_rpy;
+    for(i = 0; i < 8; i++){
+      Eigen::Vector3f transformed_size(size[0], size[1], size[2]);
+      Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+      switch(i) {
+        case 0: 
+        break;
+        case 1:
+          rpy[0] = M_PI/2.0;
+        break;
+        case 2:
+          rpy[1] = M_PI/2.0;        
+        break;
+        case 3: 
+          rpy[2] = M_PI/2.0;
+        break;      
+        case 4: 
+          rpy[0] = M_PI/2.0;
+          rpy[2] = M_PI/2.0;
+        break; 
+        case 5: 
+          rpy[1] = M_PI/2.0;
+          rpy[2] = M_PI/2.0;
+        break; 
+        case 6: 
+          rpy[0] = M_PI/2.0;
+          rpy[1] = M_PI/2.0;
+        break; 
+        case 7: 
+          rpy[0] = M_PI/2.0;
+          rpy[1] = M_PI/2.0;
+          rpy[2] = M_PI/2.0;
+        break; 
+      }  
+      transform.rotate (Eigen::AngleAxisf (rpy[0], Eigen::Vector3f::UnitX()));
+      transform.rotate (Eigen::AngleAxisf (rpy[1], Eigen::Vector3f::UnitY()));
+      transform.rotate (Eigen::AngleAxisf (rpy[2], Eigen::Vector3f::UnitZ()));  
+      transformed_size = transform*transformed_size;
+      //printf("transformed size = %f, %f, %f \n", transformed_size[0], transformed_size[1], transformed_size[2]);
+      double compare = fabs(fabs(transformed_size[0]) - object_size[0]);
+      compare = compare * fabs(fabs(transformed_size[1]) - object_size[1]);
+      compare = compare * fabs(fabs(transformed_size[2]) - object_size[2]);
+      
+      if(compare < error){
+        index = i;
+        final_rpy = rpy;       
+        error = compare;
+      }
+    }
+      
+    printf("Found Orientation %d \n", index);
+      
+    rpy = final_rpy;
+    printf("rpy = %f %f %f", rpy[0], rpy[1], rpy[2]);        
+  }  
+  return true;
+}
+
+//======================================================================================================================================  
+//======================================================================================================================================  
+//======================================================================================================================================
+
 bool robin_odlib::compareColor(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, std::vector <int> HSVcolor){
-  return false;
+  return true;
 }

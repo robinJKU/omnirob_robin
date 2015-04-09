@@ -45,6 +45,7 @@ class Object{
     
     //functions
     void printPrimitive(int index);
+    void resize();
        
 	
 };

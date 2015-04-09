@@ -16,10 +16,11 @@ Object::Object(std::string name, std::string color, std::vector <int> RGBcolor){
 }
 
 void Object::addPrimitive(std::string type, std::vector <double> size, std::vector <double> position, std::vector <double> orientation){
-  primitive_type.push_back(type);
-  primitive_size.push_back(size);
-  primitive_position.push_back(position);
-  primitive_orientation.push_back(orientation);  
+  this->primitive_type.push_back(type);
+  this->primitive_size.push_back(size);
+  this->primitive_position.push_back(position);
+  this->primitive_orientation.push_back(orientation); 
+  this->resize();   
 }
 
 std::string Object::getName(){
@@ -82,4 +83,29 @@ void Object::computeHSVcolor(std::vector <int> HSVcolor, std::vector <int> RGBco
   HSVcolor.push_back(h);  
   HSVcolor.push_back(s);  
   HSVcolor.push_back(v);   
+}
+
+void Object::resize(){
+  std::vector <double> min;
+  std::vector <double> max;
+  for(int i = 0; i < 3; i++){
+    min.push_back(0);
+    max.push_back(0);
+  }  
+  
+  for(int i = 0; i < primitive_size.size(); i++){
+    for(int k = 0; k < 3; k++){     
+      double val = -primitive_size[i][k] / 2.0 + primitive_position[i][k];  //ADD ROTATION
+      if(val < min[k]){
+        min[k] = val;
+      }
+      val = primitive_size[i][k] / 2.0 + primitive_position[i][k];
+      if(val > max[k]){
+        max[k] = val;
+      }      
+    }    
+  }  
+  for(int i = 0; i < 3; i++){
+    size[i] = max[i] - min[i];
+  }
 }

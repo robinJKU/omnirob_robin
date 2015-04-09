@@ -9,6 +9,7 @@
 #include <pcl/search/kdtree.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <Eigen/Geometry> 
 
 typedef pcl::PointXYZRGB PointType;
 typedef pcl::Normal NormalType;
@@ -20,6 +21,7 @@ namespace robin_odlib{
   bool searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, Object& object, std::vector <double>& pose, double table_height);
   void fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vector <double>& size, std::vector <double>& pose, double table_height);
   bool compareColor(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, std::vector <int> HSVcolor);
+  bool compareSize(std::vector <double> size, std::vector <double> object_size, std::vector <double>& rpy);
 
 }
 
