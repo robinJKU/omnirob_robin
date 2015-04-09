@@ -2,9 +2,9 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:property name="camera_mast_origin">
     <!-- verweiste auf die mitte des senkrechten mastes
-         x = länge des profils am roboter/2 - versatz des arms zum zentrum - winkellänge - halbe profilbreite des mastes
+         x = laenge des profils am roboter/2 - versatz des arms zum zentrum - winkellaenge - halbe profilbreite des mastes
          y = abstand zur außenkante/2 - halbe profilbreite des mastes
-         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhöhe + profilhöhe -->   
+         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhoehe + profilhoehe -->   
     <origin xyz="${0.150-0.020-0.080-0.020} ${-(0.7/2-0.02)} ${0.254/2+0.09+0.457+0.04}" rpy="0 0 0"/> 
   </xacro:property>
   
@@ -23,9 +23,9 @@
   
   <xacro:property name="lwa_origin">
     <!-- verweiste auf die mitte des lwa unterhalb der befestigungsplatte
-         x = roboterlänge / 2 - plattenlänge halbe - versatz
+         x = roboterlaenge / 2 - plattenlaenge halbe - versatz
          y = mittig
-         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhöhe + profilhöhe -->   
+         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhoehe + profilhoehe -->   
     <origin xyz="${0.7/2-0.355/2-0.094} 0 ${0.254/2+0.09+0.457+0.04}" rpy="${M_PI} 0 0"/> 
   </xacro:property>
   
@@ -41,9 +41,9 @@
   </xacro:property>
   
   <!-- laser scanner position von base_link gemessen 
-    x = roboterlänge / 2 + 3mm Abstandplatte + Scan Ebenen Ursprung von Gehäuse
+    x = roboterlaenge / 2 + 3mm Abstandplatte + Scan Ebenen Ursprung von Gehaeuse
     y = 0 Scanner sollte mittig sein
-    z = Höhe von Boden zum Gehäuse + Scan Ebenen Ursprung von Gehäuse  
+    z = Hoehe von Boden zum Gehaeuse + Scan Ebenen Ursprung von Gehaeuse  
   -->
   <xacro:property name="laserscanner_origin"> 
     <origin xyz="${0.7/2.0+0.003+0.0597} 0 ${0.293+0.116}" rpy="${M_PI} 0 0"/> 
