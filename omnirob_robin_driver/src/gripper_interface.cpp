@@ -1,15 +1,10 @@
 #include <ros/ros.h>
 
-
-
 //messages
 #include <std_msgs/Float64MultiArray.h>
 
 // services
 #include <std_srvs/Empty.h>
-
-// tf
-#include <tf/transform_listener.h>
 
 ros::ServiceServer closeGripper_server;
 ros::ServiceServer openGripper_server;
@@ -58,18 +53,8 @@ int main( int argc, char** argv) {
   ros::init(argc, argv, "gripper_interface");
   
   ros::NodeHandle n;  
-  
-  
-  //Publisher
-  gripper_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);  
-  
-  //Service Servers
-  closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
-  openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);   
-  
-  //Service Clients
-  
-  
+    
+  //Service Clients  
   ros::service::waitForService("gripper/control/start_motion");
   ros::service::waitForService("gripper/control/initialize_modules");
   ros::service::waitForService("gripper/control/reference_modules");
@@ -82,6 +67,13 @@ int main( int argc, char** argv) {
   std_srvs::Empty srv;
   gripper_init_srv.call(srv);
   gripper_ref_srv.call(srv);
+  
+  //Publisher
+  gripper_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);  
+  
+  //Service Servers
+  closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
+  openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);  
   
   
   ros::spin();

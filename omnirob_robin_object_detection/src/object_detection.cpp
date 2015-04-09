@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <sstream> 
 
-
 //pcl includes
 #include <pcl/conversions.h>
 #include <pcl/common/common.h>
@@ -28,6 +27,7 @@
 #include <visualization_msgs/Marker.h>
 #include <std_srvs/Empty.h>
 #include <omnirob_robin_msgs/get_object_pose.h>
+#include <omnirob_robin_msgs/move_pan_tilt.h>
 #include <omnirob_robin_msgs/HackObjRecAction.h>
 
 //robin object detection library

@@ -30,4 +30,5 @@ include_directories(
 )
 
 add_executable(omnirob_robin_object_detection src/object_detection.cpp src/robin_odlib.cpp src/robin_odlib_ros.cpp src/robin_object.cpp)
+add_dependencies(omnirob_robin_object_detection omnirob_robin_msgs_gencpp)
 target_link_libraries(omnirob_robin_object_detection ${catkin_LIBRARIES})
