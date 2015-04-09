@@ -49,6 +49,7 @@ std::vector <Object> objects;
 pcl::PointCloud<PointType>::Ptr cloud;
 std::vector <tf::Transform> transforms;
 std::vector <std::string> transform_names;
+tf::StampedTransform odom_base_link;
 
 //function definitions
 void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud);
@@ -63,10 +64,7 @@ void pose_to_tf(std::vector <double> pose, tf::Transform transform){
   tf::Quaternion quat;
   quat.setRPY(pose[3], pose[4], pose[5]);
   transform.setRotation(quat);
-  
-  tf::StampedTransform odom_base_link;
-  ros::spinOnce();
-  
+    
   std::vector <std::string> ids;
   pListener->getFrameStrings(ids);
   
@@ -74,14 +72,6 @@ void pose_to_tf(std::vector <double> pose, tf::Transform transform){
   for(int i = 0; i < ids.size(); i++){
     ROS_INFO("frame name = %s", ids[i].c_str());
   }
-  
-  try {            
-    pListener->waitForTransform("world", "base_link", ros::Time::now(), ros::Duration(20.0) );
-    pListener->lookupTransform("world", "base_link", ros::Time(0), odom_base_link);
-  }
-    catch(tf::TransformException e){
-    ROS_INFO("No Transform found from base_link to odom");
-  } 
   transform.mult(odom_base_link.inverse(), transform);    
 }
 
@@ -295,11 +285,18 @@ int main( int argc, char** argv) {
   
   robin_odlib_ros::loadObjects(objects);  
   
-  ros::Rate r(100);  
+  ros::Rate r(50);  
   while(ros::ok){
     for(int i = 0; i < transforms.size(); i++){      
       broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "odom", transform_names[i]));
+    }  
+    try {            
+      pListener->waitForTransform("world", "base_link", ros::Time::now(), ros::Duration(20.0) );
+      pListener->lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0), odom_base_link);
     }
+      catch(tf::TransformException e){
+      ROS_INFO("No Transform found from base_link to odom");
+    } 
     r.sleep();
     ros::spinOnce();
   }
