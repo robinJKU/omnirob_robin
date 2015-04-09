@@ -39,6 +39,9 @@ target_link_libraries(omnirob_joint_state_publisher ${catkin_LIBRARIES})
 add_executable(base_interface src/base_interface.cpp)
 target_link_libraries(base_interface ${catkin_LIBRARIES})
 
+add_executable(gripper_interface_sim src/gripper_interface_sim.cpp)
+target_link_libraries(gripper_interface_sim ${catkin_LIBRARIES})
+
 add_executable(gripper_interface src/gripper_interface.cpp)
 target_link_libraries(gripper_interface ${catkin_LIBRARIES})
 
