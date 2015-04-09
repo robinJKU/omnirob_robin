@@ -5,9 +5,11 @@
 
 // services
 #include <std_srvs/Empty.h>
+#include <omnirob_robin_msgs/move_gripper.h>
 
 ros::ServiceServer closeGripper_server;
 ros::ServiceServer openGripper_server;
+ros::ServiceServer moveGripper_server;
 
 ros::Publisher gripper_goal_pub;
 
@@ -17,34 +19,37 @@ ros::ServiceClient gripper_ref_srv;
 
 bool gripper_is_closed = false;
 
-double closed_pos = 20;
-double opened_pos = 50;
+double closed_pos = 10;
+double opened_pos = 60;
 
-void moveGripper(double space){  
-  std_msgs::Float64MultiArray msg;
-  std_srvs::Empty srv;
-  
-  msg.data.push_back(space);
-  
-  gripper_goal_pub.publish(msg);
-  
-  gripper_start_motion_srv.call(srv); 
+bool moveGripper(double stroke){    
+  if(stroke >= closed_pos && stroke <= opened_pos){
+    
+    std_msgs::Float64MultiArray msg;
+    std_srvs::Empty srv;
+    msg.data.push_back(stroke);    
+    gripper_goal_pub.publish(msg);    
+    gripper_start_motion_srv.call(srv);     
+    ros::Duration(2.0).sleep();
+    return true;
+    
+  }  
+  return false;
 }
 
-
-
-bool closeGripperCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
-  if(!gripper_is_closed){
-    gripper_is_closed = true; 
-    moveGripper(closed_pos);    
-  }
-  return true;
+bool closeGripperCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){ 
+  gripper_is_closed = true; 
+  return moveGripper(closed_pos);  
 }
 
-bool openGripperCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){  
+bool openGripperCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){   
   gripper_is_closed = false; 
-  moveGripper(opened_pos); 
-  return true;
+  return moveGripper(opened_pos);   
+}
+
+bool moveGripperCallback(omnirob_robin_msgs::move_gripper::Request& request, omnirob_robin_msgs::move_gripper::Response& response){ 
+  response.success = true;
+  return moveGripper(request.stroke);   
 }
 
 
@@ -74,6 +79,7 @@ int main( int argc, char** argv) {
   //Service Servers
   closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
   openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);  
+  moveGripper_server = n.advertiseService("gripper/stroke_srv", moveGripperCallback);  
   
   
   ros::spin();

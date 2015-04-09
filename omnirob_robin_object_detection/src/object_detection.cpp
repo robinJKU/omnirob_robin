@@ -6,16 +6,7 @@
 #include <pcl/common/common.h>
 #include <pcl_ros/transforms.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/search/search.h>
-#include <pcl/search/kdtree.h>
-#include <pcl/filters/crop_box.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/segmentation/region_growing_rgb.h>
-#include <pcl/filters/conditional_removal.h>
-#include <pcl/features/normal_3d.h>
+
 
 //ros includes
 #include "tf/transform_listener.h"
@@ -23,8 +14,6 @@
 #include <actionlib/server/simple_action_server.h>
 
 //services und messages
-#include <std_msgs/Float64MultiArray.h>
-#include <visualization_msgs/Marker.h>
 #include <std_srvs/Empty.h>
 #include <omnirob_robin_msgs/get_object_pose.h>
 #include <omnirob_robin_msgs/move_pan_tilt.h>
@@ -43,12 +32,11 @@ ros::Subscriber pointcloud_sub;
 ros::Publisher table_pub;
 ros::Publisher objects_pub;
 ros::Publisher pan_tilt_goal_pub;
-ros::Publisher box_pub;
 
 ros::ServiceServer detectObjectsService;
 ros::ServiceServer getObjectPoseService;
 
-ros::ServiceClient pan_tilt_start_motion_srv;
+ros::ServiceClient move_pan_tilt_client;
 
 tf::TransformListener* pListener;
 
@@ -172,17 +160,14 @@ void detectObjects(){
   }
 }
 
-bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
-   
+bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){   
   
-  std_msgs::Float64MultiArray msg;
-  std_srvs::Empty srv;
+  omnirob_robin_msgs::move_pan_tilt srv;
   
-  msg.data.push_back(0.2);
-  msg.data.push_back(-0.6);
+  srv.request.pan_goal = 0.4;
+  srv.request.tilt_goal = 0.6;
   
-  pan_tilt_goal_pub.publish(msg);
-  pan_tilt_start_motion_srv.call(srv); 
+  move_pan_tilt_client.call(srv);
   
   ros::Duration(5.0).sleep();
   detecting = true;   
@@ -239,16 +224,17 @@ int main( int argc, char** argv) {
   //publisher
   table_pub = n.advertise<sensor_msgs::PointCloud2> ("table_cloud", 1);
   objects_pub = n.advertise<sensor_msgs::PointCloud2> ("objects_cloud", 1);
-  pan_tilt_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("pan_tilt/control/commanded_joint_state", 1);
-  box_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  
   
   //Services Server
   detectObjectsService = n.advertiseService("detect_objects_srv", detectObjectsCallback);
   getObjectPoseService = n.advertiseService("get_object_pose_srv", getObjectPoseCallback);
   
-  //Service Client
-  ros::service::waitForService("pan_tilt/control/start_motion");
-  pan_tilt_start_motion_srv = n.serviceClient<std_srvs::Empty>("pan_tilt/control/start_motion"); 
+  //Service Clients
+  ros::service::waitForService("pan_tilt/move_pan_tilt");
+  move_pan_tilt_client = n.serviceClient<omnirob_robin_msgs::move_pan_tilt>("pan_tilt/move_pan_tilt"); 
+  
+  
   
   while(!ros::param::has("/detectable_objects")){
     ros::spinOnce();    
@@ -256,10 +242,12 @@ int main( int argc, char** argv) {
   
   robin_odlib_ros::loadObjects(objects);  
   
+  ros::Rate r(100);  
   while(ros::ok){
     for(int i = 0; i < transforms.size(); i++){      
       broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "base_link", transform_names[i]));
     }
+    r.sleep();
     ros::spinOnce();
   }
   

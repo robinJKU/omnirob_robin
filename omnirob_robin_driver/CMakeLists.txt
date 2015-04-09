@@ -44,6 +44,7 @@ add_executable(gripper_hack src/gripper_hack.cpp)
 target_link_libraries(gripper_hack ${catkin_LIBRARIES})
 
 add_executable(gripper_interface src/gripper_interface.cpp)
+add_dependencies(gripper_interface omnirob_robin_msgs_gencpp)
 target_link_libraries(gripper_interface ${catkin_LIBRARIES})
 
 add_executable(pan_tilt_interface src/pan_tilt_interface.cpp)
