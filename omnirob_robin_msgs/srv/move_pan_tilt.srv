@@ -1,0 +1,5 @@
+float32 pan_goal
+float32 tilt_goal
+---
+bool success
+
