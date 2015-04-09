@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <include file="$(find omnirob_robin_driver)/launch/base_interface.launch"></include> 
-  <include file="$(find omnirob_robin_driver)/launch/gripper_interface.launch"></include> 
-  
-
-</launch>

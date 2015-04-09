@@ -1,29 +1,40 @@
 #include <ros/ros.h>
-#include <std_msgs/Float64.h>
+
+//messages
 #include <std_msgs/Float64MultiArray.h>
+
+// services
 #include <std_srvs/Empty.h>
+#include <omnirob_robin_msgs/move_pan_tilt.h>
 
-ros::Publisher pan_pub;
-ros::Publisher tilt_pub;
 
-double pan_target = 0.0;
-double tilt_target = 0.0;
+//publisher
+ros::Publisher pan_tilt_goal_pub;
 
-void positionCallback( const std_msgs::Float64MultiArray& position) {  
-  pan_target = position.data[0];
-  tilt_target = position.data[1];
-  ROS_INFO("new pan tilt target %f %f", pan_target, tilt_target);
-}
+//server
+ros::ServiceServer move_pan_tilt_server;
 
-bool startMotionCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
-  std_msgs::Float64 pan_msg;
-  std_msgs::Float64 tilt_msg;
-  pan_msg.data = pan_target;
-  tilt_msg.data = tilt_target;
+//clients
+ros::ServiceClient pan_tilt_start_motion_srv;
+ros::ServiceClient pan_tilt_init_srv;
+ros::ServiceClient pan_tilt_ref_srv;
+
+bool movePanTiltCallback(omnirob_robin_msgs::move_pan_tilt::Request& req, omnirob_robin_msgs::move_pan_tilt::Response& res){
+  std_msgs::Float64MultiArray msg;
+  std_srvs::Empty srv;
   
-  pan_pub.publish(pan_msg);
-  tilt_pub.publish(tilt_msg);
-  return true;
+  msg.data.push_back(req.pan_goal);
+  msg.data.push_back(req.tilt_goal);
+  
+  pan_tilt_goal_pub.publish(msg);
+  
+  pan_tilt_start_motion_srv.call(srv);
+  
+  ros::Duration(2.0).sleep();
+  
+  res.success = true;
+  
+  return true;  
 }
 
 int main(int argc, char** argv)
@@ -31,13 +42,27 @@ int main(int argc, char** argv)
   // Init the ROS node
   ros::init(argc, argv, "pan_tilt_interface");
 
-  ros::NodeHandle n;   
+  ros::NodeHandle n;    
   
-  pan_pub = n.advertise<std_msgs::Float64>("pan_tilt/pan_position_controller/command", 50);
-  tilt_pub = n.advertise<std_msgs::Float64>("pan_tilt/tilt_position_controller/command", 50);    
+  //Service Clients  
+  ros::service::waitForService("pan_tilt/control/start_motion");
+  ros::service::waitForService("pan_tilt/control/initialize_modules");
+  ros::service::waitForService("pan_tilt/control/reference_modules");
+  pan_tilt_start_motion_srv = n.serviceClient<std_srvs::Empty>("pan_tilt/control/start_motion"); 
+  pan_tilt_init_srv = n.serviceClient<std_srvs::Empty>("pan_tilt/control/initialize_modules"); 
+  pan_tilt_ref_srv = n.serviceClient<std_srvs::Empty>("pan_tilt/control/reference_modules"); 
   
-  ros::Subscriber sub = n.subscribe("pant_tilt/control/commanded_joint_state", 1, positionCallback);  
-  ros::ServiceServer move_pan_tilt_service = n.advertiseService("pan_tilt/control/start_motion", startMotionCallback);
+  ROS_INFO("pan_tilt_interface: all Services available");
+  
+  std_srvs::Empty srv;
+  pan_tilt_init_srv.call(srv);
+  pan_tilt_ref_srv.call(srv);
+  
+  //Publisher
+  pan_tilt_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("pan_tilt/control/commanded_joint_state", 1);  
+  
+  //Service Servers
+  move_pan_tilt_server = n.advertiseService("pan_tilt/move_pan_tilt",movePanTiltCallback);
 
   ros::spin();
   

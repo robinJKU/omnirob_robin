@@ -178,7 +178,7 @@ void robin_odlib::Segmentation(pcl::PointCloud<PointType>::Ptr  cloud,  std::vec
 //======================================================================================================================================  
 
 
-void robin_odlib::searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, Object& object, double table_height){
+bool robin_odlib::searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, Object& object, std::vector <double>& pose, double table_height){
   //extract the indices in a new pointcloud
   printf("searching for object %s \n", object.getName().c_str());
   pcl::PointCloud<PointType>::Ptr objectCloud (new pcl::PointCloud<PointType>);	
@@ -192,25 +192,18 @@ void robin_odlib::searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poin
 	extract_indices.filter(*objectCloud);
   
   std::vector <double> size;
-  std::vector <double> pose; //position and rpy
   
-  fitBoundingBox(objectCloud, size, pose);
+  fitBoundingBox(objectCloud, size, pose, table_height);
   
-  //Add the table offset to the z size and move the box down half
-  size[2] += 0.005;
-  pose[2] -= 0.0025;
-  
-  object.setSize(size);
-  object.setPose(pose);
-  
-  
+    
+  return true;
 }
 
 //======================================================================================================================================  
 //======================================================================================================================================  
 //======================================================================================================================================
 
-void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vector <double>& size, std::vector <double>& pose){
+void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vector <double>& size, std::vector <double>& pose, double table_height){
   
   Eigen::Vector4f min, max; 
   Eigen::Vector4f centroid;  
@@ -235,11 +228,11 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
     pcl::getMinMax3D(*cloud_transformed, min, max); 
     size[0] = max[0]-min[0];
     size[1] = max[1]-min[1];
-    size[2] = max[2]-min[2];  
+    size[2] = max[2]-table_height;  
   
     centroid[0] = min[0] + size[0]/2.0; 
     centroid[1] = min[1] + size[1]/2.0; 
-    centroid[2] = min[2] + size[2]/2.0; 
+    centroid[2] = table_height + size[2]/2.0; 
     
     double vol = size[0]*size[1]*size[2];
     if(vol < 0){
@@ -261,11 +254,11 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
   pcl::getMinMax3D(*cloud_transformed, min, max); 
   size[0] = max[0]-min[0];
   size[1] = max[1]-min[1];
-  size[2] = max[2]-min[2];  
+  size[2] = max[2]-table_height;  
   
   centroid[0] = min[0] + size[0]/2.0; 
   centroid[1] = min[1] + size[1]/2.0; 
-  centroid[2] = min[2] + size[2]/2.0; 
+  centroid[2] = table_height + size[2]/2.0; 
   
   //rotate center back to inertial frame
   centroid = transform.inverse()*centroid;
@@ -278,3 +271,10 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
   pose[5] = -M_PI/180.0*minYaw;
 }
 
+//======================================================================================================================================  
+//======================================================================================================================================  
+//======================================================================================================================================
+
+bool robin_odlib::compareColor(pcl::PointCloud<PointType>::Ptr  cloud, pcl::PointIndices cluster, std::vector <int> HSVcolor){
+  return false;
+}

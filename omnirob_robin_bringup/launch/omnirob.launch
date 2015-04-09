@@ -9,9 +9,10 @@
 	<!-- laser scanner -->
 	<include file="$(find cob_sick_s300)/launch/s300.xml.launch"></include>
 
-	<!-- xsens -->
+	<!-- xsens x
 	<include file="$(find xsens_bringup)/launch/xsens.launch"></include>
+	-->
+	<!-- kinect -->
+	<include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch"></include>
 	
-	<!-- todo kinect -->
-
 </launch>

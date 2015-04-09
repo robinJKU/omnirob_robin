@@ -3,7 +3,7 @@
 
     <arg name="frame_local" default="ENU"/>
     <arg name="frame_local_imu" default="ENU"/>
-    <arg name="device" default="/dev/ttyUSB1"/>
+    <arg name="device" default="/dev/imu"/>
 
 	<node pkg="xsens_driver" type="mtnode.py" name="xsens_driver" output="screen" >
 		<param name="frame_id" value="$(arg frame_id)"/>

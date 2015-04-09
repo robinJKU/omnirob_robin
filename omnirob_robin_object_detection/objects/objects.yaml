@@ -4,7 +4,7 @@ detectable_objects: [cylinder_orange]
 objects:
   cylinder_orange:
       color: orange
-      RGBcolor:  [255, 102, 0]
+      RGBcolor:  [255, 140, 0]
       primitive0_type: cylinder
       primitive0_size: [0.04, 0.04, 0.15]
       primitive0_position: [0.0, 0.0, 0.0]

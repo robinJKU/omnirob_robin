@@ -18,12 +18,10 @@ class Object{
     
     //get Values
     std::string getName();
-    std::vector <double> getPosition();
-    std::vector <double> getOrientation();
     std::vector <double> getSize();
+    std::vector <int> getHSV();
     
     //set Values
-    void setPose(std::vector <double> pose);
     void setSize(std::vector <double> size);
     
     
@@ -43,12 +41,7 @@ class Object{
     //color variables
     std::string color;
     std::vector <int> RGBcolor;
-    std::vector <int> HSVcolor;
-        
-    //detection variables
-    bool detected;
-    std::vector <double> position;
-    std::vector <double> orientation; 
+    std::vector <int> HSVcolor;   
     
     //functions
     void printPrimitive(int index);

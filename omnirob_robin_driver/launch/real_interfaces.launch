@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+ 
+  <!-- load the gripper interface node -->   
+   
+  <node name="gripper_interface" pkg="omnirob_robin_driver" type="gripper_interface" respawn="false"
+    output="screen" ns="omnirob_robin"/> 
+    
+  <node name="pan_tilt_interface" pkg="omnirob_robin_driver" type="pan_tilt_interface" respawn="false"
+    output="screen" ns="omnirob_robin"/>      
+
+</launch>
+
+

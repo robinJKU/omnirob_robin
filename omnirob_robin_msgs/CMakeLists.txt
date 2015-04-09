@@ -37,6 +37,8 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    get_object_pose.srv
+   move_pan_tilt.srv
+   move_gripper.srv
  )
 
 ## Generate actions in the 'action' folder

@@ -1,21 +1,12 @@
 #include <ros/ros.h>
-
+#include <sstream> 
 
 //pcl includes
 #include <pcl/conversions.h>
 #include <pcl/common/common.h>
 #include <pcl_ros/transforms.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/search/search.h>
-#include <pcl/search/kdtree.h>
-#include <pcl/filters/crop_box.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/segmentation/region_growing_rgb.h>
-#include <pcl/filters/conditional_removal.h>
-#include <pcl/features/normal_3d.h>
+
 
 //ros includes
 #include "tf/transform_listener.h"
@@ -23,10 +14,9 @@
 #include <actionlib/server/simple_action_server.h>
 
 //services und messages
-#include <std_msgs/Float64MultiArray.h>
-#include <visualization_msgs/Marker.h>
 #include <std_srvs/Empty.h>
 #include <omnirob_robin_msgs/get_object_pose.h>
+#include <omnirob_robin_msgs/move_pan_tilt.h>
 #include <omnirob_robin_msgs/HackObjRecAction.h>
 
 //robin object detection library
@@ -42,12 +32,11 @@ ros::Subscriber pointcloud_sub;
 ros::Publisher table_pub;
 ros::Publisher objects_pub;
 ros::Publisher pan_tilt_goal_pub;
-ros::Publisher box_pub;
 
 ros::ServiceServer detectObjectsService;
 ros::ServiceServer getObjectPoseService;
 
-ros::ServiceClient pan_tilt_start_motion_srv;
+ros::ServiceClient move_pan_tilt_client;
 
 tf::TransformListener* pListener;
 
@@ -143,82 +132,45 @@ void detectObjects(){
   robin_odlib::Segmentation(cloud, clusters);
   
       
-  //search for shape in the seperated clouds by shape       
-  robin_odlib::searchObject(cloud, clusters[0], objects[0], table_height);
+  //search for shape in the seperated clouds by shape  
+  std::vector <double> pose; 
+  pose.resize(6);
   
-  
-  //set transforms
-  tf::Transform transform;
-  transform.setOrigin(tf::Vector3(objects[0].getPosition()[0], objects[0].getPosition()[1], objects[0].getPosition()[2]));
-  tf::Quaternion quat;
-  quat.setRPY(objects[0].getOrientation()[0], objects[0].getOrientation()[1], objects[0].getOrientation()[2]);
-  transform.setRotation(quat);
   transforms.clear();
-  transforms.push_back(transform);
   transform_names.clear();
-  transform_names.push_back(objects[0].getName());
   
-  
-  visualization_msgs::Marker marker;
-  // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-  marker.header.frame_id = "/base_link";
-  marker.header.stamp = ros::Time::now();
-
-  // Set the namespace and id for this marker.  This serves to create a unique ID
-  // Any marker sent with the same namespace and id will overwrite the old one
-  marker.ns = "basic_shapes";
-  marker.id = 1;
-
-  // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-  marker.type = visualization_msgs::Marker::CUBE;
-
-  // Set the marker action.  Options are ADD and DELETE
-  marker.action = visualization_msgs::Marker::ADD;
-
-  // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-  marker.pose.position.x = objects[0].getPosition()[0];
-  marker.pose.position.y = objects[0].getPosition()[1];
-  marker.pose.position.z = objects[0].getPosition()[2];
-  
-  quat.setRPY(0,0, objects[0].getOrientation()[2]);
-  
-  marker.pose.orientation.x = quat.getX();
-  marker.pose.orientation.y = quat.getY();
-  marker.pose.orientation.z = quat.getZ();
-  marker.pose.orientation.w = quat.getW();
-
-  // Set the scale of the marker -- 1x1x1 here means 1m on a side
-  marker.scale.x = objects[0].getSize()[0];
-  marker.scale.y = objects[0].getSize()[1];
-  marker.scale.z = objects[0].getSize()[2];
-    
-
-  // Set the color -- be sure to set alpha to something non-zero!
-  marker.color.r = 255;
-  marker.color.g = 0;
-  marker.color.b = 0;
-  marker.color.a = 0.4;
-
-  marker.lifetime = ros::Duration(1000.0);
-  
-  box_pub.publish(marker);
-    
-  
+  for(int i = 0; i < objects.size(); i++){
+    int count = 0;
+    for(int k = 0; k < clusters.size(); k++){
+      bool found = robin_odlib::searchObject(cloud, clusters[k], objects[i], pose, table_height);
+      if(found){
+        ROS_INFO("object %s found", objects[0].getName().c_str());
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
+        tf::Quaternion quat;
+        quat.setRPY(pose[3], pose[4], pose[5]);
+        transform.setRotation(quat);
+        transforms.push_back(transform);
+        std::stringstream s;
+        s << count;
+        transform_names.push_back(objects[0].getName() + s.str());
+        count++;
+      }
+    }    
+  }
 }
 
-bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
-  detecting = true;    
+bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){   
   
-  std_msgs::Float64MultiArray msg;
-  std_srvs::Empty srv;
+  omnirob_robin_msgs::move_pan_tilt srv;
   
-  msg.data.push_back(0.2);
-  msg.data.push_back(0.6);
+  srv.request.pan_goal = 0.4;
+  srv.request.tilt_goal = 0.6;
   
-  pan_tilt_goal_pub.publish(msg);
-  pan_tilt_start_motion_srv.call(srv); 
+  move_pan_tilt_client.call(srv);
   
   ros::Duration(5.0).sleep();
+  detecting = true;   
   
   detectObjects();
   
@@ -228,7 +180,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response){
   int index = -1;
   for(int i = 0; i < transform_names.size(); i++){
-    if(transform_names[i].compare(request.name)){
+    if(transform_names[i].compare(request.name) == 0){
       index = i;
     }
   }  
@@ -272,16 +224,17 @@ int main( int argc, char** argv) {
   //publisher
   table_pub = n.advertise<sensor_msgs::PointCloud2> ("table_cloud", 1);
   objects_pub = n.advertise<sensor_msgs::PointCloud2> ("objects_cloud", 1);
-  pan_tilt_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("pan_tilt/control/commanded_joint_state", 1);
-  box_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  
   
   //Services Server
   detectObjectsService = n.advertiseService("detect_objects_srv", detectObjectsCallback);
   getObjectPoseService = n.advertiseService("get_object_pose_srv", getObjectPoseCallback);
   
-  //Service Client
-  ros::service::waitForService("pan_tilt/control/start_motion");
-  pan_tilt_start_motion_srv = n.serviceClient<std_srvs::Empty>("pan_tilt/control/start_motion"); 
+  //Service Clients
+  ros::service::waitForService("pan_tilt/move_pan_tilt");
+  move_pan_tilt_client = n.serviceClient<omnirob_robin_msgs::move_pan_tilt>("pan_tilt/move_pan_tilt"); 
+  
+  
   
   while(!ros::param::has("/detectable_objects")){
     ros::spinOnce();    
@@ -289,10 +242,12 @@ int main( int argc, char** argv) {
   
   robin_odlib_ros::loadObjects(objects);  
   
+  ros::Rate r(100);  
   while(ros::ok){
     for(int i = 0; i < transforms.size(); i++){      
       broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "base_link", transform_names[i]));
     }
+    r.sleep();
     ros::spinOnce();
   }
   
