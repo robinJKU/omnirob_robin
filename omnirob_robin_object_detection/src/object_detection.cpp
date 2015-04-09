@@ -283,7 +283,12 @@ int main( int argc, char** argv) {
     ros::spinOnce();    
   }
   
-  robin_odlib_ros::loadObjects(objects);  
+  
+  
+  
+  test
+  
+  robin_odlib_ros::loadObjects(objects);
   
   ros::Rate r(50);  
   while(ros::ok){
