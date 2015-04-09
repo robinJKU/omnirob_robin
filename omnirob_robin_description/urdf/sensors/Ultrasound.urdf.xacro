@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+	
+	<xacro:macro name="ultrasound_sensor" params="number parent *origin">
+		
+		<joint name="base_to_ultrasound_sensor${number}" type="fixed" >
+			<insert_block name="origin" />
+			<parent link="${parent}" />
+			<child link="ultrasound_sensor${number}_origin_link" />			
+		</joint>
+		
+
+		<link name="ultrasound_sensor${number}_origin_link">
+			<inertial>
+				<mass value="0.1" />
+				<origin xyz="0 0.0 0.0" />
+			an_tilt_origin	<inertia ixx="0.0" ixy="0.0" ixz="0.0"
+					iyy="0.0" iyz="0.0" izz="0.0" />
+			</inertial>     
+      
+      <!-- sensor-origin is the center of the vertical post -->
+
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<box size="0.02 0.05 0.02" /> 
+				</geometry>
+        <material name="Green">
+          <color rgba="0.0 0.0 0.0 1.0"/>
+        </material>
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<box size="0.02 0.05 0.02" /> 
+				</geometry>
+			</collision>
+		</link>
+    
+   </xacro:macro>
+</robot>

@@ -12,14 +12,7 @@ Object::Object(std::string name, std::string color, std::vector <int> RGBcolor){
   
   this->color = color;
   this->RGBcolor = RGBcolor;
-  Object::computeHSVcolor(this->HSVcolor, RGBcolor);
-  
-  this->detected = false;
-  this->position.clear();
-  this->orientation.clear();   
-  this->position.resize(3);
-  this->orientation.resize(3);
-  
+  Object::computeHSVcolor(this->HSVcolor, RGBcolor);   
 }
 
 void Object::addPrimitive(std::string type, std::vector <double> size, std::vector <double> position, std::vector <double> orientation){
@@ -33,29 +26,12 @@ std::string Object::getName(){
   return name;
 }
 
-std::vector <double> Object::getPosition(){
-  return position;
-}
-
-std::vector <double> Object::getOrientation(){
-  return orientation;
-}
-
 std::vector <double> Object::getSize(){
   return size;
 }
 
-void Object::setPose(std::vector <double> pose){
-  position[0] = pose[0]; 
-  position[1] = pose[1]; 
-  position[2] = pose[2]; 
-  orientation[0] = pose[3];
-  orientation[1] = pose[4];
-  orientation[2] = pose[5];  
-}
-
-void Object::setSize(std::vector <double> size){
-  this->size = size;
+std::vector <int> Object::getHSV(){
+  return HSVcolor;
 }
 
 void Object::printObject(){
