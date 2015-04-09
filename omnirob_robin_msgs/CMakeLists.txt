@@ -46,6 +46,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate actions in the 'action' folder
 add_action_files(
   FILES
+  HackBasMov.action
+  HackGripper.action
+  HackLwaMov.action
+  HackMark.action
   HackObjRec.action
 #   Action1.action
 #   Action2.action

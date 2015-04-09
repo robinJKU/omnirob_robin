@@ -1,0 +1,15 @@
+# Goal
+geometry_msgs/Pose2D targetPos
+---
+# Result
+int32 RES_SUCCESS=0
+int32 RES_ERROR1=1
+int32 RES_ERROR2=2
+int32 RES_ERROR3=3
+int32 RES_ERROR4=4
+int32 RES_ERROR5=5
+int32 RES_ERROR6=6
+int32 res
+---
+# Feedback
+
