@@ -253,6 +253,34 @@ class Modules{
 			return only_reference_error(module) || module_not_referenced[module];
 			
 		}// no errors
+		
+		bool at_least_one_module_is_ready( void ){
+			bool is_true = false;
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				is_true = is_true || module_is_ready[module];
+			}
+			
+			return is_true;
+		}// at least one module is ready
+		
+		bool at_least_one_module_is_enabled( void ){
+			bool is_true = false;
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				is_true = is_true || module_is_enabled[module];
+			}
+			
+			return is_true;
+		}// at least one module is enabled
+		
+		bool at_least_one_module_is_enabled_and_ready( void ){
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				if( module_is_enabled[module] && module_is_ready[module] ){
+					return true;
+				}
+			}
+			
+			return false;
+		}// at least one module is enabled and ready
 	
 	
 	protected:
@@ -462,12 +490,14 @@ class LWA : public Modules{
 			for( unsigned int module = 0; module<nr_of_modules; module++ ){
 				if( (continuos_position_tracking_mode_enabled &&  module_is_enabled[module] && module_is_ready[module]) ||
 					(point_to_point_motion_enabled && module_is_ready[module] && start_motion_trigger) ){
-						
 					joint_trajectory.points[0].positions[module] =  joint_state.data[module];
 				}
 			}
 			
-			commanded_joint_state_publisher.publish( joint_trajectory);
+			if( (continuos_position_tracking_mode_enabled &&  at_least_one_module_is_enabled_and_ready() ) ||
+				(point_to_point_motion_enabled && at_least_one_module_is_ready() && start_motion_trigger) ){
+					commanded_joint_state_publisher.publish( joint_trajectory);
+			}
 			
 			if( start_motion_trigger ){
 				start_motion_trigger = false;

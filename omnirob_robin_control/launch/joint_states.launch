@@ -7,7 +7,6 @@
   <!-- load the controllers -->   
     
   <node name="controller_spawner_joint_states" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/omnirob_robin" args="
-    joint_state_controller"/> 
+    output="screen" ns="/omnirob_robin" args="joint_state_controller"/> 
 
 </launch>
