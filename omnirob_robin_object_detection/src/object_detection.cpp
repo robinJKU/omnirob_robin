@@ -65,13 +65,8 @@ void pose_to_tf(std::vector <double> pose, tf::Transform transform){
   quat.setRPY(pose[3], pose[4], pose[5]);
   transform.setRotation(quat);
     
-  std::vector <std::string> ids;
-  pListener->getFrameStrings(ids);
-  
-  ROS_INFO("number of frames = %d", (int)ids.size());
-  for(int i = 0; i < ids.size(); i++){
-    ROS_INFO("frame name = %s", ids[i].c_str());
-  }
+  ROS_INFO("odom quat %f %f %f %f", odom_base_link.getRotation().getX(), odom_base_link.getRotation().getY(), odom_base_link.getRotation().getZ(), odom_base_link.getRotation().getW());
+    
   transform.mult(odom_base_link.inverse(), transform);    
 }
 
@@ -283,11 +278,6 @@ int main( int argc, char** argv) {
     ros::spinOnce();    
   }
   
-  
-  
-  
-  test
-  
   robin_odlib_ros::loadObjects(objects);
   
   ros::Rate r(50);  
@@ -296,8 +286,8 @@ int main( int argc, char** argv) {
       broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "odom", transform_names[i]));
     }  
     try {            
-      pListener->waitForTransform("world", "base_link", ros::Time::now(), ros::Duration(20.0) );
-      pListener->lookupTransform("world", "base_link", ros::Time::now()-ros::Duration(1.0), odom_base_link);
+      pListener->waitForTransform("odom", "base_link", ros::Time(0), ros::Duration(20.0) );
+      pListener->lookupTransform("odom", "base_link", ros::Time(0), odom_base_link);
     }
       catch(tf::TransformException e){
       ROS_INFO("No Transform found from base_link to odom");
