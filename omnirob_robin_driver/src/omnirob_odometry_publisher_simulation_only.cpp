@@ -20,11 +20,11 @@ void base_callback( const sensor_msgs::JointState joint_state ){
 	// get index of base variables
 	int index_x=-1, index_y=-1, index_yaw=-1;
 	for( unsigned int ii=0; ii<joint_state.name.size(); ii++ ){
-		if( joint_state.name[ii].compare("base/x_joint")==0 ){
+		if( joint_state.name[ii].compare("base_x_joint")==0 ){
 			index_x=ii;
-		}else if( joint_state.name[ii].compare("base/y_joint")==0 ){
+		}else if( joint_state.name[ii].compare("base_y_joint")==0 ){
 			index_y=ii;
-		}else if( joint_state.name[ii].compare("base/yaw_joint")==0 ){
+		}else if( joint_state.name[ii].compare("base_yaw_joint")==0 ){
 			index_yaw=ii;
 		}
 		

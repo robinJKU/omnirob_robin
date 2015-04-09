@@ -350,7 +350,7 @@ bool robin_odlib::compareSize(std::vector <double> size, std::vector <double> ob
     printf("Found Orientation %d \n", index);
       
     rpy = final_rpy;
-    printf("rpy = %f %f %f", rpy[0], rpy[1], rpy[2]);        
+    printf("rpy = %f %f %f \n", rpy[0], rpy[1], rpy[2]);        
   }  
   return true;
 }

@@ -24,17 +24,17 @@
     </link>
 		
     
-    <joint name="base/x_joint" type="prismatic">
+    <joint name="base_x_joint" type="prismatic">
 			<origin xyz="0 0 0" rpy="0 0 0" />  
 			<axis xyz="1 0 0"/>  
       <calibration rising="0.0"/> 
       <dynamics damping="0.0" friction="0.0" />
       <limit effort="10" velocity="1.0" lower="-100" upper="100" />   
 			<parent link="odom"/>
-			<child link="base/x_link" />
+			<child link="base_x_link" />
 		</joint>
     
-    <link name="base/x_link">
+    <link name="base_x_link">
       <inertial>
 				<mass value="1" />
 				<origin xyz="0 0 0.0" />
@@ -42,17 +42,17 @@
 			</inertial>         
     </link>
     
-    <joint name="base/y_joint" type="prismatic">
+    <joint name="base_y_joint" type="prismatic">
 			<origin xyz="0 0 0" rpy="0 0 0" />  
 			<axis xyz="0 1 0"/> 
       <calibration rising="0.0"/>
       <dynamics damping="0.0" friction="0.0" />
       <limit effort="10" velocity="1.0" lower="-100" upper="100" />     
-			<parent link="base/x_link"/>
-			<child link="base/y_link" />
+			<parent link="base_x_link"/>
+			<child link="base_y_link" />
 		</joint>
     
-    <link name="base/y_link">
+    <link name="base_y_link">
       <inertial>
 				<mass value="1" />
 				<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -60,13 +60,13 @@
         </inertial>   
     </link>
 		
-		<joint name="base/yaw_joint" type="continuous">
+		<joint name="base_yaw_joint" type="continuous">
 			<origin xyz="0 0 0" rpy="0 0 0" />  
 			<axis xyz="0 0 1"/>  
       <calibration rising="0.0"/>
       <dynamics damping="0.0" friction="0.0" /> 
       <limit effort="10" velocity="1.0"/> 
-			<parent link="base/y_link"/>
+			<parent link="base_y_link"/>
 			<child link="base_link" />
 		</joint>
 		
@@ -98,14 +98,14 @@
 			</collision>
 		</link>
     
-    <joint name="base/mass_joint" type="fixed">
+    <joint name="base_mass_joint" type="fixed">
 			<origin xyz="0 0 0.4" rpy="0 0 0" />  
 			<parent link="base_link"/>
-			<child link="base/mass_link" />
+			<child link="base_mass_link" />
 		</joint>
     
     
-    <link name="base/mass_link">
+    <link name="base_mass_link">
 			<inertial>
 				<mass value="80.0" />
 				<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />

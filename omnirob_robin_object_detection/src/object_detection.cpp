@@ -18,6 +18,7 @@
 #include <omnirob_robin_msgs/get_object_pose.h>
 #include <omnirob_robin_msgs/move_pan_tilt.h>
 #include <omnirob_robin_msgs/HackObjRecAction.h>
+#include <omnirob_robin_msgs/add_marker_srv.h>
 
 //robin object detection library
 #include <robin_odlib.h>
@@ -37,6 +38,7 @@ ros::ServiceServer detectObjectsService;
 ros::ServiceServer getObjectPoseService;
 
 ros::ServiceClient move_pan_tilt_client;
+ros::ServiceClient add_marker_client;
 
 tf::TransformListener* pListener;
 
@@ -53,6 +55,41 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud);
 bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
 bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response);
 void detectObjects();
+void addMarker(std::vector <double> size, tf::Transform transform);
+void pose_to_tf(std::vector <double> pose, tf::Transform transform);
+
+void pose_to_tf(std::vector <double> pose, tf::Transform transform){
+  transform.setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
+  tf::Quaternion quat;
+  quat.setRPY(pose[3], pose[4], pose[5]);
+  transform.setRotation(quat);
+  
+  tf::StampedTransform odom_base_link;
+  ros::spinOnce();
+  
+  std::vector <std::string> ids;
+  pListener->getFrameStrings(ids);
+  
+  ROS_INFO("number of frames = %d", (int)ids.size());
+  for(int i = 0; i < ids.size(); i++){
+    ROS_INFO("frame name = %s", ids[i].c_str());
+  }
+  
+  try {            
+    pListener->waitForTransform("world", "base_link", ros::Time::now(), ros::Duration(20.0) );
+    pListener->lookupTransform("world", "base_link", ros::Time(0), odom_base_link);
+  }
+    catch(tf::TransformException e){
+    ROS_INFO("No Transform found from base_link to odom");
+  } 
+  transform.mult(odom_base_link.inverse(), transform);    
+}
+
+
+void addMarker(std::vector <double> size, tf::Transform transform){
+  
+}
+
 
 void execute(const omnirob_robin_msgs::HackObjRecGoalConstPtr& goal, Server* as)
 {
@@ -120,6 +157,19 @@ void detectObjects(){
   output_cloud->header.frame_id = "/base_link";
   table_pub.publish(output_cloud);
   
+  //calculate table bounding box
+  std::vector <double> table_size;
+  std::vector <double> table_pose;
+  //robin_odlib::fitBoundingBox(table_cloud, table_size, table_pose, 0.0);
+  
+  //ROS_INFO("table_size = %f, %f, %f", table_size[0], table_size[1], table_size[2]);
+  //ROS_INFO("table_pose = %f, %f, %f", table_pose[0], table_pose[1], table_pose[2]);
+  
+  tf::Transform table_transform;
+  //pose_to_tf(table_pose, table_transform);
+  //addMarker(table_size, table_transform);
+  
+  
   //publish objects    
   pcl::toROSMsg (*cloud, *output_cloud);
   output_cloud->header.stamp = ros::Time::now();
@@ -146,11 +196,11 @@ void detectObjects(){
       if(found){
         ROS_INFO("object %s found", objects[0].getName().c_str());
         tf::Transform transform;
-        transform.setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
-        tf::Quaternion quat;
-        quat.setRPY(pose[3], pose[4], pose[5]);
-        transform.setRotation(quat);
-        transforms.push_back(transform);
+        pose_to_tf(pose, transform);        
+          
+        addMarker(objects[i].getSize(), transform);
+       
+        transforms.push_back(transform);       
         std::stringstream s;
         s << count;
         transform_names.push_back(objects[0].getName() + s.str());
@@ -223,8 +273,7 @@ int main( int argc, char** argv) {
   
   //publisher
   table_pub = n.advertise<sensor_msgs::PointCloud2> ("table_cloud", 1);
-  objects_pub = n.advertise<sensor_msgs::PointCloud2> ("objects_cloud", 1);
-  
+  objects_pub = n.advertise<sensor_msgs::PointCloud2> ("objects_cloud", 1);  
   
   //Services Server
   detectObjectsService = n.advertiseService("detect_objects_srv", detectObjectsCallback);
@@ -233,6 +282,10 @@ int main( int argc, char** argv) {
   //Service Clients
   ros::service::waitForService("pan_tilt/move_pan_tilt");
   move_pan_tilt_client = n.serviceClient<omnirob_robin_msgs::move_pan_tilt>("pan_tilt/move_pan_tilt"); 
+  
+  ros::service::waitForService("/add_marker");
+  add_marker_client = n.serviceClient<omnirob_robin_msgs::add_marker_srv>("add_marker"); 
+  
   
   
   
@@ -245,7 +298,7 @@ int main( int argc, char** argv) {
   ros::Rate r(100);  
   while(ros::ok){
     for(int i = 0; i < transforms.size(); i++){      
-      broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "base_link", transform_names[i]));
+      broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "odom", transform_names[i]));
     }
     r.sleep();
     ros::spinOnce();

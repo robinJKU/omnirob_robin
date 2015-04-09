@@ -238,7 +238,7 @@ int main(int argc, char **argv)
   ros::Subscriber gripper_subscriber = n.subscribe("/omnirob_robin/gripper/state/joint_state_array", 1000, gripper_callback);
   
   // init subscriber and msg - BASE
-  std::string base_prefix = "base/";
+  std::string base_prefix = "base_";
   base_joint_state.name.resize(3);
   base_joint_state.name[0] = base_prefix + "x_joint";
   base_joint_state.name[1] = base_prefix + "y_joint";
