@@ -136,7 +136,7 @@ class Modules{
 			enable_point_to_point_motion_service = handle.advertiseService( group_name + "/control/" + "enable_point_to_point_motion", &Modules::enable_point_to_point_motion, this);
 			initialize_modules_service = handle.advertiseService( group_name + "/control/" + "initialize_modules",  &Modules::initialize_modules, this);
 			reboot_modules_service = handle.advertiseService( group_name + "/control/" + "reboot_modules",  &Modules::reboot_modules, this);
-			reference_modules_service = handle.advertiseService( group_name + "/control/" + "reference_module",  &Modules::reference_modules, this);
+			reference_modules_service = handle.advertiseService( group_name + "/control/" + "reference_modules",  &Modules::reference_modules, this);
 			send_acknowledge_to_modules_service = handle.advertiseService( group_name + "/control/" + "send_acknowledge_to_modules",  &Modules::send_acknowledge_to_modules, this);
 			start_motion_service = handle.advertiseService( group_name + "/control/" + "start_motion",  &Modules::start_motion, this);
 			stop_motion_service = handle.advertiseService( group_name + "/control/" + "stop_motion",  &Modules::stop_motion, this); 
