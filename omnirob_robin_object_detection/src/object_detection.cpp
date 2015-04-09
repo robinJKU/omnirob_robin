@@ -213,7 +213,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   std_srvs::Empty srv;
   
   msg.data.push_back(0.2);
-  msg.data.push_back(0.6);
+  msg.data.push_back(-0.6);
   
   pan_tilt_goal_pub.publish(msg);
   pan_tilt_start_motion_srv.call(srv); 
