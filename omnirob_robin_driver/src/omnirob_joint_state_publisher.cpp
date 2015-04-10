@@ -110,11 +110,11 @@ void base_callback( const geometry_msgs::Twist base_vel ){
     
     base_joint_state.position[0] = x;
 	base_joint_state.position[1] = y;
-	base_joint_state.position[2] = yaw_imu;
+	base_joint_state.position[2] = yaw;
 	
 	base_joint_state.velocity[0] = I_vx;
 	base_joint_state.velocity[1] = I_vy;
-	base_joint_state.velocity[2] = omegaz_imu;
+	base_joint_state.velocity[2] = omegaz;
 
 	joint_state_publisher.publish( base_joint_state);
  	
@@ -125,7 +125,7 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	odom.pose.pose.position.x = x;
  	odom.pose.pose.position.y = y;
  	odom.pose.pose.position.z = 0.0;
- 	odom.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw (0.0, 0.0, yaw_imu);
+ 	odom.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw (0.0, 0.0, yaw);
  	
  	odom.child_frame_id = "base_link";
  	odom.twist.twist.linear.x = vx;
@@ -133,7 +133,7 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	odom.twist.twist.linear.z = 0.0;
  	odom.twist.twist.angular.x = 0.0;
  	odom.twist.twist.angular.y = 0.0;
- 	odom.twist.twist.angular.z = omegaz_imu;
+ 	odom.twist.twist.angular.z = omegaz;
  	
  	odometry_publisher.publish( odom );
  	
