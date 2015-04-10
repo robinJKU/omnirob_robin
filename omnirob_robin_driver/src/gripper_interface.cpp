@@ -19,11 +19,11 @@ ros::ServiceClient gripper_ref_srv;
 
 bool gripper_is_closed = false;
 
-double closed_pos = 10;
-double opened_pos = 60;
+double closed_pos = 50;
+double opened_pos = 5;
 
 bool moveGripper(double stroke){    
-  if(stroke >= closed_pos && stroke <= opened_pos){
+  if(stroke <= closed_pos && stroke >= opened_pos){
     
     std_msgs::Float64MultiArray msg;
     std_srvs::Empty srv;
