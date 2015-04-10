@@ -3,15 +3,15 @@ omnirob_robin:
     # Position Controllers ---------------------------------------
     x_position_controller:
       type: position_controllers/JointPositionController
-      joint: base/x_joint
+      joint: base_x_joint
       pid: {p: 1.0}
       
     y_position_controller:
       type: position_controllers/JointPositionController
-      joint: base/y_joint
+      joint: base_y_joint
       pid: {p: 1.0}
     
     yaw_position_controller:
       type: position_controllers/JointPositionController
-      joint: base/yaw_joint
+      joint: base_yaw_joint
       pid: {p: 1.0}

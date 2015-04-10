@@ -3,6 +3,7 @@
 
 	<!-- load hardware interface and controler here -->
 	<include file="$(find omnirob_robin_driver)/launch/lwa_interface.launch"></include>
+	<include file="$(find omnirob_robin_driver)/launch/real_interfaces.launch"></include>
 	<include file="$(find omnirob_robin_control)/launch/lwa_control.launch"></include>
 	<include file="$(find omnirob_robin_driver)/launch/state_publisher.launch"></include>
 

@@ -5,7 +5,7 @@
      
     <transmission name="tran_x">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="base/x_joint">
+        <joint name="base_x_joint">
           <hardwareInterface>PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="motor_x">
@@ -16,7 +16,7 @@
     
     <transmission name="tran_y">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="base/y_joint">
+        <joint name="base_y_joint">
           <hardwareInterface>PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="motor_y">
@@ -27,7 +27,7 @@
     
     <transmission name="tran_yaw">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="base/yaw_joint">
+        <joint name="base_yaw_joint">
           <hardwareInterface>PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="motor_yaw">
