@@ -200,7 +200,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   omnirob_robin_msgs::move_pan_tilt srv;
   
   srv.request.pan_goal = 0.4;
-  srv.request.tilt_goal = 0.6;
+  srv.request.tilt_goal = -0.6;
   
   move_pan_tilt_client.call(srv);
   
@@ -268,8 +268,8 @@ int main( int argc, char** argv) {
   ros::service::waitForService("pan_tilt/move_pan_tilt");
   move_pan_tilt_client = n.serviceClient<omnirob_robin_msgs::move_pan_tilt>("pan_tilt/move_pan_tilt"); 
   
-  ros::service::waitForService("/add_marker");
-  add_marker_client = n.serviceClient<omnirob_robin_msgs::add_marker_srv>("add_marker"); 
+//  ros::service::waitForService("/add_marker");
+//  add_marker_client = n.serviceClient<omnirob_robin_msgs::add_marker_srv>("add_marker"); 
   
   
   
