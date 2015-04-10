@@ -67,7 +67,7 @@ void pose_to_tf(std::vector <double> pose, tf::Transform transform){
     
   ROS_INFO("odom quat %f %f %f %f", odom_base_link.getRotation().getX(), odom_base_link.getRotation().getY(), odom_base_link.getRotation().getZ(), odom_base_link.getRotation().getW());
     
-  transform.mult(odom_base_link.inverse(), transform);    
+ // transform.mult(odom_base_link.inverse(), transform);    
 }
 
 
@@ -200,7 +200,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   omnirob_robin_msgs::move_pan_tilt srv;
   
   srv.request.pan_goal = 0.4;
-  srv.request.tilt_goal = -0.6;
+  srv.request.tilt_goal = 0.6;
   
   move_pan_tilt_client.call(srv);
   
@@ -283,7 +283,7 @@ int main( int argc, char** argv) {
   ros::Rate r(50);  
   while(ros::ok){
     for(int i = 0; i < transforms.size(); i++){      
-      broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "odom", transform_names[i]));
+      broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "base_link", transform_names[i]));
     }  
     try {            
       pListener->waitForTransform("odom", "base_link", ros::Time(0), ros::Duration(20.0) );
