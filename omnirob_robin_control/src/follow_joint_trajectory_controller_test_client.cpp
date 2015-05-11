@@ -32,15 +32,15 @@ int main( int argc, char** argv) {
 	std::vector<double> joint_vector(7);
 	goal.trajectory.points.resize(5);
 	
-	joint_vector[0]=0.0; joint_vector[1]=0.0; joint_vector[2]=0.0; joint_vector[3]=0.0; joint_vector[4]=0.0; joint_vector[5]=0.0; joint_vector[6]=0.0; joint_vector[7]=0.0;
+	joint_vector[0]=0.0; joint_vector[1]=0.0; joint_vector[2]=0.0; joint_vector[3]=0.0; joint_vector[4]=0.0; joint_vector[5]=0.0; joint_vector[6]=0.0;
 	goal.trajectory.points[0].positions = joint_vector;
-	joint_vector[0]=0.3; joint_vector[1]=0.0; joint_vector[2]=0.4; joint_vector[3]=0.0; joint_vector[4]=0.7; joint_vector[5]=0.0; joint_vector[6]=0.9; joint_vector[7]=0.0;
+	joint_vector[0]=0.3; joint_vector[1]=0.0; joint_vector[2]=0.4; joint_vector[3]=0.0; joint_vector[4]=0.7; joint_vector[5]=0.0; joint_vector[6]=0.9;
 	goal.trajectory.points[1].positions = joint_vector;
-	joint_vector[0]=0.5; joint_vector[1]=0.0; joint_vector[2]=0.9; joint_vector[3]=0.0; joint_vector[4]=1.0; joint_vector[5]=0.0; joint_vector[6]=0.3; joint_vector[7]=0.0;
+	joint_vector[0]=0.5; joint_vector[1]=0.0; joint_vector[2]=0.9; joint_vector[3]=0.0; joint_vector[4]=1.0; joint_vector[5]=0.0; joint_vector[6]=0.3;
 	goal.trajectory.points[2].positions = joint_vector;
-	joint_vector[0]=-0.5; joint_vector[1]=0.0; joint_vector[2]=-0.9; joint_vector[3]=0.0; joint_vector[4]=-1.0; joint_vector[5]=0.0; joint_vector[6]=-0.3; joint_vector[7]=0.0;
+	joint_vector[0]=-0.5; joint_vector[1]=0.0; joint_vector[2]=-0.9; joint_vector[3]=0.0; joint_vector[4]=-1.0; joint_vector[5]=0.0; joint_vector[6]=-0.3;
 	goal.trajectory.points[3].positions = joint_vector;
-	joint_vector[0]=0.0; joint_vector[1]=0.0; joint_vector[2]=0.0; joint_vector[3]=0.0; joint_vector[4]=0.0; joint_vector[5]=0.0; joint_vector[6]=0.0; joint_vector[7]=0.0;
+	joint_vector[0]=0.0; joint_vector[1]=0.0; joint_vector[2]=0.0; joint_vector[3]=0.0; joint_vector[4]=0.0; joint_vector[5]=0.0; joint_vector[6]=0.0;
 	goal.trajectory.points[4].positions = joint_vector;
 	
 	ac.sendGoal(goal);

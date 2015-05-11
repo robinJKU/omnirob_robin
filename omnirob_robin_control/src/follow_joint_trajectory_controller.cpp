@@ -127,12 +127,12 @@ public:
 		// stream trajectory
 		std_msgs::Float64MultiArray lwa_point;
 		lwa_point.data.resize(7);
-		ros::Rate rate_100Hz(100);
+		ros::Rate rate_10Hz(10);
 		
 		for( unsigned int point_ii=0; point_ii<trajectory.points.size(); point_ii++){
 			
 			for( unsigned int joint_ii=0; joint_ii<7; joint_ii++ ){
-				if( joint_index[joint_ii]>0 ){
+				if( joint_index[joint_ii]>=0 ){
 					lwa_point.data[joint_ii] = trajectory.points[point_ii].positions[joint_index[joint_ii]];
 				}else{
 					// hold joint constant
@@ -141,25 +141,35 @@ public:
 			}
 			// set points
 			lwa_commanded_joint_state_publisher.publish( lwa_point);
-			rate_100Hz.sleep();
+			rate_10Hz.sleep();
 			ros::spinOnce();
 			
 			lwa_set_point_client.call( empty_srv);
-			rate_100Hz.sleep();
+			rate_10Hz.sleep();
 			
 		}// for all points
 		
 		// set restart mode off
 		lwa_reset_mode.call( empty_srv);
-		
+
+		ros::Rate rate_1Hz(1);		
+		while( lwa_trajectory_time_left_<0.0 ){
+			rate_1Hz.sleep();
+			ros::spinOnce();
+		}
+
 		//  move 
 		lwa_start_motion.call( empty_srv);
 		lwa_start_trajectory.call( empty_srv);
-		ros::Rate rate_10Hz(10);
+
+		printf("lwa_trajectory_time_left = %f\n", lwa_trajectory_time_left_);
+		printf("modules are ready = %i\n", (int) modues_are_ready_);
 		while( as_.isActive() && (lwa_trajectory_time_left_>0.0) && modues_are_ready_ ){
 			rate_10Hz.sleep();
+			ros::spinOnce();
 		}
 		
+		printf("finished\n");
 		if( !as_.isActive() ){
 			ROS_ERROR("Action canceled!");
 			as_.setAborted(result_);
