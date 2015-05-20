@@ -266,7 +266,7 @@ int main( int argc, char** argv) {
 	
 	ROS_INFO("save parameters");
 	std::ofstream yaml_file( "/home/omnirob/catkin_ws/src/omnirob_robin/omnirob_robin_object_detection/data/marker_calibration.yaml" );
-	yaml_file << "marker_ids: [\'marker0\', \'marker1\', \'marker2\']\n";
+	yaml_file << "marker_ids: [0, 1, 2]\n";
 	yaml_file << "marker0:\n"; // <!-- described in map coordinates -->
 	yaml_file << "  position:\n";
 	yaml_file << "    x: " << marker0_to_map_avg.getOrigin()[0] <<"\n";
