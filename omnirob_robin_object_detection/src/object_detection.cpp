@@ -57,9 +57,9 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response);
 void detectObjects();
 void addMarker(std::vector <double> size, tf::Transform transform);
-void pose_to_tf(std::vector <double> pose, tf::Transform& transform);
+void pose_to_tf(std::vector <double> pose, tf::Transform transform);
 
-void pose_to_tf(std::vector <double> pose, tf::Transform& transform){
+void pose_to_tf(std::vector <double> pose, tf::Transform transform){
   transform.setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
   tf::Quaternion quat;
   quat.setRPY(pose[3], pose[4], pose[5]);
@@ -82,23 +82,8 @@ void execute(const omnirob_robin_msgs::HackObjRecGoalConstPtr& goal, Server* as)
 	omnirob_robin_msgs::HackObjRecResult res;
 	ROS_INFO("executing object recognition");
 
-omnirob_robin_msgs::move_pan_tilt srv;
-  
-  srv.request.pan_goal = 0.4;
-  srv.request.tilt_goal = 0.6;
-  
-  move_pan_tilt_client.call(srv);
-  
-  ros::Duration(5.0).sleep();
-  detecting = true;   
-  
+	detecting = true;
   detectObjects();
-
-  srv.request.pan_goal = 0.0;
-  srv.request.tilt_goal = 0.0;
-
-  ros::Duration(5.0).sleep();
-  move_pan_tilt_client.call(srv);
   
   if(transform_names.size() == 0){
     res.nObjects = 0;
@@ -223,12 +208,6 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   detecting = true;   
   
   detectObjects();
-
-  srv.request.pan_goal = 0.0;
-  srv.request.tilt_goal = 0.0;
-
-  ros::Duration(5.0).sleep();
-  move_pan_tilt_client.call(srv);	
   
   return true;
 }
@@ -307,8 +286,8 @@ int main( int argc, char** argv) {
       broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "base_link", transform_names[i]));
     }  
     try {            
-      //pListener->waitForTransform("odom", "base_link", ros::Time(0), ros::Duration(20.0) );
-      //pListener->lookupTransform("odom", "base_link", ros::Time(0), odom_base_link);
+      pListener->waitForTransform("odom", "base_link", ros::Time(0), ros::Duration(20.0) );
+      pListener->lookupTransform("odom", "base_link", ros::Time(0), odom_base_link);
     }
       catch(tf::TransformException e){
       ROS_INFO("No Transform found from base_link to odom");

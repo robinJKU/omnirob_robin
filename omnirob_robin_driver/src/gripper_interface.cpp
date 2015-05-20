@@ -60,12 +60,12 @@ int main( int argc, char** argv) {
   ros::NodeHandle n;  
     
   //Service Clients  
-  ros::service::waitForService("/omnirob_robin/gripper/control/start_motion");
-  ros::service::waitForService("/omnirob_robin/gripper/control/initialize_modules");
-  ros::service::waitForService("/omnirob_robin/gripper/control/reference_module");
-  gripper_start_motion_srv = n.serviceClient<std_srvs::Empty>("/omnirob_robin/gripper/control/start_motion"); 
-  gripper_init_srv = n.serviceClient<std_srvs::Empty>("/omnirob_robin/gripper/control/initialize_modules"); 
-  gripper_ref_srv = n.serviceClient<std_srvs::Empty>("/omnirob_robin/gripper/control/reference_module"); 
+  ros::service::waitForService("gripper/control/start_motion");
+  ros::service::waitForService("gripper/control/initialize_modules");
+  ros::service::waitForService("gripper/control/reference_modules");
+  gripper_start_motion_srv = n.serviceClient<std_srvs::Empty>("gripper/control/start_motion"); 
+  gripper_init_srv = n.serviceClient<std_srvs::Empty>("gripper/control/initialize_modules"); 
+  gripper_ref_srv = n.serviceClient<std_srvs::Empty>("gripper/control/reference_modules"); 
   
   ROS_INFO("gripper_interface: all Services available");
   
@@ -74,12 +74,12 @@ int main( int argc, char** argv) {
   gripper_ref_srv.call(srv);
   
   //Publisher
-  gripper_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("/omnirob_robin/gripper/control/commanded_joint_state", 1);  
+  gripper_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);  
   
   //Service Servers
-  closeGripper_server = n.advertiseService("/omnirob_robin/gripper/close_srv", closeGripperCallback);
-  openGripper_server = n.advertiseService("/omnirob_robin/gripper/open_srv", openGripperCallback);  
-  moveGripper_server = n.advertiseService("/omnirob_robin/gripper/stroke_srv", moveGripperCallback);  
+  closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
+  openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);  
+  moveGripper_server = n.advertiseService("gripper/stroke_srv", moveGripperCallback);  
   
   
   ros::spin();

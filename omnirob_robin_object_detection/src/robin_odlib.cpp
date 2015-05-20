@@ -125,8 +125,8 @@ void robin_odlib::seperateTable(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poi
   
   //remove table and set table cloud  
   //remove everything below the table plane
-  cropBoxFilter.setMin(Eigen::Vector4f(0.0, -0.5, z-0.005, 0.0));
-  cropBoxFilter.setMax(Eigen::Vector4f(1.4 , 0.5, z+0.5, 0.0));
+  cropBoxFilter.setMin(Eigen::Vector4f(0.0, -5.0, z-0.005, 0.0));
+  cropBoxFilter.setMax(Eigen::Vector4f(5.0, 5.0, z+1, 0.0));
   
   cropBoxFilter.setTranslation(Eigen::Vector3f (0, 0, 0));
   cropBoxFilter.setRotation(Eigen::Vector3f (0, 0, 0));
@@ -138,8 +138,8 @@ void robin_odlib::seperateTable(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poi
    
   
   //seperate the table for visualisation
-  cropBoxFilter.setMin(Eigen::Vector4f(0.0, -5.0, z-0.2, 0.0));
-  cropBoxFilter.setMax(Eigen::Vector4f(1.4, 5.0, z+0.05, 0.0));
+  cropBoxFilter.setMin(Eigen::Vector4f(0.0, -5.0, z-0.005, 0.0));
+  cropBoxFilter.setMax(Eigen::Vector4f(5.0, 5.0, z+0.005, 0.0));
     
   cropBoxFilter.setNegative(false);
   cropBoxFilter.filter(*table_cloud); 
