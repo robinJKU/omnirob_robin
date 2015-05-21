@@ -41,6 +41,7 @@ find_package(catkin REQUIRED COMPONENTS
    move_gripper.srv
    add_marker_srv.srv
    remove_marker_srv.srv
+   localization.srv
  )
 
 ## Generate actions in the 'action' folder

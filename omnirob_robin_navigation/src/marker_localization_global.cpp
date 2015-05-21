@@ -16,14 +16,11 @@
 #include <dynamic_reconfigure/Reconfigure.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Float64MultiArray.h>
-
-// global variables
-unsigned int nr_of_samples_received;
-bool detection_mode;
-tf::TransformListener *transform_listener;
+#include <omnirob_robin_msgs/localization.h>
 
 // prototypes
 std::string unsigned_int_to_string( unsigned int value );
+bool wait_for_service( std::string topic );
 
 class Pose_Samples{
 	public:
@@ -114,6 +111,9 @@ class Pose_Samples{
 		samples.push_back( entry);
 	}// push_back
 	
+	unsigned int size( void ){
+		return samples.size();
+	}// size 
 	
 };// Pose_Samples
 
@@ -131,9 +131,9 @@ class AR_Marker{
 	
 	public:
 	/**
-	 * default constructor
+	 * constructor
 	 */
-	AR_Marker():avg_pose_is_initialized(false){}
+	AR_Marker( ):avg_pose_is_initialized(false){}
 	
 	public:
 	geometry_msgs::Pose avg_pose( void ){
@@ -157,28 +157,120 @@ class AR_Marker{
 	}// to string
 };
 
+/**
+ * \class AR_Marker_Localization
+ *
+ * \brief main class for ar_marker based localization
+ *
+ */
 class AR_Marker_Localization{
 	public:
-	std::vector<AR_Marker> mark;
-	std::string base_link;
+	std::string base_link; /**< base linke which will be detected */
 	
 	private:
-	unsigned int last_considered_id;
-	geometry_msgs::Pose estimated_base_pose_inertial_frame;
-	bool base_is_localized;
+	ros::NodeHandle node_handle;
+	ros::NodeHandle private_ns_node_handle;
+	
+	tf::TransformListener *transform_listener;
+	ros::ServiceServer localization_service;
+	
+	std::vector<AR_Marker> mark; /**< detected marks */
+	unsigned int last_considered_id; /**< last id which which were looked for in get_index */
+	unsigned int nr_of_samples_received;
+	bool detection_mode;
+	unsigned int nr_of_markers_received;
 	
 	public:
 	/**
-	 * default constructor
+	 * constructor: validate and read required paramertes
 	 */
-	AR_Marker_Localization (): base_is_localized(false), last_considered_id(0){}
+	AR_Marker_Localization () throw (int):
+	last_considered_id(0), node_handle(), private_ns_node_handle("~")
+	{
+	  // parameter: base_link
+	  private_ns_node_handle.getParam("base_link", base_link);
+	  if( base_link.empty() ){
+		  ROS_INFO("Use default base frame: /base_link");
+		  base_link = "/base_link";
+	  }
+	  
+	  // parameter: marker_ids
+	  if( !private_ns_node_handle.hasParam("marker_ids") ){
+		  ROS_ERROR("No marker ids specifies!");
+		  throw -1;
+	  }
+	  std::vector<int> marker_ids_int;
+	  private_ns_node_handle.getParam("marker_ids", marker_ids_int);
+	  
+	  std::vector<unsigned int> marker_ids;
+	  for( unsigned int marker_ii=0; marker_ii<marker_ids_int.size(); marker_ii++){
+		  if( marker_ids_int[marker_ii]<0 ){
+			  ROS_WARN("Received negative marker %i id - discard id", marker_ids_int[marker_ii]);
+		  }else{
+			  marker_ids.push_back( (unsigned int) marker_ids_int[marker_ii]);
+		  }
+	  }
+	  if( marker_ids_int.size()==0 ){
+		  ROS_ERROR("Invalid number of marker ids");
+		  throw -1;
+	  }
+	  
+	  set_marker_ids( marker_ids);
+	  
+	  // parameter: marker positions in inertial (=map) frame
+	  for( unsigned int marker_ii=0; marker_ii<marker_ids.size(); marker_ii++ ){
+		if(    !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/x")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/y")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/z")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/x")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/y")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/z")
+			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/w") ){
+			ROS_ERROR("Not enought parameters for marker: %s", unsigned_int_to_string(marker_ids[marker_ii]).c_str());
+			throw -1;
+			
+		}else{
+			double rx,ry,rz, ox,oy,oz,ow;
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/x",rx);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/y",ry);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/z",rz);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/x",ox);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/y",oy);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/z",oz);
+			private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/w",ow);
+			
+			mark[ marker_ii].pose_inertial_frame.setOrigin( tf::Vector3(rx,ry,rz));
+			mark[ marker_ii].pose_inertial_frame.setRotation( tf::Quaternion(ox,oy,oz,ow));
+		}
+	  }
+	  
+	  // construct transform listener
+	  transform_listener = new tf::TransformListener(node_handle );
+	  
+	}// constructor
 	
+	/**
+	 * destructor
+	 */
+	~AR_Marker_Localization( ){
+		if( transform_listener!=NULL ){
+			delete transform_listener;
+		}
+	}// destructor
+	
+	/**
+	 * Localizes the base_link frame through the received poses of ar landmarks. The algorithm build the average over
+	 * all (one per landmark) estimated poses. @see Pose_Samples::calc_average
+	 * @param estimation: Returns the estimated pose described in map frame
+	 * @return Success
+	 */
 	bool localize_base_frame( geometry_msgs::Pose &estimation ){
 		ROS_INFO("localize base link");
 		Pose_Samples base_link_poses;
 		
 		for( unsigned int mark_ii=0; mark_ii<mark.size(); mark_ii++){
 			if( mark[mark_ii].marker_detected ){
+				ROS_INFO("use data of marker %u whith %i samples", mark[mark_ii].marker_id, mark[mark_ii].observed_pose_reference_frame.size());
 				// calculate marker pose in reference frame
 				tf::Transform pose_mark_ii_refence_frame;
 				tf::poseMsgToTF( mark[mark_ii].avg_pose(), pose_mark_ii_refence_frame);
@@ -207,7 +299,7 @@ class AR_Marker_Localization{
 		}// for all marks
 		
 		// average all markers
-		ROS_INFO("calc average");
+		ROS_INFO("calc average of localization with %u marker", base_link_poses.size());
 		estimation = base_link_poses.calc_average();
 		
 		// select relevant values (x,y,yaw)
@@ -222,8 +314,11 @@ class AR_Marker_Localization{
 		tf::poseTFToMsg( estimation_tf, estimation);
 		return true;
 		
-	}// localize base frame
+	}// localize_base_frame
 	
+	/**
+	 * @return Index of marker_id id in mark array
+	 */
 	int get_index( unsigned int id ){
 		if( mark.size()==0 ){
 			return -1;
@@ -245,10 +340,80 @@ class AR_Marker_Localization{
 		return -1;
 	}// get index
 	
+	/**
+	 * @return true if the mark array contains the specified marker_id
+	 */
 	bool contains( unsigned int marker_id ){
 		return this->get_index( marker_id)>=0? true : false;
 	}// contains
 	
+	
+	private:
+	ar_track_alvar_msgs::AlvarMarkers filter( ar_track_alvar_msgs::AlvarMarkers raw_msg ){
+		ar_track_alvar_msgs::AlvarMarkers marker;
+		tf::StampedTransform to_optical_frame_from_ref_frame;
+		tf::Transform marker_pose_reference_frame, marker_pose_optical_frame;
+		double alpha, beta;
+		const static double alpha_max_abs=(53.0-5.0)*M_PI/180.0/2.0;
+		const static double beta_max_abs=(71.0-5.0)*M_PI/180.0/2.0;
+		
+		for( unsigned int marker_ii=0; marker_ii<raw_msg.markers.size(); marker_ii++){
+		  // check if marker is known
+		  if( !contains( raw_msg.markers[marker_ii].id) ){
+			  continue;
+		  }
+		  
+		  // check if marker is in sight field
+		  try{
+			  transform_listener->lookupTransform( "/kinect2_rgb_optical_frame", raw_msg.markers[marker_ii].header.frame_id, ros::Time(0), to_optical_frame_from_ref_frame);
+			  
+		  }catch(tf::TransformException ex){
+			   ROS_ERROR("%s",ex.what());
+			   continue;
+		  }
+		  tf::poseMsgToTF( raw_msg.markers[marker_ii].pose.pose, marker_pose_reference_frame);
+		  marker_pose_optical_frame = to_optical_frame_from_ref_frame * marker_pose_reference_frame;
+		  alpha = atan( marker_pose_optical_frame.getOrigin()[1]/marker_pose_optical_frame.getOrigin()[2]);
+		  beta = atan( marker_pose_optical_frame.getOrigin()[0]/marker_pose_optical_frame.getOrigin()[2]);
+		  
+		  if( fabs(alpha)>alpha_max_abs || fabs(beta)>beta_max_abs ){
+			  continue;
+		  }
+		  
+		  // add marker
+		  marker.markers.push_back( raw_msg.markers[marker_ii]);
+		
+		}
+		return marker;
+		
+	}// filter
+	
+	/** 
+	 * Callback function for ar pose markers
+	 */
+	void ar_pose_marker_callback( ar_track_alvar_msgs::AlvarMarkers raw_marker_msg ){
+		ar_track_alvar_msgs::AlvarMarkers marker_msg = filter( raw_marker_msg);
+		
+		unsigned int nr_of_valid_markers = marker_msg.markers.size();
+		if( nr_of_valid_markers>0 ){
+			if( detection_mode ){
+				nr_of_markers_received=nr_of_valid_markers>nr_of_markers_received?nr_of_valid_markers:nr_of_markers_received;
+				
+			}else{
+				for(unsigned int marker_ii=0; marker_ii<marker_msg.markers.size(); marker_ii++ ){
+					// if marker id is known, insert marker pose 
+					insert_pose( marker_msg.markers[marker_ii].id, marker_msg.markers[marker_ii].pose.pose, marker_msg.markers[marker_ii].header.frame_id);
+					
+				}// for all markeres
+				nr_of_samples_received++;
+			}
+		}
+	}// ar pose marker callback
+
+	/**
+	 * Add the specified sample marker_pose to the mark array
+	 * @param marker_pose: Pose of marker with id marker_id described in reference_frame_id
+	 */
 	void insert_pose( unsigned int marker_id, geometry_msgs::Pose marker_pose, std::string reference_frame_id ){
 		unsigned int marker_index = get_index( marker_id );
 		if( marker_index>=0 ){
@@ -263,6 +428,10 @@ class AR_Marker_Localization{
 		}
 	}// insert pose
 	
+	public:
+	/**
+	 * Initializes the mark object by setting the marker_ids
+	 */
 	void set_marker_ids( std::vector<unsigned int> marker_ids ){
 		mark.resize( marker_ids.size());
 		for( unsigned marker_ii=0; marker_ii< marker_ids.size(); marker_ii++){
@@ -270,14 +439,163 @@ class AR_Marker_Localization{
 		}
 	}// set marker_ids
 	
+	/**
+	 * Callback of the localization service
+	 */
+	bool localization_service_callback( omnirob_robin_msgs::localization::Request &req, omnirob_robin_msgs::localization::Response &res ){
+		ROS_INFO("Start global localization -------------------");
+		// wait for services
+	    std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
+	    if( !wait_for_service( pan_tilt_start_motion_srv) ){
+		    res.error_message = "Service "+ pan_tilt_start_motion_srv +" is not available";
+		    ROS_ERROR("%s", res.error_message.c_str());
+		    return true;
+	    }
+	    std::string ar_track_set_param_srv = "/ar_track_alvar/set_parameters";
+	    if( !wait_for_service( ar_track_set_param_srv) ){
+		    res.error_message = "Service "+ ar_track_set_param_srv +" is not available";
+		    ROS_ERROR("%s", res.error_message.c_str());
+		    return true;
+	    }
+	    
+	    // enable ar track alvar node
+		ros::ServiceClient ar_set_parameters_client = node_handle.serviceClient<dynamic_reconfigure::Reconfigure>( ar_track_set_param_srv);
+		dynamic_reconfigure::Reconfigure ar_parameters;
+		ar_parameters.request.config.bools.resize(1);
+		ar_parameters.request.config.bools[0].name="enabled";
+		ar_parameters.request.config.bools[0].value=true;
+		ar_set_parameters_client.call( ar_parameters);
+
+		// subscribe to marker poses
+		ros::Subscriber ar_pose_marker_subscriber = node_handle.subscribe("/ar_pose_marker", 50, &AR_Marker_Localization::ar_pose_marker_callback, this);
+
+		// look around, search for pan angle overlooking the maximum number of markers
+		ros::ServiceClient pan_start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
+		ros::Publisher pan_commanded_joint_state_pubisher = node_handle.advertise<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/control/commanded_joint_state", 5);
+
+		std_srvs::Empty empty_srvs;
+		std_msgs::Float64MultiArray pan_goal_position_msgs;
+		pan_goal_position_msgs.data.resize(2);
+
+		detection_mode = true;
+		ros::Rate rate_1s(1);
+
+		double min_angle=-0.9, max_angle=0.9, increment_angle=20.0/180.0*M_PI;
+		pan_goal_position_msgs.data[0] = min_angle;
+		
+		unsigned int max_nr_of_marks_detected=0;
+		double angle_overlooking_maximum_nr_of_markers;
+		
+		while( ros::ok() && pan_goal_position_msgs.data[0]<=max_angle ){
+			// go to next pan angle
+			pan_commanded_joint_state_pubisher.publish( pan_goal_position_msgs);
+			ros::spinOnce();
+			pan_start_motion_client.call( empty_srvs);
+			rate_1s.sleep();
+			
+			// check nr of found markers
+			nr_of_markers_received=0;
+			rate_1s.sleep(); 
+			ros::spinOnce();
+			if( max_nr_of_marks_detected<nr_of_markers_received ){
+				max_nr_of_marks_detected = nr_of_markers_received;
+				angle_overlooking_maximum_nr_of_markers = pan_goal_position_msgs.data[0];
+			}
+			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_goal_position_msgs.data[0]*180.0/M_PI);
+			if( max_nr_of_marks_detected== 2){
+				break;
+			}
+			
+			// adapt pan angle
+			pan_goal_position_msgs.data[0] += increment_angle;
+			
+		}// while no marker found
+		if( !ros::ok() ){
+		  return true;
+		}
+		if( max_nr_of_marks_detected==0 ){
+			res.error_message = "Finished scan, no marker detected";
+			return true;
+		}
+		
+		// move to optimal pan angle
+		ROS_INFO("move to %f degree", angle_overlooking_maximum_nr_of_markers*180.0/M_PI);
+		pan_goal_position_msgs.data[0] = angle_overlooking_maximum_nr_of_markers;
+		pan_commanded_joint_state_pubisher.publish( pan_goal_position_msgs);
+		ros::spinOnce();
+	    pan_start_motion_client.call( empty_srvs);
+	    rate_1s.sleep();
+	    detection_mode = false;
+
+		// wait for detected markers
+		unsigned int nr_of_avg;
+		int tmp_nr_of_avg;
+		private_ns_node_handle.param( "nr_of_avg", tmp_nr_of_avg, 20);
+		if( tmp_nr_of_avg<=0 ){	  
+		ROS_WARN("Unexpected nr of averaging samples %i, use default value (%i) insted", nr_of_avg, 20);
+		nr_of_avg = 20;
+		}else{
+		  nr_of_avg = tmp_nr_of_avg;
+		}
+
+		clear();
+		nr_of_samples_received = 0;
+		while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
+		  ROS_INFO("Buffer marker poses %i/%i received", nr_of_samples_received, nr_of_avg);
+		  rate_1s.sleep();
+		  ros::spinOnce();
+		}
+		if( !ros::ok() ){
+		  return true;
+		}
+
+		// disable ar track alvar node
+		ar_parameters.request.config.bools[0].value=false;
+		ar_set_parameters_client.call( ar_parameters);
+
+		// evaluate values
+		ROS_INFO("Evaluate values");
+		geometry_msgs::Pose estimation;
+		if( !localize_base_frame(estimation) ){
+		  res.error_message = "localization failed";
+		  ROS_ERROR("%s", res.error_message.c_str());
+		  return true;
+		}
+		
+		ROS_INFO("finished localization-----------------------------------");
+		ROS_INFO("position = [%f, %f, %f]", estimation.position.x, estimation.position.y, estimation.position.z);
+		double roll, pitch, yaw;
+		tf::Matrix3x3( tf::Quaternion(estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w)).getRPY(roll, pitch, yaw);
+		ROS_INFO("orientation = [%f, %f, %f, %f] (quaternion)", estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w);
+		ROS_INFO("orientation = [%f, %f, %f] (RPY in degree)", roll*180.0/M_PI, pitch*180.0/M_PI, yaw*180.0/M_PI);
+  
+	    res.base_link = estimation;
+	    return true;
+	    
+		
+	}// localization service callback
+	
+	/**
+	 * Initiaizes the service object.
+	 */
+	void advertise_ar_localization_service( void ){
+		ROS_INFO("Advertising global localization service");
+		localization_service = node_handle.advertiseService("/global_localization", &AR_Marker_Localization::localization_service_callback, this);
+	}// advertise ar localization service
+	
+	/**
+	 * Reset marker. Remove old samples
+	 */
 	void clear( void ){
 		for( unsigned int mark_ii=0; mark_ii<mark.size(); mark_ii++){
 			mark[mark_ii].clear();
 		}
 		last_considered_id = 0;
-		base_is_localized = false;
 	}// clear
 	
+	/**
+	 * Print markers to string
+	 */
 	std::string to_string( void ){
 		std::stringstream string_stream;
 		string_stream << "total nr of marker" << mark.size() <<"\n";
@@ -287,36 +605,14 @@ class AR_Marker_Localization{
 		return string_stream.str();
 	}// to string stream
 	
-} markers;
+};
 
-void ar_pose_marker_callback( ar_track_alvar_msgs::AlvarMarkers marker_msg ){
-	int nr_of_valid_markers=0;
-	for( unsigned int marker_ii=0; marker_ii<marker_msg.markers.size(); marker_ii++){
-		if( markers.contains( marker_msg.markers[marker_ii].id) ){
-			nr_of_valid_markers++;
-		}
-	}
-	
-	if( nr_of_valid_markers>0 ){
-		if( detection_mode ){
-			ROS_INFO("Found valid marker - disable detection mode");
-			detection_mode = false;
-			
-		}else{
-			for(unsigned int marker_ii=0; marker_ii<marker_msg.markers.size(); marker_ii++ ){
-				// if marker id is known, insert marker pose 
-				if( markers.contains( marker_msg.markers[marker_ii].id)){
-					markers.insert_pose( marker_msg.markers[marker_ii].id, marker_msg.markers[marker_ii].pose.pose, marker_msg.markers[marker_ii].header.frame_id);
-				}else{
-					ROS_INFO("Got unrecognized (id: %u) marker pose", marker_msg.markers[marker_ii].id);
-				}
-				
-			}// for all markeres
-			nr_of_samples_received++;
-		}
-	}
-}// ar pose marker callback
 
+std::string unsigned_int_to_string( unsigned int value ){
+	std::stringstream value_string_stream;
+	value_string_stream << value;
+	return value_string_stream.str();
+}// unsigned int to string
 
 bool wait_for_service( std::string topic ){
   ros::Rate rate_1s(1);
@@ -333,18 +629,6 @@ bool wait_for_service( std::string topic ){
 	
 }// wait for service
 
-std::string unsigned_int_to_string( unsigned int value ){
-	std::stringstream value_string_stream;
-	value_string_stream << value;
-	return value_string_stream.str();
-}// unsigned int to string
-
-void clean_up( void ){
-	if( transform_listener!=NULL ){
-		delete transform_listener;
-	}
-}// clean up
-
 int main( int argc, char** argv) {
 	 
    // initialize node
@@ -352,204 +636,31 @@ int main( int argc, char** argv) {
   ros::NodeHandle node_handle;
   ros::NodeHandle private_ns_node_handle("~");
   
-  transform_listener = new tf::TransformListener(node_handle);
-  
-  // validate and read required parameters 
-  private_ns_node_handle.getParam("base_link", markers.base_link);
-  if( markers.base_link.empty() ){
-	  markers.base_link = "/base_link";
-  }
-  
-  if( !private_ns_node_handle.hasParam("marker_ids") ){
-	  ROS_ERROR("No marker ids specifies!");
-	  clean_up();
-	  return -1;
-  }
-  std::vector<int> marker_ids_int;
-  private_ns_node_handle.getParam("marker_ids", marker_ids_int);
-  
-  std::vector<unsigned int> marker_ids;
-  for( unsigned int marker_ii=0; marker_ii<marker_ids_int.size(); marker_ii++){
-	  if( marker_ids_int[marker_ii]<0 ){
-		  ROS_WARN("Received negative marker %i id - discard id", marker_ids_int[marker_ii]);
-	  }else{
-		  marker_ids.push_back( (unsigned int) marker_ids_int[marker_ii]);
-	  }
-  }
-  if( marker_ids_int.size()==0 ){
-	  ROS_ERROR("Invalid number of marker ids");
-	  clean_up();
-	  return -1;
-  }
-  
-  std::stringstream output_stream;
-  output_stream << "Found marker configuration file. Looking for marker with ids: [";
-  for( unsigned int marker_ii=0; marker_ii<marker_ids.size(); marker_ii++){
-	 output_stream << marker_ids[marker_ii];
-	 if( marker_ii<marker_ids.size()-1){
-		 output_stream <<", ";
-	 }
-  }
-  output_stream << "]";
-  ROS_INFO("%s", output_stream.str().c_str() );
-  
-  markers.set_marker_ids( marker_ids);
-  for( unsigned int marker_ii=0; marker_ii<marker_ids.size(); marker_ii++ ){
-	if(    !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/x")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/y")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/z")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/x")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/y")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/z")
-	    || !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/w") ){
-		ROS_ERROR("Not enought parameters for marker: %s", unsigned_int_to_string(marker_ids[marker_ii]).c_str());
-		clean_up();
-		return -1;
-		
-	}else{
-		double rx,ry,rz, ox,oy,oz,ow;
-		private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/x",rx);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/y",ry);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/position/z",rz);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/x",ox);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/y",oy);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/z",oz);
-	    private_ns_node_handle.getParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/w",ow);
-	    
-		markers.mark[ marker_ii].pose_inertial_frame.setOrigin( tf::Vector3(rx,ry,rz));
-		markers.mark[ marker_ii].pose_inertial_frame.setRotation( tf::Quaternion(ox,oy,oz,ow));
-	}
+  AR_Marker_Localization *ar_localization;
+  // initialize localization procedure
+  try{
+	ar_localization = new AR_Marker_Localization;
+  }catch(int e){
+	ROS_ERROR("cant initialize localization object");
+	return e;
   }
   ROS_INFO("Data read successfully:");
-  ROS_INFO("%s", markers.to_string().c_str());
-	
-  // wait for services
-  std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
-  if( !wait_for_service( pan_tilt_start_motion_srv) ){
-	  clean_up();
-	  return -1;
-  }
-  std::string ar_track_set_param_srv = "/ar_track_alvar/set_parameters";
-  if( !wait_for_service( ar_track_set_param_srv) ){
-	  clean_up();
-	  return -1;
+  ROS_INFO("%s", ar_localization->to_string().c_str());
+  
+  // adevertise services
+  ar_localization->advertise_ar_localization_service();
+  // @todo: ar_localization.start_ar_localization_acion_server(); 
+  
+  // wait for some work
+  while( ros::ok() ){
+  	ros::spinOnce();
+  	ros::Rate(1).sleep();
   }
   
-  /* ---------------------------------------------------------- */
-  // enable ar track alvar node
-  ros::ServiceClient ar_set_parameters_client = node_handle.serviceClient<dynamic_reconfigure::Reconfigure>( ar_track_set_param_srv);
-  dynamic_reconfigure::Reconfigure ar_parameters;
-  ar_parameters.request.config.bools.resize(1);
-  ar_parameters.request.config.bools[0].name="enabled";
-  ar_parameters.request.config.bools[0].value=true;
-  ar_set_parameters_client.call( ar_parameters);
-  
-  // subscribe to marker poses
-  ros::Subscriber ar_pose_marker_subscriber = node_handle.subscribe("/ar_pose_marker", 50, ar_pose_marker_callback);
-  
-  // look around, search for pan angle overlooking the maximum number of markers
-  ros::ServiceClient pan_start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
-  ros::Publisher pan_commanded_joint_state_pubisher = node_handle.advertise<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/control/commanded_joint_state", 5);
-  
-  
-  
-  
-  std_srvs::Empty empty_srvs;
-  std_msgs::Float64MultiArray pan_goal_position_msgs;
-  pan_goal_position_msgs.data.resize(2);
-  
-  detection_mode = true;
-  ros::Rate rate_1s(1);
-  rate_1s.sleep(); 
-  ros::spinOnce();
-  
-  double min_angle=-0.9, max_angle=0.9, increment_angle=20.0/180.0*M_PI;
-  unsigned int half_part_scanned=false;
-  bool last_round=false;
-  if( detection_mode ){
-	  while( ros::ok() ){
-		  
-		  ROS_INFO("No marker detected, change pan angle");
-		  pan_goal_position_msgs.data[0] -= increment_angle;
-		  if( pan_goal_position_msgs.data[0]<min_angle ){
-			  pan_goal_position_msgs.data[0]=pan_goal_position_msgs.data[1] + max_angle - min_angle;
-			  half_part_scanned = true;
-		  }
-		  
-		  if( half_part_scanned && pan_goal_position_msgs.data[0]<(max_angle+min_angle)/2.0 ){
-			  ROS_ERROR("Finished scan, no marker detected");
-			  clean_up();
-			  return -1;
-		  }
-		  pan_commanded_joint_state_pubisher.publish( pan_goal_position_msgs);
-		  ros::spinOnce();
-		  pan_start_motion_client.call( empty_srvs);
-		  // wait for pose reached
-		  rate_1s.sleep();
-		  
-		  // wait for marker detection
-		  rate_1s.sleep(); 
-		  ros::spinOnce();
-		  
-		  if( !detection_mode ){
-			  if( (!last_round) && (min_angle<pan_goal_position_msgs.data[0]-increment_angle) ){
-				  last_round = true;
-			  }else{
-				  break;
-			  }
-		  }
-		  
-	  }// while no marker found
-  }
-  if( !ros::ok() ){
-	  clean_up();
-	  return -1;
-  }
-  
-  // wait for detected markers
-  unsigned int nr_of_avg;
-  int tmp_nr_of_avg;
-  private_ns_node_handle.param( "nr_of_avg", tmp_nr_of_avg, 20);
-  if( tmp_nr_of_avg<=0 ){	  
-	ROS_WARN("Unexpected nr of averaging samples %i, use default value (%i) insted", nr_of_avg, 20);
-	nr_of_avg = 20;
-  }else{
-	  nr_of_avg = tmp_nr_of_avg;
-  }
-  
-  markers.clear();
-  nr_of_samples_received = 0;
-  while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
-	  ROS_INFO("Buffer marker poses %i/%i received", nr_of_samples_received, nr_of_avg);
-	  rate_1s.sleep();
-	  ros::spinOnce();
-  }
-  if( !ros::ok() ){
-	  clean_up();
-	  return -1;
-  }
-  
-  // disable ar track alvar node
-  ar_parameters.request.config.bools[0].value=false;
-  ar_set_parameters_client.call( ar_parameters);
-  
-  // evaluate values
-  ROS_INFO("Evaluate values");
-  geometry_msgs::Pose estimation;
-  if( !markers.localize_base_frame(estimation) ){
-	  ROS_ERROR("localization failed");
-	  clean_up();
-	  return -1;
-  }
-  
-  ROS_INFO("finished localization");
-  ROS_INFO("position = [%f, %f, %f]", estimation.position.x, estimation.position.y, estimation.position.z);
-  double roll, pitch, yaw;
-  tf::Matrix3x3( tf::Quaternion(estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w)).getRPY(roll, pitch, yaw);
-  ROS_INFO("orientation = [%f, %f, %f, %f] (quaternion)", estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w);
-  ROS_INFO("orientation = [%f, %f, %f] (RPY in degree)", roll*180.0/M_PI, pitch*180.0/M_PI, yaw*180.0/M_PI);
-  
+  // clean up and exit
+  delete ar_localization;
   return 0;
   
 }
+
 
