@@ -2,7 +2,10 @@
 <launch>
 
   <node pkg="omnirob_robin_navigation" type="marker_localization_global" name="marker_localization_global" output="screen">
-		<rosparam command="load" file="$(find omnirob_robin_navigation)/data/marker_calibration.yaml" />
+    <rosparam command="load" file="$(find omnirob_robin_navigation)/data/marker_calibration.yaml" />
+    <rosparam>
+      base_link: base_link
+    </rosparam>
   </node>
 
 </launch>

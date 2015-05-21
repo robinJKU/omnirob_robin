@@ -157,9 +157,10 @@ class AR_Marker{
 	}// to string
 };
 
-class AR_MARKERS{
+class AR_Marker_Localization{
 	public:
 	std::vector<AR_Marker> mark;
+	std::string base_link;
 	
 	private:
 	unsigned int last_considered_id;
@@ -170,31 +171,33 @@ class AR_MARKERS{
 	/**
 	 * default constructor
 	 */
-	AR_MARKERS (): base_is_localized(false), last_considered_id(0){}
+	AR_Marker_Localization (): base_is_localized(false), last_considered_id(0){}
 	
 	bool localize_base_frame( geometry_msgs::Pose &estimation ){
+		ROS_INFO("localize base link");
 		Pose_Samples base_link_poses;
 		
 		for( unsigned int mark_ii=0; mark_ii<mark.size(); mark_ii++){
 			if( mark[mark_ii].marker_detected ){
-				ROS_INFO("calc estimation for marker %u", mark[mark_ii].marker_id);
 				// calculate marker pose in reference frame
 				tf::Transform pose_mark_ii_refence_frame;
 				tf::poseMsgToTF( mark[mark_ii].avg_pose(), pose_mark_ii_refence_frame);
 				
 				// transformation marker pose to base_link frame
 				tf::StampedTransform to_reference_frame_from_base_link;
+				if( base_link.empty() ){
+					ROS_ERROR("Can't located base link - No base link frame specified");
+					return false;
+				}
 				try{
 				  // the listener need time to buffer tf data
-				  transform_listener->waitForTransform("/base_link", mark[mark_ii].reference_frame_id, ros::Time::now(), ros::Duration(2.0));
-				  ROS_INFO("%s", mark[mark_ii].reference_frame_id.c_str());
-				  transform_listener->lookupTransform("/base_link", mark[mark_ii].reference_frame_id, ros::Time(0), to_reference_frame_from_base_link);
+				  transform_listener->waitForTransform( mark[mark_ii].reference_frame_id, base_link, ros::Time::now(), ros::Duration(2.0));
+				  transform_listener->lookupTransform( mark[mark_ii].reference_frame_id, base_link, ros::Time(0), to_reference_frame_from_base_link);
 				}
 				catch (tf::TransformException ex){
 				  ROS_ERROR("Can't lookup reference frame: %s",ex.what());
 				  return false;
 				}
-				
 				
 				// calculate base_link pose in map_frame
 				geometry_msgs::Pose base_link_pose_map_frame;
@@ -221,7 +224,7 @@ class AR_MARKERS{
 		
 	}// localize base frame
 	
-	unsigned int get_index( unsigned int id ){
+	int get_index( unsigned int id ){
 		if( mark.size()==0 ){
 			return -1;
 		}
@@ -286,16 +289,15 @@ class AR_MARKERS{
 	
 } markers;
 
-
 void ar_pose_marker_callback( ar_track_alvar_msgs::AlvarMarkers marker_msg ){
-	bool found_valid_marker=false;
-	for( unsigned int marker_ii=0; marker_ii<marker_msg.markers.size() && (!found_valid_marker); marker_ii++){
+	int nr_of_valid_markers=0;
+	for( unsigned int marker_ii=0; marker_ii<marker_msg.markers.size(); marker_ii++){
 		if( markers.contains( marker_msg.markers[marker_ii].id) ){
-			found_valid_marker = true;
+			nr_of_valid_markers++;
 		}
 	}
 	
-	if( found_valid_marker ){
+	if( nr_of_valid_markers>0 ){
 		if( detection_mode ){
 			ROS_INFO("Found valid marker - disable detection mode");
 			detection_mode = false;
@@ -353,6 +355,11 @@ int main( int argc, char** argv) {
   transform_listener = new tf::TransformListener(node_handle);
   
   // validate and read required parameters 
+  private_ns_node_handle.getParam("base_link", markers.base_link);
+  if( markers.base_link.empty() ){
+	  markers.base_link = "/base_link";
+  }
+  
   if( !private_ns_node_handle.hasParam("marker_ids") ){
 	  ROS_ERROR("No marker ids specifies!");
 	  clean_up();
@@ -428,6 +435,7 @@ int main( int argc, char** argv) {
 	  return -1;
   }
   
+  /* ---------------------------------------------------------- */
   // enable ar track alvar node
   ros::ServiceClient ar_set_parameters_client = node_handle.serviceClient<dynamic_reconfigure::Reconfigure>( ar_track_set_param_srv);
   dynamic_reconfigure::Reconfigure ar_parameters;
@@ -439,9 +447,12 @@ int main( int argc, char** argv) {
   // subscribe to marker poses
   ros::Subscriber ar_pose_marker_subscriber = node_handle.subscribe("/ar_pose_marker", 50, ar_pose_marker_callback);
   
-  // move pan angle until a marker is localized
+  // look around, search for pan angle overlooking the maximum number of markers
   ros::ServiceClient pan_start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
   ros::Publisher pan_commanded_joint_state_pubisher = node_handle.advertise<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/control/commanded_joint_state", 5);
+  
+  
+  
   
   std_srvs::Empty empty_srvs;
   std_msgs::Float64MultiArray pan_goal_position_msgs;
@@ -496,15 +507,14 @@ int main( int argc, char** argv) {
   }
   
   // wait for detected markers
-  unsigned int nr_of_avg=10;
-  if( private_ns_node_handle.hasParam("nr_of_avg") ){
-	  int temp_nr_of_avg;
-	  private_ns_node_handle.getParam("nr_of_avg",temp_nr_of_avg);
-	  if( temp_nr_of_avg>0 ){
-		  nr_of_avg=(unsigned int)temp_nr_of_avg;
-	  }else{
-		  ROS_ERROR("Unexpected nr of averaging samples %i", temp_nr_of_avg);
-	  }
+  unsigned int nr_of_avg;
+  int tmp_nr_of_avg;
+  private_ns_node_handle.param( "nr_of_avg", tmp_nr_of_avg, 20);
+  if( tmp_nr_of_avg<=0 ){	  
+	ROS_WARN("Unexpected nr of averaging samples %i, use default value (%i) insted", nr_of_avg, 20);
+	nr_of_avg = 20;
+  }else{
+	  nr_of_avg = tmp_nr_of_avg;
   }
   
   markers.clear();
