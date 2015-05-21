@@ -296,7 +296,7 @@ int main( int argc, char** argv) {
 	yaml_file << "    x: " << marker2_to_map_avg.getRotation()[0] <<"\n";
 	yaml_file << "    y: " << marker2_to_map_avg.getRotation()[1] <<"\n";
 	yaml_file << "    z: " << marker2_to_map_avg.getRotation()[2] <<"\n";
-	yaml_file << "    w: " << marker2_to_map_avg.getRotation()[3] <<"\n";
+	yaml_file << "    w: " << marker2_to_map_avg.getRotation()[3] <<" \n";
 	yaml_file.close();
 	  
 	  while( ros::ok() ){
