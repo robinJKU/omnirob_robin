@@ -33,7 +33,7 @@
 
     <!-- laser scanner -->
     <param name="laser_min_dist" value="0.4"/>
-    <paran name="laser_max_dist" value="25.0"/>
+    <param name="laser_max_dist" value="25.0"/>
 
     <!-- Debug parameters -->
       <param name="pub_drawings" value="true"/>

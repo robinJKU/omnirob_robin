@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-	<!-- start navigation nodes -->
-	<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch	"></include>
-	<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch	"></include>
+	<!-- start localization nodes -->
+	<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include>
+	<include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
+	
+	<!--start mapping nodes -->
+	<!-- <include file="$(find omnirob_robin_navigation)/launch/hector.launch"></include> -->
 
 	<!-- start main demo node -->
-	<node pkg="omnirob_robin_demo" type="pick_and_place_demo" name="pick_and_place_demo" output="screen"></node>
+<!--	<node pkg="omnirob_robin_demo" type="pick_and_place_demo" name="pick_and_place_demo" output="screen"></node> -->
 	
 </launch>
