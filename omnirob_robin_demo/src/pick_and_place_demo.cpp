@@ -5,6 +5,7 @@
 //services und messages
 #include <omnirob_robin_msgs/localization.h>
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include "std_msgs/String.h"
 
 int main( int argc, char** argv) {
 	 
@@ -13,7 +14,7 @@ int main( int argc, char** argv) {
   ros::NodeHandle node_handle;
   
   // check if all required services and topics exists
-  std::string hector_get_map_topic = "/dynamic_map";
+  std::string hector_get_map_topic = "/hector_slam/get_map";
   if( !wait_for_service( hector_get_map_topic, 10) ){
 	  return -1;
   }
@@ -35,20 +36,33 @@ int main( int argc, char** argv) {
   }
   
   // set initial values of hector mapping
-  ros::Publisher hector_initialize_publisher = node_handle.advertise<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 5);
-  geometry_msgs::PoseWithCovarianceStamped hector_initialize_msg;
-  
   ROS_INFO("initialize hector");
+  geometry_msgs::PoseWithCovarianceStamped hector_initialize_msg;
   hector_initialize_msg.header.frame_id = "/map";
   hector_initialize_msg.header.stamp = ros::Time::now();
   hector_initialize_msg.pose.pose = global_localization_msg.response.base_link;
   
-  //while( ros::ok() ){
-	hector_initialize_publisher.publish( hector_initialize_msg);
-	hector_initialize_publisher.publish( hector_initialize_msg);
-	ros::spinOnce();
+  ros::Publisher hector_initialize_publisher = node_handle.advertise<geometry_msgs::PoseWithCovarianceStamped>("/hector_slam/set_initial_pose", 10);
+  if( wait_until_publisher_is_connected( hector_initialize_publisher) ){
+	  ROS_ERROR("Can't initialize hector initialization publisher");
+	  return -1;
+  }
+  
+  std_msgs::String hector_reset_msg;
+  hector_reset_msg.data = "reset";
+  ros::Publisher hector_reset_publisher = node_handle.advertise<std_msgs::String>("/hector_slam/syscommand", 10);
+  if( wait_until_publisher_is_connected( hector_reset_publisher) ){
+	  ROS_ERROR("Can't initialize hector reset publisher");
+	  return -1;
+  }
+  
+  hector_reset_publisher.publish( hector_reset_msg);
+  hector_initialize_publisher.publish( hector_initialize_msg);
+  
+  // 
+  
+  ros::spin();
 	
-//}
   
   
   // todo1: do a global localization
