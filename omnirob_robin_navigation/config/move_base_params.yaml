@@ -1,0 +1,27 @@
+# Move base node parameters
+# control flags
+base_local_planner: "dwa_local_planner/DWAPlannerROS"
+base_global_planner: "navfn/NavfnROS"
+
+shutdown_costmaps: false
+controller_frequency: 50.0 
+oscillation_timeout: 5.0
+oscillation_distance: 0.05
+
+# default recovery behaviour: [{name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},
+#                              {name: rotate_recovery, type: rotate_recovery/RotateRecovery},
+#                              {name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}]
+
+planner_patience: 5.0 # How long the planner will wait in seconds in an attempt to find a valid plan before space-clearing operations are performed. 
+controller_patience: 15.0 # How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed. 
+
+# configure recovery behaviour
+conservative_reset_dist: 3.0 # The distance away from the robot in meters at which obstacles will be cleared from the costmap when attempting to clear space in the map. Note, this parameter is only used when the default recovery behaviors are used for move_base. 
+recovery_behavior_enabled: true
+clearing_rotation_allowed: true
+
+
+
+
+
+
