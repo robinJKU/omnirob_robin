@@ -44,6 +44,7 @@
    <!-- remap -->
    <remap from="/initialpose" to="/hector_slam/set_initial_pose"/>
    <remap from="/dynamic_map" to="/hector_slam/get_map"/>
-
+   <remap from="/map" to="/map_slam"/>
+   <remap from="/map_metadata" to="/map_slam_metadata"/>
    </node>
 </launch>

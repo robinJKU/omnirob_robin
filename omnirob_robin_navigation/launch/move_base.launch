@@ -14,7 +14,7 @@
     
     <!-- move base -->
     <rosparam file="$(find omnirob_robin_navigation)/config/move_base_params.yaml" command="load" />
-    <remap from="cmd_vel" to="/omnirob_robin/base/drives/state/vel"/>
+    <remap from="cmd_vel" to="/omnirob_robin/base/drives/control/cmd_vel"/>
     
   </node>
 </launch>

@@ -43,7 +43,7 @@ int main( int argc, char** argv) {
   hector_initialize_msg.pose.pose = global_localization_msg.response.base_link;
   
   ros::Publisher hector_initialize_publisher = node_handle.advertise<geometry_msgs::PoseWithCovarianceStamped>("/hector_slam/set_initial_pose", 10);
-  if( wait_until_publisher_is_connected( hector_initialize_publisher) ){
+  if( !wait_until_publisher_is_connected( hector_initialize_publisher) ){
 	  ROS_ERROR("Can't initialize hector initialization publisher");
 	  return -1;
   }
@@ -51,7 +51,7 @@ int main( int argc, char** argv) {
   std_msgs::String hector_reset_msg;
   hector_reset_msg.data = "reset";
   ros::Publisher hector_reset_publisher = node_handle.advertise<std_msgs::String>("/hector_slam/syscommand", 10);
-  if( wait_until_publisher_is_connected( hector_reset_publisher) ){
+  if( !wait_until_publisher_is_connected( hector_reset_publisher) ){
 	  ROS_ERROR("Can't initialize hector reset publisher");
 	  return -1;
   }
