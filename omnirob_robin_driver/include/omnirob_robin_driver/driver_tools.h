@@ -127,6 +127,8 @@ class Pan_Tilt{
 			ros::spinOnce();
 			std_srvs::Empty empty_srvs;
 			start_motion_client.call( empty_srvs);
+
+			return true;
 		}// move to state
 		
 		/**

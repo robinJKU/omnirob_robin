@@ -186,7 +186,7 @@ class AR_Marker_Localization{
 	unsigned int nr_of_samples_received;
 	bool detection_mode;
 	unsigned int nr_of_markers_received;
-	ros::Time marker_should_be_lather_than;
+        ar_track_alvar_msgs::AlvarMarkers latest_marker;
 	Pan_Tilt *pan_tilt;
 	
 	public:
@@ -194,7 +194,7 @@ class AR_Marker_Localization{
 	 * constructor: validate and read required paramertes
 	 */
 	AR_Marker_Localization ():
-	last_considered_id(0), node_handle(), private_ns_node_handle("~"), marker_should_be_lather_than()
+	last_considered_id(0), node_handle(), private_ns_node_handle("~")
 	{
 	  // parameter: base_link
 	  private_ns_node_handle.getParam("base_link", base_link);
@@ -375,7 +375,8 @@ class AR_Marker_Localization{
 	 */
 	ar_track_alvar_msgs::AlvarMarkers filter( ar_track_alvar_msgs::AlvarMarkers raw_msg, ros::Time later_than = ros::Time() ){
 		ar_track_alvar_msgs::AlvarMarkers marker;
-		if( (!later_than.is_zero()) && (raw_msg.header.stamp<=later_than) ){
+		if( (!later_than.is_zero()) && raw_msg.markers.size()>0 && (raw_msg.markers[0].header.stamp<=later_than) ){
+			ROS_INFO("Discard old message");
 			return marker;
 		}
 		
@@ -388,6 +389,7 @@ class AR_Marker_Localization{
 		for( unsigned int marker_ii=0; marker_ii<raw_msg.markers.size(); marker_ii++){
 		  // check if marker is known
 		  if( !contains( raw_msg.markers[marker_ii].id) ){
+			  ROS_WARN("Found unknown marker with id %i", raw_msg.markers[marker_ii].id);
 			  continue;
 		  }
 		  
@@ -405,6 +407,7 @@ class AR_Marker_Localization{
 		  beta = atan( marker_pose_optical_frame.getOrigin()[0]/marker_pose_optical_frame.getOrigin()[2]);
 		  
 		  if( fabs(alpha)>alpha_max_abs || fabs(beta)>beta_max_abs ){
+			  ROS_WARN("Marker %i is out of sight, discard marker pose", raw_msg.markers[marker_ii].id);
 			  continue;
 		  }
 		  
@@ -420,8 +423,10 @@ class AR_Marker_Localization{
 	 * Callback function for ar pose markers
 	 */
 	void ar_pose_marker_callback( ar_track_alvar_msgs::AlvarMarkers raw_marker_msg ){
+		latest_marker = raw_marker_msg;
+
 		ar_track_alvar_msgs::AlvarMarkers marker_msg;
-		marker_msg = filter( raw_marker_msg, marker_should_be_lather_than);
+		marker_msg = filter( raw_marker_msg);
 		
 		unsigned int nr_of_valid_markers = marker_msg.markers.size();
 		if( nr_of_valid_markers>0 ){
@@ -438,6 +443,23 @@ class AR_Marker_Localization{
 			}
 		}
 	}// ar pose marker callback
+
+	bool block_until_latest_marker_is_later_than( ros::Time later_than, float time_out=10.0){
+
+		ros::Rate sleep_rate(2.0);
+		if( time_out>=0.0 ){
+			sleep_rate = ros::Rate(10.0/time_out);
+		}
+		unsigned int cnt=0;
+		while( ros::ok() && cnt<10.0 && latest_marker.markers.size()>0 && latest_marker.markers[0].header.stamp<=later_than ){
+			cnt++;
+			sleep_rate.sleep();
+			ros::spinOnce();
+		}
+
+		return latest_marker.header.stamp<=later_than;
+
+        }// block until latest marker is later than
 
 	/**
 	 * Add the specified sample marker_pose to the mark array
@@ -500,9 +522,10 @@ class AR_Marker_Localization{
 
 		// look around, search for pan angle overlooking the maximum number of markers
 		detection_mode = true;
-		ros::Rate rate_1s(1);
 
-		double min_angle=-0.9, max_angle=0.9, increment_angle=20.0/180.0*M_PI;
+		double min_angle=-1.8, max_angle=1.8, increment_angle=20.0/180.0*M_PI;
+		min_angle=-0.4;
+		max_angle=0.4;
 		std::vector<float> pan_tilt_target_position(2);
 		pan_tilt_target_position[0] = min_angle;
 		
@@ -518,11 +541,10 @@ class AR_Marker_Localization{
 			}
 			
 			// check nr of found markers
+			block_until_latest_marker_is_later_than( ros::Time::now(), 5.0 );
 			nr_of_markers_received=0;
-			marker_should_be_lather_than = ros::Time::now();
-			rate_1s.sleep(); 
+			ros::Rate(1.0).sleep();
 			ros::spinOnce();
-			
 			if( max_nr_of_marks_detected<nr_of_markers_received ){
 				max_nr_of_marks_detected = nr_of_markers_received;
 				angle_overlooking_maximum_nr_of_markers = pan_tilt_target_position[0];
@@ -566,11 +588,11 @@ class AR_Marker_Localization{
 		}
 
 		clear();
-		marker_should_be_lather_than = ros::Time::now();
+		block_until_latest_marker_is_later_than( ros::Time::now(), 5.0 );
 		nr_of_samples_received = 0;
 		while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
 		  ROS_INFO("Buffer marker poses %i/%i received", nr_of_samples_received, nr_of_avg);
-		  rate_1s.sleep();
+		  ros::Rate(1.0).sleep();
 		  ros::spinOnce();
 		}
 		if( !ros::ok() ){
