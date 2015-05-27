@@ -10,7 +10,7 @@
     <rosparam file="$(find omnirob_robin_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find omnirob_robin_navigation)/config/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find omnirob_robin_navigation)/config/global_planner_params.yaml" command="load" />
-    <rosparam file="$(find omnirob_robin_navigation)/config/navfn_global_planner_params.yaml" command="load" />
+    <!-- global planner used instead  <rosparam file="$(find omnirob_robin_navigation)/config/navfn_global_planner_params.yaml" command="load" /> -->
     
     <!-- move base -->
     <rosparam file="$(find omnirob_robin_navigation)/config/move_base_params.yaml" command="load" />

@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   trajectory_msgs
   omnirob_robin_msgs
+  omnirob_robin_tools_ros
 )
 
 ## Generate used messages and services
@@ -27,10 +28,12 @@ catkin_package(
 #  LIBRARIES omnirob_robin_driver
 #  CATKIN_DEPENDS geometry_msgs/Twist roscpp std_msgs
 #  DEPENDS system_lib
+   INCLUDE_DIRS include
 )
 
 
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -60,4 +63,6 @@ target_link_libraries(virtuell_robot_driver_interface ${catkin_LIBRARIES})
 add_executable(omnirob_odometry_publisher_simulation_only src/omnirob_odometry_publisher_simulation_only.cpp)
 target_link_libraries(omnirob_odometry_publisher_simulation_only ${catkin_LIBRARIES})
 
-
+install(DIRECTORY include/${PROJECT_NAME}/
+ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)

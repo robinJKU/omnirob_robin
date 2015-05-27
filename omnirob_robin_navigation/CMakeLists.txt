@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   ar_track_alvar_msgs
   dynamic_reconfigure
   omnirob_robin_msgs
+  omnirob_robin_tools_ros
+  omnirob_robin_driver
 )
 
 # Generate used messages and services

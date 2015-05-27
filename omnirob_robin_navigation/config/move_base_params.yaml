@@ -1,7 +1,7 @@
 # Move base node parameters
 # control flags
 base_local_planner: "dwa_local_planner/DWAPlannerROS"
-base_global_planner: "navfn/NavfnROS"
+base_global_planner: "global_planner/PlannerCore" # "navfn/NavfnROS"
 
 shutdown_costmaps: false
 controller_frequency: 5.0 

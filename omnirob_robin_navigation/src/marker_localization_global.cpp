@@ -2,6 +2,11 @@
 #include <sstream> 
 #include <fstream>
 
+// custom libraries
+#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <omnirob_robin_driver/driver_tools.h>
+
+// extern libraries
 #include <Eigen/Dense>
 
 //ros includes
@@ -20,7 +25,6 @@
 
 // prototypes
 std::string unsigned_int_to_string( unsigned int value );
-bool wait_for_service( std::string topic );
 
 class Pose_Samples{
 	public:
@@ -168,24 +172,29 @@ class AR_Marker_Localization{
 	std::string base_link; /**< base linke which will be detected */
 	
 	private:
+	// handles
 	ros::NodeHandle node_handle;
 	ros::NodeHandle private_ns_node_handle;
 	
+	// services, topics and tf
 	tf::TransformListener *transform_listener;
 	ros::ServiceServer localization_service;
 	
+	// member variables
 	std::vector<AR_Marker> mark; /**< detected marks */
 	unsigned int last_considered_id; /**< last id which which were looked for in get_index */
 	unsigned int nr_of_samples_received;
 	bool detection_mode;
 	unsigned int nr_of_markers_received;
+	ros::Time marker_should_be_lather_than;
+	Pan_Tilt *pan_tilt;
 	
 	public:
 	/**
 	 * constructor: validate and read required paramertes
 	 */
-	AR_Marker_Localization () throw (int):
-	last_considered_id(0), node_handle(), private_ns_node_handle("~")
+	AR_Marker_Localization ():
+	last_considered_id(0), node_handle(), private_ns_node_handle("~"), marker_should_be_lather_than()
 	{
 	  // parameter: base_link
 	  private_ns_node_handle.getParam("base_link", base_link);
@@ -227,7 +236,7 @@ class AR_Marker_Localization{
 			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/z")
 			|| !private_ns_node_handle.hasParam("marker"+ unsigned_int_to_string(marker_ids[marker_ii]) +"/orientation/w") ){
 			ROS_ERROR("Not enought parameters for marker: %s", unsigned_int_to_string(marker_ids[marker_ii]).c_str());
-			throw -1;
+			throw "Not enought parameters for marker";
 			
 		}else{
 			double rx,ry,rz, ox,oy,oz,ow;
@@ -244,6 +253,13 @@ class AR_Marker_Localization{
 		}
 	  }
 	  
+	  // construct pan tilt object
+	  try{
+		pan_tilt = new Pan_Tilt();
+	  }catch( char* error_message){
+		  throw error_message;
+	  }
+	  
 	  // construct transform listener
 	  transform_listener = new tf::TransformListener(node_handle );
 	  
@@ -255,6 +271,9 @@ class AR_Marker_Localization{
 	~AR_Marker_Localization( ){
 		if( transform_listener!=NULL ){
 			delete transform_listener;
+		}
+		if( pan_tilt!=NULL ){
+			delete pan_tilt;
 		}
 	}// destructor
 	
@@ -349,8 +368,17 @@ class AR_Marker_Localization{
 	
 	
 	private:
-	ar_track_alvar_msgs::AlvarMarkers filter( ar_track_alvar_msgs::AlvarMarkers raw_msg ){
+	/**
+	 * This function parse the raw_msg and removes those markers which aren't known or are simply too close at the borders.
+	 * The latter is important because at the borders ar track alvar returns invalid marker positions.
+	 * @param later_than: If lather_than is specified, also a filtering with respect to time is done. This means all messages which are before later_than are discareded. 
+	 */
+	ar_track_alvar_msgs::AlvarMarkers filter( ar_track_alvar_msgs::AlvarMarkers raw_msg, ros::Time later_than = ros::Time() ){
 		ar_track_alvar_msgs::AlvarMarkers marker;
+		if( (!later_than.is_zero()) && (raw_msg.header.stamp<=later_than) ){
+			return marker;
+		}
+		
 		tf::StampedTransform to_optical_frame_from_ref_frame;
 		tf::Transform marker_pose_reference_frame, marker_pose_optical_frame;
 		double alpha, beta;
@@ -392,7 +420,8 @@ class AR_Marker_Localization{
 	 * Callback function for ar pose markers
 	 */
 	void ar_pose_marker_callback( ar_track_alvar_msgs::AlvarMarkers raw_marker_msg ){
-		ar_track_alvar_msgs::AlvarMarkers marker_msg = filter( raw_marker_msg);
+		ar_track_alvar_msgs::AlvarMarkers marker_msg;
+		marker_msg = filter( raw_marker_msg, marker_should_be_lather_than);
 		
 		unsigned int nr_of_valid_markers = marker_msg.markers.size();
 		if( nr_of_valid_markers>0 ){
@@ -470,44 +499,41 @@ class AR_Marker_Localization{
 		ros::Subscriber ar_pose_marker_subscriber = node_handle.subscribe("/ar_pose_marker", 50, &AR_Marker_Localization::ar_pose_marker_callback, this);
 
 		// look around, search for pan angle overlooking the maximum number of markers
-		ros::ServiceClient pan_start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
-		ros::Publisher pan_commanded_joint_state_pubisher = node_handle.advertise<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/control/commanded_joint_state", 5);
-
-		std_srvs::Empty empty_srvs;
-		std_msgs::Float64MultiArray pan_goal_position_msgs;
-		pan_goal_position_msgs.data.resize(2);
-
 		detection_mode = true;
 		ros::Rate rate_1s(1);
 
 		double min_angle=-0.9, max_angle=0.9, increment_angle=20.0/180.0*M_PI;
-		pan_goal_position_msgs.data[0] = min_angle;
+		std::vector<float> pan_tilt_target_position(2);
+		pan_tilt_target_position[0] = min_angle;
 		
 		unsigned int max_nr_of_marks_detected=0;
 		double angle_overlooking_maximum_nr_of_markers;
 		
-		while( ros::ok() && pan_goal_position_msgs.data[0]<=max_angle ){
+		while( ros::ok() && pan_tilt_target_position[0]<=max_angle ){
 			// go to next pan angle
-			pan_commanded_joint_state_pubisher.publish( pan_goal_position_msgs);
-			ros::spinOnce();
-			pan_start_motion_client.call( empty_srvs);
-			rate_1s.sleep();
+			if( !pan_tilt->move_to_state_blocking( pan_tilt_target_position, 10.0) ){
+				res.error_message = "Pan Tilt target position isn't reached in time";
+				ROS_ERROR("%s", res.error_message.c_str());
+				return true;
+			}
 			
 			// check nr of found markers
 			nr_of_markers_received=0;
+			marker_should_be_lather_than = ros::Time::now();
 			rate_1s.sleep(); 
 			ros::spinOnce();
+			
 			if( max_nr_of_marks_detected<nr_of_markers_received ){
 				max_nr_of_marks_detected = nr_of_markers_received;
-				angle_overlooking_maximum_nr_of_markers = pan_goal_position_msgs.data[0];
+				angle_overlooking_maximum_nr_of_markers = pan_tilt_target_position[0];
 			}
-			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_goal_position_msgs.data[0]*180.0/M_PI);
+			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_tilt_target_position[0]*180.0/M_PI);
 			if( max_nr_of_marks_detected== 2){
 				break;
 			}
 			
 			// adapt pan angle
-			pan_goal_position_msgs.data[0] += increment_angle;
+			pan_tilt_target_position[0] += increment_angle;
 			
 		}// while no marker found
 		if( !ros::ok() ){
@@ -520,11 +546,12 @@ class AR_Marker_Localization{
 		
 		// move to optimal pan angle
 		ROS_INFO("move to %f degree", angle_overlooking_maximum_nr_of_markers*180.0/M_PI);
-		pan_goal_position_msgs.data[0] = angle_overlooking_maximum_nr_of_markers;
-		pan_commanded_joint_state_pubisher.publish( pan_goal_position_msgs);
-		ros::spinOnce();
-	    pan_start_motion_client.call( empty_srvs);
-	    rate_1s.sleep();
+		pan_tilt_target_position[0] = angle_overlooking_maximum_nr_of_markers;
+		if( !pan_tilt->move_to_state_blocking( pan_tilt_target_position, 10.0) ){
+			res.error_message = "Pan Tilt target position isn't reached in time";
+			ROS_ERROR("%s", res.error_message.c_str());
+			return true;
+		}
 	    detection_mode = false;
 
 		// wait for detected markers
@@ -539,6 +566,7 @@ class AR_Marker_Localization{
 		}
 
 		clear();
+		marker_should_be_lather_than = ros::Time::now();
 		nr_of_samples_received = 0;
 		while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
 		  ROS_INFO("Buffer marker poses %i/%i received", nr_of_samples_received, nr_of_avg);
@@ -614,20 +642,6 @@ std::string unsigned_int_to_string( unsigned int value ){
 	return value_string_stream.str();
 }// unsigned int to string
 
-bool wait_for_service( std::string topic ){
-  ros::Rate rate_1s(1);
-  unsigned int waiting_cnt=0;
-  while( waiting_cnt<10 && ros::ok() && !ros::service::exists(topic, false) ){
-	  ROS_INFO("Waiting for service %s", topic.c_str());
-	  rate_1s.sleep();
-  }
-  if( waiting_cnt>10 ){
-	  ROS_ERROR("Service %s is not available", topic.c_str());
-	  return false;
-  }
-  return true;
-	
-}// wait for service
 
 int main( int argc, char** argv) {
 	 
@@ -649,7 +663,6 @@ int main( int argc, char** argv) {
   
   // adevertise services
   ar_localization->advertise_ar_localization_service();
-  // @todo: ar_localization.start_ar_localization_acion_server(); 
   
   // wait for some work
   while( ros::ok() ){
