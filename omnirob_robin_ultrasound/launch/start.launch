@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="rosserial_server" type="serial_node" name="rosserial_server">
+    <rosparam>
+      port: /dev/ttyACM0
+      require:
+        publishers: [ status ]
+        subscribers: [ cmd, lights ]
+    </rosparam>
+  </node>
+  <node pkg="rosserial_python" type="message_info_service.py"
+        name="rosserial_message_info" />
+  <node pkg="omnirob_robin_ultrasound" type="arduino_node" name="arduino_node">
+  	<param name="min_distance" type="double" value="0.2"/>
+  </node>
+</launch>

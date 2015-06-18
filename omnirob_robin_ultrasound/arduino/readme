@@ -1,0 +1,10 @@
+Arduino IDE für Ros konfigurieren:
+http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
+
+Fix für permission denied fehler beim upload zum Arduino:
+http://arduino-er.blogspot.co.at/2014/08/arduino-ide-error-avrdude-seropen-cant.html
+
+ROS packages:
+rosserial-server
+rosserial
+rosserial-arduino
