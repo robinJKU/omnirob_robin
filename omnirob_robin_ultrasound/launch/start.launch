@@ -2,7 +2,7 @@
 <launch>
   <node pkg="rosserial_server" type="serial_node" name="rosserial_server">
     <rosparam>
-      port: /dev/ttyACM0
+      port: /dev/arduino
       require:
         publishers: [ status ]
         subscribers: [ cmd, lights ]
@@ -12,5 +12,6 @@
         name="rosserial_message_info" />
   <node pkg="omnirob_robin_ultrasound" type="arduino_node" name="arduino_node">
   	<param name="min_distance" type="double" value="0.2"/>
+  	<param name="max_distance" type="double" value="1.5"/>
   </node>
 </launch>

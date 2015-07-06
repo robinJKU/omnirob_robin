@@ -10,6 +10,7 @@
 sensor_msgs::Range range[SENSOR_COUNT];
 std_msgs::ByteMultiArray enableDirection;
 double min_distance;
+double max_distance;
 
 void arduinoCallback(const std_msgs::Float64MultiArray values)
 {
@@ -20,13 +21,13 @@ void arduinoCallback(const std_msgs::Float64MultiArray values)
   	if(values.data[i] > min_distance) {
   		enableDirection.data.push_back(1);
   	} else {
-  	  enableDirection.data.push_back(0);
+		enableDirection.data.push_back(0);
   	}
 		range[i].radiation_type = 0; //ULTRANSOUND
 		range[i].field_of_view = 0.5;
 		range[i].min_range = 0.030;
-		range[i].max_range = 2.5;
-		range[i].range = values.data[i];
+		range[i].max_range = max_distance;		
+		range[i].range = values.data[i];		
 		range[i].header.seq = seq_;
 		range[i].header.stamp = ros::Time::now();
 		char buffer[40];
@@ -62,6 +63,9 @@ int main(int argc, char **argv)
   {
     if(!n.getParam("/arduino_node/min_distance", min_distance)){
      min_distance = 0.2;
+    }
+    if(!n.getParam("/arduino_node/max_distance", max_distance)){
+     max_distance = 1.5;
     }
     for(int i=0; i<SENSOR_COUNT; i++)
     {
