@@ -1,0 +1,8 @@
+Sonar_srf08		KEYWORD1
+connect		KEYWORD2
+sendCommand	KEYWORD2
+setUnit		KEYWORD2
+setRegister	KEYWORD2
+readData	KEYWORD2
+changeAddress	KEYWORD2
+
