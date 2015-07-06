@@ -26,8 +26,8 @@ void arduinoCallback(const std_msgs::Float64MultiArray values)
 		range[i].radiation_type = 0; //ULTRANSOUND
 		range[i].field_of_view = 0.5;
 		range[i].min_range = 0.030;
-		range[i].max_range = max_distance;		
-		range[i].range = values.data[i];		
+		range[i].max_range = max_distance;	
+		range[i].range = values.data[i];				
 		range[i].header.seq = seq_;
 		range[i].header.stamp = ros::Time::now();
 		char buffer[40];
