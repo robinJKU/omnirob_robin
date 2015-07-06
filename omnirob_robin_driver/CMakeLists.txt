@@ -63,6 +63,9 @@ target_link_libraries(virtuell_robot_driver_interface ${catkin_LIBRARIES})
 add_executable(omnirob_odometry_publisher_simulation_only src/omnirob_odometry_publisher_simulation_only.cpp)
 target_link_libraries(omnirob_odometry_publisher_simulation_only ${catkin_LIBRARIES})
 
+add_executable(teleop_joy src/teleop_joy.cpp)
+target_link_libraries(teleop_joy ${catkin_LIBRARIES})
+
 install(DIRECTORY include/${PROJECT_NAME}/
  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )

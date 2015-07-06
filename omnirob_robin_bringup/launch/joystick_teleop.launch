@@ -1,12 +1,11 @@
+<?xml version="1.0"?>
 <launch>
-  
-
-  <node pkg="turtlebot_teleop" type="turtlebot_teleop_joy" name="turtlebot_teleop_joystick">
-    <param name="scale_angular" value="1.5"/>
-    <param name="scale_linear" value="0.5"/>
-    <remap from="turtlebot_teleop_joystick/cmd_vel" to="omnirob_robin/base/drives/control/cmd_vel"/>
+  <rosparam>
+    joy_node/dev: "/dev/input/js0"
+  </rosparam>
+  <!-- omnirob_teleop_key already has its own built in velocity smoother -->
+  <node pkg="joy" type="joy_node" name="joy_node"> </node>
+  <node pkg="omnirob_mapping" type="teleop_joy" name="teleop_joy">  
+    <remap from="/teleop_joy/cmd_vel" to="/omnirob_robin/base/drives/control/cmd_vel"/>
   </node>
-
-  <node pkg="joy" type="joy_node" name="joystick"/>
-
 </launch>
