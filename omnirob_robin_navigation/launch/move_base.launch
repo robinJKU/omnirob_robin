@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+  <!-- move base node -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <!-- local navigation -->
     <rosparam file="$(find omnirob_robin_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />

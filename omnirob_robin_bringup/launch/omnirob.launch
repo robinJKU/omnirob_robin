@@ -16,4 +16,7 @@
 	<!-- kinect -->
 	<include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch"></include>
 	
+	<!-- ultrasound -->
+	<include file="$(find omnirob_robin_ultrasound)/launch/start.launch"></include>
+	
 </launch>

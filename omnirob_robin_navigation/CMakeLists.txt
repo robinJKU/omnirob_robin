@@ -37,3 +37,6 @@ include_directories(
 
 add_executable(marker_localization_global src/marker_localization_global.cpp)
 target_link_libraries(marker_localization_global ${catkin_LIBRARIES})
+
+add_executable(global_localization src/global_localization.cpp)
+target_link_libraries(global_localization ${catkin_LIBRARIES})

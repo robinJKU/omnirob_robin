@@ -79,6 +79,8 @@ int main( int argc, char** argv) {
   
   hector_initialize_publisher = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("/hector_slam/set_initial_pose", 10);
   hector_reset_publisher = n.advertise<std_msgs::String>("/hector_slam/syscommand", 10);
+  
+  globalLocalization();
    
   ros::spin();
 	  

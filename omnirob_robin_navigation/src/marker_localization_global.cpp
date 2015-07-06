@@ -524,8 +524,6 @@ class AR_Marker_Localization{
 		detection_mode = true;
 
 		double min_angle=-1.8, max_angle=1.8, increment_angle=20.0/180.0*M_PI;
-		min_angle=-0.4;
-		max_angle=0.4;
 		std::vector<float> pan_tilt_target_position(2);
 		pan_tilt_target_position[0] = min_angle;
 		
@@ -550,7 +548,7 @@ class AR_Marker_Localization{
 				angle_overlooking_maximum_nr_of_markers = pan_tilt_target_position[0];
 			}
 			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_tilt_target_position[0]*180.0/M_PI);
-			if( max_nr_of_marks_detected== 2){
+			if( max_nr_of_marks_detected== 1){
 				break;
 			}
 			
@@ -629,8 +627,8 @@ class AR_Marker_Localization{
 	 * Initiaizes the service object.
 	 */
 	void advertise_ar_localization_service( void ){
-		ROS_INFO("Advertising global localization service");
-		localization_service = node_handle.advertiseService("/global_localization", &AR_Marker_Localization::localization_service_callback, this);
+		ROS_INFO("Advertising marker localization service");
+		localization_service = node_handle.advertiseService("/marker_localization", &AR_Marker_Localization::localization_service_callback, this);
 	}// advertise ar localization service
 	
 	/**

@@ -1,5 +1,5 @@
 max_obstacle_height: 0.60 # assume something like an arm is mounted on top of the robot
-robot_radius: 0.5 # distance a circular robot should be clear of the obstacle
+robot_radius: 0.55 # distance a circular robot should be clear of the obstacle
 
 # map_type: voxel # not specified, uses a 2D obstacle map
 obstacle_layer:
@@ -18,8 +18,13 @@ obstacle_layer:
   
 inflation_layer:
   enabled: true
-  cost_scaling_factor: 2.0 # exponential rate at which the obstacle cost drops off (default: 10), see http://wiki.ros.org/costmap_2d/flat
-  inflation_radius: 1.0 # max. distance from an obstacle at which costs are incurred for planning paths.
+  cost_scaling_factor: 8.0 # exponential rate at which the obstacle cost drops off (default: 10), see http://wiki.ros.org/costmap_2d/flat
+  inflation_radius: 0.65 # max. distance from an obstacle at which costs are incurred for planning paths.
 
 static_layer:
   enabled: true
+
+sonar_layer:
+    topics: ['/Ultrasound/Sensor0', '/Ultrasound/Sensor1', '/Ultrasound/Sensor2', '/Ultrasound/Sensor3', '/Ultrasound/Sensor4', '/Ultrasound/Sensor5', '/Ultrasound/Sensor6', '/Ultrasound/Sensor7']
+    no_readings_timeout: 1.0
+

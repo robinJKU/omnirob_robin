@@ -16,25 +16,25 @@ DWAPlannerROS:
   rot_stopped_vel: 0.4
   
   # acceleration limits
-  acc_lim_x: 0.5
-  acc_lim_theta: 0.5
-  acc_lim_y: 0.5
+  acc_lim_x: 0.3
+  acc_lim_theta: 0.3
+  acc_lim_y: 0.3
   
   # Goal Tolerance Parameters
-  yaw_goal_tolerance: 0.05
-  xy_goal_tolerance: 0.03
+  yaw_goal_tolerance: 0.1
+  xy_goal_tolerance: 0.2
   latch_xy_goal_tolerance: false # xy and theta goal has to be considered
   
   # Forward Simulation Parameters
-  sim_time: 2.0
-  vx_samples: 10
-  vy_samples: 10
-  vtheta_samples: 10
+  sim_time: 5.0
+  vx_samples: 20
+  vy_samples: 20
+  vtheta_samples: 20
   
   # Trajectory Scoring Parameters
-  path_distance_bias: 24.0 # weighting for how much it should stick to the global path plan
+  path_distance_bias: 10.0 # weighting for how much it should stick to the global path plan
   goal_distance_bias: 32.0 # wighting for how much it should attempt to reach its goal
-  occdist_scale: 0.5 # weighting for how much the controller should avoid obstacles
+  occdist_scale: 25.0 # weighting for how much the controller should avoid obstacles
   forward_point_distance: 0.3 # distance to the next scoring point
   stop_time_buffer: 0.2 # amount of time that the robot must stop before a collision in order for a trajectory to be considered valid in seconds 
   scaling_speed: 0.25 # absolute velocity at which to start scaling (increasing) the robot's footprint

@@ -14,6 +14,8 @@
 
         <!-- start move base -->
         <include file="$(find omnirob_robin_navigation)/launch/move_base.launch"></include>
+        
+        <node pkg="omnirob_robin_navigation" type="global_localization" name="global_localization" output="screen" />
 
 </launch>
 
