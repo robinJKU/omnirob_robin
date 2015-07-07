@@ -1,0 +1,15 @@
+# goal defines
+string object_id
+shape_msgs/SolidPrimitive object_primitive
+# additionally the pose has to be on the tf tree
+---
+# result defines
+string error_message
+---
+# feedback
+int8 state
+
+# state defines
+int8 INITIALIZING=0
+int8 PLANNING=1
+int8 EXECUTING=2

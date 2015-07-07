@@ -1,0 +1,11 @@
+#goal definition
+---
+#result definition
+string error_message
+---
+#feedback
+int8 lwa_state
+
+int8 INITIALIZING=0
+int8 PLANNING=1
+int8 EXECUTING=2

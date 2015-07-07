@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- load hardware interface, only interfacing LWA3 -->
+  <group ns="omnirob_robin">
+    <node pkg="omnirob_robin_driver" type="gripper_interface" name="gripper_interface" output="screen">
+    	<param name="closed_position" type = "double" value = "50.0" /> <!-- in mm -->
+    	<param name="opened_position" type = "double" value = "5.0" /> <!-- in mm -->
+    </node>
+  </group>
+
+</launch>

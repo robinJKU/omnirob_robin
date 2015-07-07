@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="world_file"  default="$(find omnirob_robin_gazebo)/worlds/arena.world"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="paused" value="false"/>
+    <arg name="debug" value="false"/>
+    <arg name="world_name" value="$(arg world_file)"/>
+  </include> 
+  
+  <include file="$(find omnirob_robin_gazebo)/launch/includes/omnirob_spawner.launch"></include> 
+    
+</launch>

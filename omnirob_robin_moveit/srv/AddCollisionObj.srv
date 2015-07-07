@@ -1,0 +1,4 @@
+shape_msgs/SolidPrimitive primitive
+string primitive_id 
+---
+bool success
