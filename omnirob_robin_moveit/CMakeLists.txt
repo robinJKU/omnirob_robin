@@ -105,20 +105,24 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 # This will be the node which is used to create the needed services
 add_executable(omnirob_moveit src/omnirob_moveit.cpp)
+add_dependencies(omnirob_moveit omnirob_robin_moveit_gencpp)
 target_link_libraries(omnirob_moveit ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS omnirob_moveit DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # This node is for testing rviz and gazebo with the moveit interface
 add_executable(omnirob_moveit_simulation src/omnirob_moveit_simulation.cpp)
+add_dependencies(omnirob_moveit_simulation omnirob_robin_moveit_gencpp)
 target_link_libraries(omnirob_moveit_simulation ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS omnirob_moveit_simulation DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # This node is our joint_states_publisher
 add_executable(joint_states_publisher src/joint_states_publisher.cpp)
+add_dependencies(joint_states_publisher omnirob_robin_moveit_gencpp)
 target_link_libraries(joint_states_publisher ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS joint_states_publisher DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 add_executable(test_lwa_interface src/test_lwa_interface.cpp)
+add_dependencies(test_lwa_interface omnirob_robin_moveit_gencpp)
 target_link_libraries(test_lwa_interface ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS test_lwa_interface DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
