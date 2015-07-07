@@ -171,10 +171,10 @@ int main( int argc, char** argv) {
   ROS_INFO("wait for gripper services");
   ros::service::waitForService("gripper/control/start_motion");
   ros::service::waitForService("gripper/control/initialize_modules");
-  ros::service::waitForService("gripper/control/reference_modules");
+  ros::service::waitForService("gripper/control/reference_module");
   gripper_start_motion_srv = n.serviceClient<std_srvs::Empty>("gripper/control/start_motion"); 
   gripper_init_srv = n.serviceClient<std_srvs::Empty>("gripper/control/initialize_modules"); 
-  gripper_ref_srv = n.serviceClient<std_srvs::Empty>("gripper/control/reference_modules");
+  gripper_ref_srv = n.serviceClient<std_srvs::Empty>("gripper/control/reference_module");
   gripper_enable_p2p_motion_srv = n.serviceClient<std_srvs::Empty>("gripper/control/enable_point_to_point_motion");
   ROS_INFO("gripper_interface: all Services available");
 

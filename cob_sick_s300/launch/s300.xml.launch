@@ -4,6 +4,7 @@
 	<!-- start laser driver -->
 	<node name="laser_front" pkg="cob_sick_s300" type="cob_sick_s300" respawn="false" output="screen" > 
 		<rosparam command="load" file="$(find cob_sick_s300)/launch/s300.yaml"/>
+		<param name="publish_frequency" type="double" value="15.0"/>
 	</node>
 
 </launch>
