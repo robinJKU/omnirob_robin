@@ -182,19 +182,19 @@ int main(int argc, char** argv)
   // Data structures
   // Manual value setting
   limits_lwa1.has_velocity_limits = true;
-  limits_lwa1.max_velocity = 0.15;
+  limits_lwa1.max_velocity = 0.218;
   limits_lwa2.has_velocity_limits = true;
-  limits_lwa2.max_velocity = 0.15;
+  limits_lwa2.max_velocity = 0.218;
   limits_lwa3.has_velocity_limits = true;
-  limits_lwa3.max_velocity = 0.15;
+  limits_lwa3.max_velocity = 0.209;
   limits_lwa4.has_velocity_limits = true;
-  limits_lwa4.max_velocity = 0.15;
+  limits_lwa4.max_velocity = 0.209;
   limits_lwa5.has_velocity_limits = true;
-  limits_lwa5.max_velocity = 0.15;
+  limits_lwa5.max_velocity = 0.218;
   limits_lwa6.has_velocity_limits = true;
-  limits_lwa6.max_velocity = 0.15;
+  limits_lwa6.max_velocity = 0.218;
   limits_lwa7.has_velocity_limits = true;
-  limits_lwa7.max_velocity = 0.15;
+  limits_lwa7.max_velocity = 0.218;
   
   limits_lwa1.has_acceleration_limits = true;
   limits_lwa1.max_acceleration = 0.7;

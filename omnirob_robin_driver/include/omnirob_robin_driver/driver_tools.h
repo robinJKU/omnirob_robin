@@ -55,10 +55,8 @@ class Pan_Tilt{
 		 * destructor
 		 */
 		~Pan_Tilt()
-		{
+		{}
 			
-		}
-	
 	public:
 		/**
 		 * Callback for the joint state subscriber
@@ -72,9 +70,7 @@ class Pan_Tilt{
 			}else{
 				ROS_WARN("joint state callback - Msg data not proper sized: got %i, expected 2",  (int) joint_state_msg.data.size() );
 			}
-			
 		}// joint state callback
-		
 		
 	public:
 		/**
@@ -170,8 +166,5 @@ class Pan_Tilt{
 			ros::spinOnce();
 			return std::vector<float>( joint_state);
 		}
-		
 };
-
-
 #endif

@@ -2,9 +2,11 @@
 <launch>
  
   <!-- load the gripper interface node -->   
+  <group ns="omnirob_robin/">
+	<rosparam command="load" file="$(find omnirob_robin_driver)/config/joint_limits.yaml"/>
+  </group>
    
-  <node name="gripper_interface" pkg="omnirob_robin_driver" type="gripper_interface" respawn="false"
-    output="screen" ns="omnirob_robin"/>
+  <include file="$(find omnirob_robin_driver)/launch/gripper_interface.launch" />
     
   <node name="base_interface" pkg="omnirob_robin_driver" type="base_interface" respawn="false"
     output="screen" ns="omnirob_robin"/>  

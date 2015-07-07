@@ -5,6 +5,8 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/JointTrajectory.h>
+#include <omnirob_robin_driver/cubic_trajectory_generator.h>
+#include <control_msgs/JointTrajectoryControllerState.h>
 
 class Modules{
 	protected:
@@ -49,6 +51,7 @@ class Modules{
 		
 		// subscribed topics
 		ros::Subscriber commanded_joint_state_subscriber;
+		ros::Subscriber joint_state_subscriber;
 		ros::Subscriber e_stop_subscriber;
 		
 		// published topics
@@ -110,6 +113,7 @@ class Modules{
 			// subscribe topics
 			commanded_joint_state_subscriber = handle.subscribe<std_msgs::Float64MultiArray>( group_name + "/control/" + "commanded_joint_state", 10, &Modules::set_joint_state, this);
 			e_stop_subscriber = handle.subscribe<std_msgs::Bool>( emergency_stop_topic, 10, &Modules::emergency_stop, this);
+			joint_state_subscriber = handle.subscribe<control_msgs::JointTrajectoryControllerState>(group_name + "/joint_controllers/state", 10, &Modules::joint_state_callback, this);
 			
 			// published topics
 			initialization_error_publisher = handle.advertise<std_msgs::Float64MultiArray>( group_name + "/state/" + "error/" +  "initialization_error", 10);
@@ -143,7 +147,6 @@ class Modules{
 		
 			
 		}// constructor
-	
 	
 	protected:
 		std_msgs::Float64MultiArray convert_bool2float_array( std::vector<bool> bool_array ){
@@ -220,19 +223,15 @@ class Modules{
 		}// clear error
 	
 		void set_modules_ready( void){
-			
 			for( unsigned int module=0; module<nr_of_modules; module++){
 				module_is_ready[module] = true;
 			}
-			
 		}// set modules
 		
 		void reset_modules_ready( void){
-			
 			for( unsigned int module=0; module<nr_of_modules; module++){
 				module_is_ready[module] = false;
 			}
-			
 		}// reset modules
 
 		bool only_reference_error( unsigned int module){
@@ -249,11 +248,32 @@ class Modules{
 		}// only reference error
 		
 		bool no_errors( unsigned int module ){
-			
 			return only_reference_error(module) || module_not_referenced[module];
-			
 		}// no errors
 		
+		bool modules_are_enabled(){
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				if( !module_is_enabled[module])
+					return false;
+			}
+			return true;
+		}
+		bool modules_are_ready(){
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				if( !module_is_ready[module])
+					return false;
+			}
+			return true;
+		}
+
+		bool no_errors(){
+			for( unsigned int module=0; module<nr_of_modules; module++){
+				if( !no_errors( module) )
+					return false;
+			}
+			return true;
+		}
+
 		bool at_least_one_module_is_ready( void ){
 			bool is_true = false;
 			for( unsigned int module=0; module<nr_of_modules; module++){
@@ -281,6 +301,12 @@ class Modules{
 			
 			return false;
 		}// at least one module is enabled and ready
+
+		void joint_state_callback( control_msgs::JointTrajectoryControllerState joint_state_control_msg){
+			std_msgs::Float64MultiArray joint_state_multiarray;
+			joint_state_multiarray.data = joint_state_control_msg.actual.positions;
+			joint_state_array_publisher.publish( joint_state_multiarray);
+		}
 	
 	
 	protected:
@@ -387,8 +413,10 @@ class Modules{
 			
 			// todo: enable position control with respect to the enabled modi
 			// @ point to point motion: start_motion callback ->  command joints
-			// @ continuos position control: 
-			
+			// @ continuos position control:
+			if( point_to_point_motion_enabled){
+
+			}
 			return true;
 			
 		}// start motion 
@@ -408,7 +436,6 @@ class Modules{
 		// topics
 		void set_joint_state( std_msgs::Float64MultiArray desired_joint_state ){
 			joint_state = desired_joint_state;
-			
 		}
 		
 		void emergency_stop( std_msgs::Bool e_stop ){
@@ -447,25 +474,51 @@ class Modules{
 			module_is_enabled_publisher.publish( convert_bool2float_array( module_is_enabled ));
 			module_is_ready_publisher.publish( convert_bool2float_array( module_is_ready ));
 			position_reached_publisher.publish( convert_bool2float_array( position_reached ));
-			
-			joint_state_array_publisher.publish( joint_state);
-			
 		}// publish module state
-			
-	
+
 };// class Modules
 
 
-class LWA : public Modules{
+class LWA: public Modules{
 	private:
 		ros::Publisher commanded_joint_state_publisher;
 		trajectory_msgs::JointTrajectory joint_trajectory;
 		
+		// trajectory interpolation
+		ros::ServiceServer start_trajectory_service_server;
+		ros::ServiceServer stop_trajectory_service_server;
+		ros::ServiceServer set_point_service_server;
+		ros::ServiceServer reset_mode_service_server;
+		ros::Publisher trajectory_time_left_publisher;
+
+		bool trajectory_enabled;
+		bool stop_trajectory;
+		bool trajectory_reset_mode_enabled;
+
+		cubic_trajectories *trajectory;
+		std::vector<std::vector<double> > s_node;
+		std::vector<double> v_max_;
+		std::vector<double> a_max_;
+		std::vector<double> j_max_;
+		double trajectory_time;
+		double trajectory_time_filtered;
+
+		double Ts_;
+
+		double filter_coeff_a1;
+		double filter_coeff_b0;
+		double filter_coeff_b1;
+
+		// filter coefficients
+		const static double cut_off_frequency_low_pass = 6.0;
+
 	public:
-		LWA( ros::NodeHandle handle, std::string group_name, std::string controller_name, std::string emergency_stop_topic )
-			: Modules( handle, group_name, 7, emergency_stop_topic )
+
+		LWA( ros::NodeHandle handle, std::string group_name, std::string controller_name, std::string emergency_stop_topic, std::vector<double> v_max, std::vector<double> a_max, std::vector<double> j_max, double Ts):
+			Modules( handle, group_name, 7, emergency_stop_topic ),
+			trajectory_enabled(false),
+			trajectory_reset_mode_enabled(false)
 		{
-			
 			joint_trajectory.joint_names.push_back("lwa/joint_1");
 			joint_trajectory.joint_names.push_back("lwa/joint_2");
 			joint_trajectory.joint_names.push_back("lwa/joint_3");
@@ -476,36 +529,183 @@ class LWA : public Modules{
 			
 			joint_trajectory.points.resize(1);
 			joint_trajectory.points[0].positions.resize( 7);
-			
 			joint_trajectory.points[0].time_from_start = ros::Duration(0.021);
 			
-			commanded_joint_state_publisher = handle.advertise<trajectory_msgs::JointTrajectory>( controller_name + "/command" ,  1); 
-			
+			commanded_joint_state_publisher = handle.advertise<trajectory_msgs::JointTrajectory>( controller_name + "/command" ,  1);
+
+			// trajectory
+			start_trajectory_service_server = handle.advertiseService("/omnirob_robin/lwa/trajectory/start", &LWA::start_trajectory_callback, this);
+			stop_trajectory_service_server = handle.advertiseService("/omnirob_robin/lwa/trajectory/stop", &LWA::stop_trajectory_callback, this); // todo kontrolle ob existent
+			set_point_service_server = handle.advertiseService("/omnirob_robin/lwa/trajectory/set_point", &LWA::set_point_callback, this);
+			reset_mode_service_server = handle.advertiseService("/omnirob_robin/lwa/trajectory/reset_mode", &LWA::reset_trajectory_callback, this);
+			trajectory_time_left_publisher = handle.advertise<std_msgs::Float64>("/omnirob_robin/lwa/trajectory/time_left", 10);
+
+			trajectory = NULL;
+
+			if( v_max.size()!=7 ){
+				ROS_ERROR("Invalid number of elements in v_max");
+				v_max.clear();
+				v_max.resize(7);
+			}
+			if( a_max.size()!=7 ){
+				ROS_ERROR("Invalid number of elements in a_max");
+				a_max.clear();
+				a_max.resize(7);
+			}
+			if( j_max.size()!=7 ){
+				ROS_ERROR("Invalid number of elements in j_max");
+				j_max.clear();
+				j_max.resize(7);
+			}
+			v_max_ = v_max;
+			a_max_ = a_max;
+			j_max_ = j_max;
+
+			Ts_ = Ts;
+
+			filter_coeff_a1 = (2.0-Ts*cut_off_frequency_low_pass)/(2.0+Ts*cut_off_frequency_low_pass);
+			filter_coeff_b0 = Ts*cut_off_frequency_low_pass/(2.0+Ts*cut_off_frequency_low_pass);
+			filter_coeff_b1 = Ts*cut_off_frequency_low_pass/(2.0+Ts*cut_off_frequency_low_pass);
+		}
+		~LWA()
+		{
+			if( trajectory!=NULL )
+				delete trajectory;
 		}
 		
-		void publish_commanded_state( void ){
-			
-			joint_trajectory.header.stamp = ros::Time::now();
+	private: // trajectory execution
+		bool start_trajectory_callback( std_srvs::Empty::Request &req, std_srvs::Empty::Response &res ){
+			if( trajectory_reset_mode_enabled){
+				ROS_ERROR("Could not start trajectory - reset mode is activate.");
+			}else{
+				ROS_INFO("Start trajectory");
+				trajectory_enabled = true;
+				trajectory_time = 0.0;
+			}
+			return true;
+		}
+		bool stop_trajectory_callback( std_srvs::Empty::Request &req, std_srvs::Empty::Response &res ){
+			if( trajectory_enabled){
+				ROS_INFO("Stop trajectory");
+				trajectory_enabled = false;
+				stop_trajectory = true;
 
-			for( unsigned int module = 0; module<nr_of_modules; module++ ){
-				if( (continuos_position_tracking_mode_enabled &&  module_is_enabled[module] && module_is_ready[module]) ||
-					(point_to_point_motion_enabled && module_is_ready[module] && start_motion_trigger) ){
-					joint_trajectory.points[0].positions[module] =  joint_state.data[module];
+				trajectory_time = trajectory_time_filtered + 1.0/cut_off_frequency_low_pass;
+			}
+			return true;
+		}
+
+	private: // trajectory stream
+		bool reset_trajectory_callback( std_srvs::Empty::Request &req, std_srvs::Empty::Response &res ){
+			trajectory_reset_mode_enabled = !trajectory_reset_mode_enabled;
+			if( trajectory_reset_mode_enabled){
+				s_node.clear();
+				s_node.resize(7);
+				trajectory_time = 0.0;
+				trajectory_time_filtered = 0.0;
+			}else{
+				if( s_node[0].size()==0 ){
+					ROS_ERROR("Trajectory not initialized - no intermediate points specified");
+				}else{
+					ROS_INFO("construct trajectory out of %u points", (unsigned int) s_node.size());
+					ROS_INFO("v_max = %f, a_max = %f, j_max = %f", v_max_[0], a_max_[0], j_max_[0]);
+					cubic_trajectories *temp_trajectories = new cubic_trajectories( s_node, v_max_, a_max_, j_max_ );
+
+					ROS_INFO("dimension = %i x %i", (int) s_node.size(), (int) s_node[0].size());
+					for(unsigned int point=0; point<s_node.size(); point++){
+						for( unsigned int config=0; config<s_node[0].size(); config++){
+							ROS_INFO("s_node[%i,%i] = %f", (int) point, (int) config, (float) s_node[point][config]);
+						}
+					}
+
+
+					ROS_INFO("initialize trajectory ... ");
+					temp_trajectories->initialize_trajectories();
+
+					if( temp_trajectories->is_valid_initialized() ){
+						if( trajectory!=NULL ){
+							delete trajectory;
+						}
+						trajectory = temp_trajectories;
+
+						std_msgs::Float64 time_left;
+						time_left.data=trajectory->total_length();
+						trajectory_time_left_publisher.publish(time_left);
+						ROS_INFO("OK - duration %f", time_left.data);
+					}else{
+						delete temp_trajectories;
+						ROS_ERROR("FAILED");
+					}
 				}
 			}
-			
-			if( (continuos_position_tracking_mode_enabled &&  at_least_one_module_is_enabled_and_ready() ) ||
-				(point_to_point_motion_enabled && at_least_one_module_is_ready() && start_motion_trigger) ){
-					commanded_joint_state_publisher.publish( joint_trajectory);
+			return true;
+		}
+		bool set_point_callback( std_srvs::Empty::Request &req, std_srvs::Empty::Response &res ){
+			if( joint_state.data.size()!=7 ){
+				ROS_ERROR("Number of commanded joint states does not fit. Can't set point in trajectory.");
+			}else{
+				for( unsigned int module=0; module<7; module++){
+					s_node[module].push_back( joint_state.data[module]);
+				}
 			}
-			
-			if( start_motion_trigger ){
+			return true;
+		}
+
+	public:
+		/**
+		 * This function has to be called repeatedly to continuously transmit motion commands to the simulation.
+		 */
+		void transmit_command( void )
+		{
+			if( !modules_are_ready() || !modules_are_enabled() ){
+				return;
+			}
+
+			// continous motion
+			if( continuos_position_tracking_mode_enabled && !trajectory_reset_mode_enabled && trajectory!=NULL )
+			{
+				// fill data message
+				joint_trajectory.header.stamp = ros::Time::now();
+				trajectory->evaluate_trajectories( trajectory_time_filtered, joint_trajectory.points[0].positions);
+
+				// publish data
+				commanded_joint_state_publisher.publish( joint_trajectory);
+
+				// update time
+				double u_km1 = trajectory_time;
+				double u_k=u_km1;
+				if( trajectory_enabled){
+					u_k += Ts_;
+				}
+
+				// filter for soft start / stop
+				double y_km1 = trajectory_time_filtered;
+				double y_k=y_km1;
+
+				if( !stop_trajectory && trajectory_enabled ){
+					y_k = y_km1+Ts_;
+				}else if( stop_trajectory ){
+					y_k = filter_coeff_a1*y_km1 + filter_coeff_b0*u_k + filter_coeff_b1*u_km1;
+				}
+				trajectory_time = u_k;
+				trajectory_time_filtered = y_k;
+
+				std_msgs::Float64 time_left;
+				time_left.data=trajectory->total_length()-trajectory_time_filtered;
+				trajectory_time_left_publisher.publish(time_left);
+			}
+
+			if( point_to_point_motion_enabled && start_motion_trigger){
+				// fill data message
+				joint_trajectory.header.stamp = ros::Time::now();
+				joint_trajectory.points[0].positions = joint_state.data;
+
+				// publish data
+				commanded_joint_state_publisher.publish( joint_trajectory);
+
 				start_motion_trigger = false;
 			}
-			
 		}
-		
-	
 }; // class LWA
 
 class PAN_TILT : public Modules{
@@ -517,13 +717,14 @@ class PAN_TILT : public Modules{
 		PAN_TILT( ros::NodeHandle handle, std::string group_name, std::string controller_name_pan, std::string controller_name_tilt, std::string emergency_stop_topic )
 			: Modules( handle, group_name, 2, emergency_stop_topic )
 		{
-			
 			pan_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_pan + "/command" ,  1); 
 			tilt_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_tilt + "/command" ,  1); 
-			
 		}
 		
-		void publish_commanded_state( void ){
+		/**
+		 * This function has to be called repeatedly to continuously transmit motion commands to the simulation.
+		 */
+		void transmit_command( void ){
 			// pan
 			if( (continuos_position_tracking_mode_enabled &&  module_is_enabled[0] && module_is_ready[0]) ||
 			    (point_to_point_motion_enabled && module_is_ready[0] && start_motion_trigger) ){
@@ -556,16 +757,31 @@ class GRIPPER : public Modules{
 	private:
 		ros::Publisher left_commanded_joint_state_publisher;
 		ros::Publisher right_commanded_joint_state_publisher;
+		ros::Publisher joint_state_publisher;
+		double last_stroke;
 		
 	public:
 		GRIPPER( ros::NodeHandle handle, std::string group_name, std::string controller_name_left,  std::string controller_name_right, std::string emergency_stop_topic )
 			: Modules( handle, group_name, 1, emergency_stop_topic )
 		{
+			last_stroke = 0.0;
 			left_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_left + "/command" ,  1); 
-			right_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_right + "/command" ,  1); 
+			right_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_right + "/command" ,  1);
+			joint_state_publisher = handle.advertise<std_msgs::Float64MultiArray>( "/omnirob_robin/gripper/state/joint_state_array", 1);
 		}
-		
-		void publish_commanded_state( void ){
+
+
+		void publish_module_state(){
+			Modules::publish_module_state();
+			std_msgs::Float64MultiArray stroke_state;
+			stroke_state.data.push_back( last_stroke);
+			joint_state_publisher.publish( stroke_state);
+		}
+
+		/**
+		 * This function has to be called repeatedly to continuously transmit motion commands to the simulation.
+		 */
+		void transmit_command( void ){
 			if( (continuos_position_tracking_mode_enabled &&  module_is_enabled[0] && module_is_ready[0]) ||
 			    (point_to_point_motion_enabled && module_is_ready[0] && start_motion_trigger) ){
 					
@@ -574,6 +790,7 @@ class GRIPPER : public Modules{
 				std_msgs::Float64 left, right;
 				left.data = joint_state.data[0]/2.0 * 0.001; // gripper command in mm!!
 				right.data = joint_state.data[0]/2.0 * 0.001; // gripper command in mm!!
+				last_stroke = joint_state.data[0];
 				
 				left_commanded_joint_state_publisher.publish( left );
 				right_commanded_joint_state_publisher.publish( right );
@@ -581,6 +798,8 @@ class GRIPPER : public Modules{
 			
 		}
 		
+
+
 }; // class GRIPPER
 
 
@@ -628,7 +847,6 @@ class BASE{
 			canserver_state_publisher = handle.advertise<std_msgs::Bool>( group_name + "/canserver/" + "server_is_ready", 10);
 			base_state_ready_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/info/motors_ready_end_enabled", 1000);
 			base_state_fault_publisher = handle.advertise<std_msgs::Bool>( group_name + "/drives/state/error/motors_have_error", 1000);
-		
 		}
 		
 	private:
@@ -675,7 +893,10 @@ class BASE{
 		}
 		
 	public:
-		void publish_cmd_vel( void ){
+		/**
+		 * This function has to be called repeatedly to continuously transmit motion commands to the simulation.
+		 */
+		void transmit_command( void ){
 			if( can_server_enabled && drives_enabled ){
 				cmd_vel_publisher.publish( cmd_vel);
 			}
@@ -694,9 +915,74 @@ class BASE{
 			
 		}
 		
-	
 }; // class base
 
+std::vector<double> read_velocity_joint_limits(){
+	std::vector<double> v_max(7);
+	bool limit_exists;
+	std::stringstream stream;
+	std::string name_space;
+	for(unsigned int ii=0; ii<v_max.size(); ii++){
+		stream.str("");
+		stream << "/omnirob_robin/joint_limits/lwa/joint_" << ii+1 << "/";
+		name_space = stream.str();
+		ROS_INFO("%s",name_space.c_str());
+		if( ros::param::get( name_space + "has_velocity_limits", limit_exists) && limit_exists){
+			if( !ros::param::get( name_space + "max_velocity", v_max[ii]) || v_max[ii]<0.0 ){
+				switch(ii){
+				case 0:
+				case 1:
+				case 4:
+				case 5:
+					v_max[ii]=0.218; // 50% of physical max value
+					break;
+				case 2:
+				case 3:
+					v_max[ii]=0.209; // 50% of physical max value
+					break;
+				case 6:
+					v_max[ii]=0.4365; // 50% of physical max value
+					break;
+				}
+				ROS_WARN("invalid parameter: %s/max_velocity, use default value %f rad/s instead", name_space.c_str(), (float) v_max[ii]);
+			}
+		}
+	}
+	return v_max;
+}
+
+std::vector<double> read_acceleartion_joint_limits(){
+	std::vector<double> a_max(7);
+	bool limit_exists;
+	std::stringstream stream;
+	std::string name_space;
+	for(unsigned int ii=0; ii<a_max.size(); ii++){
+		stream.str("");
+		stream << "/omnirob_robin/joint_limits/lwa/joint_" << ii+1 << "/";
+		name_space = stream.str();
+		if( ros::param::get( name_space + "has_acceleration_limits", limit_exists) && limit_exists){
+			if( !ros::param::get( name_space + "max_acceleration", a_max[ii]) || a_max[ii]<0.0 ){
+				switch(ii){
+				case 0:
+				case 1:
+				case 4:
+				case 5:
+					a_max[ii]=0.8725;
+					break;
+				case 2:
+				case 3:
+					a_max[ii]=0.8250;
+					break;
+				case 6:
+					a_max[ii]=1.745;
+					break;
+				}
+				ROS_WARN("invalid parameter: %s/max_acceleration, use default value %f rad/s^2 instead", name_space.c_str(), (float) a_max[ii]);
+			}
+		}
+	}
+	return a_max;
+}
 
 int main( int argc, char** argv) {
 
@@ -704,19 +990,35 @@ int main( int argc, char** argv) {
 	ros::init(argc, argv, "virtuell_robot_driver_interface");
 	ros::NodeHandle handle;
 	
-	LWA lwa(handle, "/omnirob_robin/lwa", "/omnirob_robin/lwa/joint_controllers", "/omnirob_robin/emergency_stop" );
+	std::vector<double> v_max, a_max, j_max;
+	v_max = read_velocity_joint_limits();
+	a_max = read_acceleartion_joint_limits();
+	j_max.resize(a_max.size());
+
+	ROS_INFO("size =%f", (float) v_max.size());
+	ROS_INFO("size =%f", (float) a_max.size());
+	ROS_INFO("size =%f", (float) j_max.size());
+
+	for( unsigned int ii=0; ii<j_max.size(); ii++){
+		j_max[ii] = 100.0*a_max[ii];
+		ROS_INFO("v_max[%i]=%f",ii,v_max[ii]);
+		ROS_INFO("a_max[%i]=%f",ii,a_max[ii]);
+	}
+
+	double Ts=0.01;
+
+	LWA lwa(handle, "/omnirob_robin/lwa", "/omnirob_robin/lwa/joint_controllers", "/omnirob_robin/emergency_stop", v_max, a_max, j_max, Ts);
 	PAN_TILT pan_tilt(handle, "/omnirob_robin/pan_tilt", "/omnirob_robin/pan_tilt/pan_position_controller", "/omnirob_robin/pan_tilt/tilt_position_controller", "/omnirob_robin/emergency_stop" );
 	GRIPPER gripper(handle, "/omnirob_robin/gripper", "/omnirob_robin/gripper/left_position_controller", "/omnirob_robin/gripper/right_position_controller" , "/omnirob_robin/emergency_stop" );
 	BASE base( handle, "/omnirob_robin/base", "/omnirob_robin/emergency_stop" );
 	
-	ros::Duration rate(0.01);
+	ros::Duration rate(Ts);
 	
 	while( ros::ok() ){
-		
-		lwa.publish_commanded_state();
-		pan_tilt.publish_commanded_state();
-		gripper.publish_commanded_state();
-		base.publish_cmd_vel();
+		lwa.transmit_command();
+		pan_tilt.transmit_command();
+		gripper.transmit_command();
+		base.transmit_command();
 		ros::spinOnce();
 		
 		lwa.publish_module_state();
@@ -726,7 +1028,5 @@ int main( int argc, char** argv) {
 		ros::spinOnce();
 		
 		rate.sleep();
-		
 	}
-	
 }// main

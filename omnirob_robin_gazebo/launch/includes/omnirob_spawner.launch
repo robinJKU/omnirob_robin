@@ -8,8 +8,8 @@
   <!-- Gazebo model spawner -->
   <node name="spawn_omnirob_model" pkg="gazebo_ros" type="spawn_model"
         args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description 
-        -x 0
-        -y 0
+        -x 2.3
+        -y 1.9
         -z 0.01   
         -model omnirob"/>   
 </launch>

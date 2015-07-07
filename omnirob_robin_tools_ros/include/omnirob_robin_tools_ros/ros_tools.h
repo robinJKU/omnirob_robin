@@ -2,7 +2,12 @@
 #define __ROS_TOOLS_H
 
 #include <ros/ros.h>
-
+/**
+ * This blocking method waits until a given service is available or an ammount of time is elapsed.
+ * @param topic: Topic name of the service
+ * @param for_nr_of_sec: Number of seconds to wait. default=10.0
+ * @return True if the service is finally available.
+ */
 bool wait_for_service( std::string topic, float for_nr_of_sec=10.0 ){
   ros::Rate rate(10.0/for_nr_of_sec);
   unsigned int waiting_cnt=0;
@@ -19,6 +24,12 @@ bool wait_for_service( std::string topic, float for_nr_of_sec=10.0 ){
 	
 }// wait for service
 
+/**
+ * This blocking function listen to a specified topic and wait until ther is at least one node which subscribes to this topic or an amount of time is elapsed.
+ * @param pub: Initialized publisher which points to the topic of interest.
+ * @param for_nr_of_sec: Number of seconds to wait. default=10.0
+ * @return True if there is at least one subscriber.
+ */
 bool wait_until_publisher_is_connected( ros::Publisher pub, float for_nr_of_sec=10.0 ){
 	ros::Rate rate(10.0/for_nr_of_sec);
     unsigned int waiting_cnt=0;
