@@ -66,6 +66,9 @@ target_link_libraries(omnirob_odometry_publisher_simulation_only ${catkin_LIBRAR
 add_executable(teleop_joy src/teleop_joy.cpp)
 target_link_libraries(teleop_joy ${catkin_LIBRARIES})
 
+add_executable(base_driver src/base_driver.cpp)
+target_link_libraries(base_driver ${catkin_LIBRARIES})
+
 install(DIRECTORY include/${PROJECT_NAME}/
  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )

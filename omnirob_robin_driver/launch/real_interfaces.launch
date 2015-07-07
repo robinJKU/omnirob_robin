@@ -7,7 +7,11 @@
     output="screen" ns="omnirob_robin"/> 
     
   <node name="pan_tilt_interface" pkg="omnirob_robin_driver" type="pan_tilt_interface" respawn="false"
-    output="screen" ns="omnirob_robin"/>      
+    output="screen" ns="omnirob_robin"/>  
+  
+  <node name="base_driver" pkg="omnirob_robin_driver" type="base_driver" respawn="false" 
+	output="screen" ns="omnirob_robin"/>  
+       
 
 </launch>
 
