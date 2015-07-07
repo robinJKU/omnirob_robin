@@ -52,28 +52,28 @@
     <disable_collisions link1="base_link" link2="lwa/link_2" reason="Never" />
     <disable_collisions link1="base_link" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="base_link" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor0_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor1_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor2_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor3_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor4_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor5_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor6_origin_link" reason="Adjacent" />
-    <disable_collisions link1="base_link" link2="ultrasound_sensor7_origin_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US0_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US1_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US2_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US3_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US4_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US5_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US6_link" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="US7_link" reason="Adjacent" />
     <disable_collisions link1="camera_mast_origin_link" link2="laser_scanner_link" reason="Never" />
     <disable_collisions link1="camera_mast_origin_link" link2="lwa/link_0" reason="Never" />
     <disable_collisions link1="camera_mast_origin_link" link2="lwa/link_1" reason="Never" />
     <disable_collisions link1="camera_mast_origin_link" link2="lwa/link_2" reason="Never" />
     <disable_collisions link1="camera_mast_origin_link" link2="pan_tilt/pan_link" reason="Adjacent" />
     <disable_collisions link1="camera_mast_origin_link" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="camera_mast_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US0_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="camera_mast_origin_link" link2="US7_link" reason="Never" />
     <disable_collisions link1="gripper/finger_left_link" link2="gripper/finger_right_link" reason="Default" />
     <disable_collisions link1="gripper/finger_left_link" link2="gripper/palm_link" reason="Adjacent" />
     <disable_collisions link1="gripper/finger_left_link" link2="lwa/link_3" reason="Never" />
@@ -98,14 +98,14 @@
     <disable_collisions link1="kinect2_link" link2="lwa/link_1" reason="Never" />
     <disable_collisions link1="kinect2_link" link2="lwa/link_2" reason="Never" />
     <disable_collisions link1="kinect2_link" link2="pan_tilt/tilt_link" reason="Adjacent" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="kinect2_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US0_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="kinect2_link" link2="US7_link" reason="Never" />
     <disable_collisions link1="laser_scanner_link" link2="lwa/link_0" reason="Never" />
     <disable_collisions link1="laser_scanner_link" link2="lwa/link_1" reason="Never" />
     <disable_collisions link1="laser_scanner_link" link2="lwa/link_2" reason="Never" />
@@ -113,14 +113,14 @@
     <disable_collisions link1="laser_scanner_link" link2="lwa/link_4" reason="Never" />
     <disable_collisions link1="laser_scanner_link" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="laser_scanner_link" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="laser_scanner_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US0_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="laser_scanner_link" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_0" link2="lwa/link_1" reason="Adjacent" />
     <disable_collisions link1="lwa/link_0" link2="lwa/link_2" reason="Never" />
     <disable_collisions link1="lwa/link_0" link2="lwa/link_3" reason="Never" />
@@ -129,14 +129,14 @@
     <disable_collisions link1="lwa/link_0" link2="lwa/link_6" reason="Never" />
     <disable_collisions link1="lwa/link_0" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="lwa/link_0" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_0" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US0_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US1_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US2_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US3_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US4_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US5_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US6_link" reason="Never" />
+    <disable_collisions link1="lwa/link_0" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_1" link2="lwa/link_2" reason="Adjacent" />
     <disable_collisions link1="lwa/link_1" link2="lwa/link_3" reason="Never" />
     <disable_collisions link1="lwa/link_1" link2="lwa/link_4" reason="Never" />
@@ -144,14 +144,14 @@
     <disable_collisions link1="lwa/link_1" link2="lwa/link_6" reason="Never" />
     <disable_collisions link1="lwa/link_1" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="lwa/link_1" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_1" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US0_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US1_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US2_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US3_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US4_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US5_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US6_link" reason="Never" />
+    <disable_collisions link1="lwa/link_1" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_2" link2="lwa/link_3" reason="Adjacent" />
     <disable_collisions link1="lwa/link_2" link2="lwa/link_4" reason="Never" />
     <disable_collisions link1="lwa/link_2" link2="lwa/link_5" reason="Never" />
@@ -159,85 +159,85 @@
     <disable_collisions link1="lwa/link_2" link2="lwa/link_7" reason="Never" />
     <disable_collisions link1="lwa/link_2" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="lwa/link_2" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_2" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US0_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US1_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US2_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US3_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US4_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US5_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US6_link" reason="Never" />
+    <disable_collisions link1="lwa/link_2" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_3" link2="lwa/link_4" reason="Adjacent" />
     <disable_collisions link1="lwa/link_3" link2="lwa/link_5" reason="Never" />
     <disable_collisions link1="lwa/link_3" link2="lwa/link_6" reason="Never" />
     <disable_collisions link1="lwa/link_3" link2="lwa/link_7" reason="Never" />
     <disable_collisions link1="lwa/link_3" link2="pan_tilt/pan_link" reason="Never" />
     <disable_collisions link1="lwa/link_3" link2="pan_tilt/tilt_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_3" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US0_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US1_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US2_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US3_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US4_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US5_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US6_link" reason="Never" />
+    <disable_collisions link1="lwa/link_3" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_4" link2="lwa/link_5" reason="Adjacent" />
     <disable_collisions link1="lwa/link_4" link2="lwa/link_6" reason="Never" />
     <disable_collisions link1="lwa/link_4" link2="lwa/link_7" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="lwa/link_4" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US0_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US1_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US2_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US3_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US4_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US5_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US6_link" reason="Never" />
+    <disable_collisions link1="lwa/link_4" link2="US7_link" reason="Never" />
     <disable_collisions link1="lwa/link_5" link2="lwa/link_6" reason="Adjacent" />
     <disable_collisions link1="lwa/link_5" link2="lwa/link_7" reason="Never" />
     <disable_collisions link1="lwa/link_6" link2="lwa/link_7" reason="Adjacent" />
     <disable_collisions link1="pan_tilt/pan_link" link2="pan_tilt/tilt_link" reason="Adjacent" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/pan_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor0_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="pan_tilt/tilt_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor1_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor0_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor2_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor1_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor2_origin_link" link2="ultrasound_sensor3_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor2_origin_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor2_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor2_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor2_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor3_origin_link" link2="ultrasound_sensor4_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor3_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor3_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor3_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor4_origin_link" link2="ultrasound_sensor5_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor4_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor4_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor5_origin_link" link2="ultrasound_sensor6_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor5_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
-    <disable_collisions link1="ultrasound_sensor6_origin_link" link2="ultrasound_sensor7_origin_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US0_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/pan_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US0_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="pan_tilt/tilt_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US1_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US0_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US2_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US1_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US2_link" link2="US3_link" reason="Never" />
+    <disable_collisions link1="US2_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="US2_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="US2_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US2_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US3_link" link2="US4_link" reason="Never" />
+    <disable_collisions link1="US3_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="US3_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US3_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US4_link" link2="US5_link" reason="Never" />
+    <disable_collisions link1="US4_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US4_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US5_link" link2="US6_link" reason="Never" />
+    <disable_collisions link1="US5_link" link2="US7_link" reason="Never" />
+    <disable_collisions link1="US6_link" link2="US7_link" reason="Never" />
 </robot>
