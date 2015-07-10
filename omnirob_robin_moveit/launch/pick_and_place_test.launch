@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Start the actual move_group node/action server -->
+  <node name="omnirob_moveit" pkg="omnirob_robin_moveit" type="omnirob_moveit" respawn="false" output="screen">
+    <remap from="/joint_states" to="/omnirob_robin/joint_states"/>
+  </node>
+
+</launch>
