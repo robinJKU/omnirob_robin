@@ -497,13 +497,13 @@ class AR_Marker_Localization{
 		ROS_INFO("Start global localization -------------------");
 		// wait for services
 	    std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
-	    if( !wait_for_service( pan_tilt_start_motion_srv) ){
+	    if( !omnirob_ros_tools::wait_for_service( pan_tilt_start_motion_srv) ){
 		    res.error_message = "Service "+ pan_tilt_start_motion_srv +" is not available";
 		    ROS_ERROR("%s", res.error_message.c_str());
 		    return true;
 	    }
 	    std::string ar_track_set_param_srv = "/ar_track_alvar/set_parameters";
-	    if( !wait_for_service( ar_track_set_param_srv) ){
+	    if( !omnirob_ros_tools::wait_for_service( ar_track_set_param_srv) ){
 		    res.error_message = "Service "+ ar_track_set_param_srv +" is not available";
 		    ROS_ERROR("%s", res.error_message.c_str());
 		    return true;

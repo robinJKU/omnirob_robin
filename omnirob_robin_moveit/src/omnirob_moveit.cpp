@@ -17,6 +17,9 @@
 // messsages
 #include <omnirob_robin_msgs/move_gripper.h>
 
+// tools
+#include <omnirob_robin_tools_ros/ros_tools.h>
+
 class pick_and_place_action_server
 {
 public:
@@ -25,22 +28,19 @@ public:
 	 */
 	pick_and_place_action_server( std::string pick_action_topic = "/pick_action"):
 		lwa_(),
-		pick_action_server_(node_handle_, pick_action_topic, false), // todo: was ist node_handle_, wo wird es initialisiert und warum braucht das der constructor?
-		action_is_blocked_(true)
+		pick_action_server_(node_handle_, pick_action_topic, false),
+		blocker_("/unblock")
 	{
-
-		ros::NodeHandle node_handl;
-
 		// wait for service
-		ROS_INFO("Wait for services");
+		ROS_INFO("Waiting for services");
 		if( !ros::service::waitForService("/omnirob_robin/gripper/open_srv", 5) ||
 		    !ros::service::waitForService("/omnirob_robin/gripper/close_srv", 5) )
 		{
 			ROS_ERROR("Didn't find all required services (gripper/open_srv, close_srv)");
 		}else
 		{
-			open_gripper_client = node_handl.serviceClient<omnirob_robin_msgs::move_gripper>("/omnirob_robin/gripper/open_srv");
-			close_gripper_client = node_handl.serviceClient<omnirob_robin_msgs::move_gripper>("/omnirob_robin/gripper/close_srv");
+			open_gripper_client = node_handle_.serviceClient<omnirob_robin_msgs::move_gripper>("/omnirob_robin/gripper/open_srv");
+			close_gripper_client = node_handle_.serviceClient<omnirob_robin_msgs::move_gripper>("/omnirob_robin/gripper/close_srv");
 			ROS_INFO("Got all services");
 		}
 
@@ -48,11 +48,9 @@ public:
 		pick_action_server_.registerGoalCallback(boost::bind(&pick_and_place_action_server::pick_and_place_goal_callback, this));
 		pick_action_server_.registerPreemptCallback(boost::bind(&pick_and_place_action_server::pick_and_place_preempt_callback, this));
 
-		// broadcast service
-		unblock_service_ = node_handl.advertiseService("unblock", &pick_and_place_action_server::unblock, this);
-
 		// tf
 		tf_listener_= new(tf::TransformListener);
+		tf_broadcaster_ = new(tf::TransformBroadcaster);
 
 		// define transformation between object frame and gripper frame
 		tf::Transform to_object_rotated_from_gripper;
@@ -80,16 +78,8 @@ public:
 		to_object_from_lwa_link7_ = to_object_rotated_from_gripper*to_gripper_from_lwa_link7_stamped;
 		to_object_from_lwa_link7_ = to_object_rotated_from_gripper;
 
-		ROS_INFO("broadcast transform");
-		tf::TransformBroadcaster br;
-		ros::Duration(1.0).sleep();
-		ros::spinOnce();
-		br.sendTransform(tf::StampedTransform(to_object_rotated_from_gripper.inverse(), ros::Time::now(), "lwa/link_7", "object_rotated_d")); // todo: remove
-		ros::Duration(1.0).sleep();
-		ros::spinOnce();
-
 		// start server
-		ROS_INFO("start server");
+		ROS_INFO("Start server");
 		pick_action_server_.start();
 	}
 	/**
@@ -99,15 +89,12 @@ public:
 	{
 		if( tf_listener_!=NULL)
 			delete tf_listener_;
+
+		if( tf_broadcaster_!=NULL)
+			delete tf_broadcaster_;
 	}
 
 private:
-	bool unblock( std_srvs::Empty::Request& req, std_srvs::Empty::Response& res )
-	{
-		action_is_blocked_=false;
-		return true;
-	}
-
 	void pick_and_place_goal_callback( void)
 	{
 		ROS_INFO("got pick request");
@@ -143,12 +130,14 @@ private:
 
 		// plan grasp
 		geometry_msgs::Pose lwa_link_7_target_pose = calc_grasp( to_base_link_from_object);
+		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose")); // todo: remove
 
 		// plan path above pick pose
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose;
 
 		geometry_msgs::Pose lwa_link_7_above_target_pose = geometry_msgs::Pose(lwa_link_7_target_pose);
 		lwa_link_7_above_target_pose.position.z += 1e-1;
+		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_above_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose_above")); // todo: remove
 		ROS_INFO("Plan path to intermediate point");
 		unsigned int ii=0;
 		while(ii<5){
@@ -176,13 +165,8 @@ private:
 		}
 
 		// blocking node todo: remove
-		while( action_is_blocked_ && ros::ok() )
-		{
-			ros::Duration(2.0).sleep();
-			lwa_.plan_continuous_path_.visualize_plan();
-			ros::spinOnce();
-		}
-		action_is_blocked_ = true;
+		lwa_.plan_continuous_path_.visualize_plan();
+		blocker_.block();
 
 		// plan path to pick pose
 		ROS_INFO("Plan path to pick pose");
@@ -223,14 +207,9 @@ private:
 			return;
 		}
 
-		// blocking node todo: remove
-		while( action_is_blocked_ && ros::ok()  )
-		{
-			ros::Duration(2.0).sleep();
-			lwa_.plan_continuous_path_.visualize_plan();
-			ros::spinOnce();
-		}
-		action_is_blocked_ = true;
+		// todo: remove
+		lwa_.plan_continuous_path_.visualize_plan();
+		blocker_.block();
 
 		// execute first path
 		ROS_INFO("start first execution");
@@ -240,13 +219,7 @@ private:
 		}
 
 		// blocking node todo: remove
-		while( action_is_blocked_ && ros::ok() )
-		{
-			ROS_INFO("blocking");
-			ros::Duration(2.0).sleep();
-			ros::spinOnce();
-		}
-		action_is_blocked_ = true;
+		blocker_.block();
 
 		ROS_INFO("start second execution");
 		moveit_tools::print_plan( plan_above_pick_pose);
@@ -261,13 +234,7 @@ private:
 		
 
 		// blocking node todo: remove
-		while( action_is_blocked_ && ros::ok() )
-		{
-			ROS_INFO("blocking");
-			ros::Duration(2.0).sleep();
-			ros::spinOnce();
-		}
-		action_is_blocked_ = true;
+		blocker_.block();
 
 		close_gripper_client.call( move_gripper_msgs);
 		if( !move_gripper_msgs.response.error_message.empty() )
@@ -288,8 +255,7 @@ private:
 		lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
 
 		// blocking node todo: remove
-		while( action_is_blocked_ && ros::ok() );
-		action_is_blocked_ = true;
+		blocker_.block();
 
 		ROS_INFO("original path - above pick pose");
 		moveit_tools::print_plan( plan_above_pick_pose);
@@ -314,8 +280,8 @@ private:
 	 * @return lwa/link_7 frame for the grasp pose describet in base_link frame
 	 */
 	geometry_msgs::Pose calc_grasp( const tf::Transform &to_base_link_from_object ){
-		// correct the object yaw angle
-		//   for the following, only the projection onto the xy plane is considered:
+		// correct the object yaw angle:
+		//   for the following, only the projection onto the xy plane is considered
 		//   the x-axis of the object frame should always look into the direction given by the vector from base_link to object_link
 		double angle = atan2( to_base_link_from_object.getOrigin()[1], to_base_link_from_object.getOrigin()[0]); // angle between x axis and direction vector
 		tf::Quaternion rotate_tangential;
@@ -324,24 +290,12 @@ private:
 		tf::Transform to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
 		to_base_link_from_object_rotated.setRotation( rotate_tangential);
 
-	    // calculate grasp
-	    tf::Transform to_base_link_from_lwa_link7_desired = to_base_link_from_object_rotated*to_object_from_lwa_link7_;
+		// calculate grasp
+		tf::Transform to_base_link_from_lwa_link7_desired = to_base_link_from_object_rotated*to_object_from_lwa_link7_;
 
-	    // visualize grasp
-	    ROS_INFO("broadcast transform");
-		static tf::TransformBroadcaster br;
-		ros::Duration(1.0).sleep();
-		ros::spinOnce();
-		br.sendTransform(tf::StampedTransform(to_base_link_from_object_rotated, ros::Time::now(), "base_link", "object_rotated")); // todo: remove
-		br.sendTransform(tf::StampedTransform(to_object_from_lwa_link7_, ros::Time::now(), "object_rotated", "lwa/link_7_desired")); // todo: remove
-		ros::Duration(1.0).sleep();
-		ros::spinOnce();
-
-
-
-	  	geometry_msgs::Pose lwa_link_7_target_pose;
-	  	tf::poseTFToMsg(to_base_link_from_lwa_link7_desired, lwa_link_7_target_pose);
-	  	return lwa_link_7_target_pose;
+		geometry_msgs::Pose lwa_link_7_target_pose;
+		tf::poseTFToMsg(to_base_link_from_lwa_link7_desired, lwa_link_7_target_pose);
+		return lwa_link_7_target_pose;
 	}
 
 private:
@@ -350,16 +304,18 @@ private:
 
 	// action servers
 	actionlib::SimpleActionServer<omnirob_robin_moveit::pick_and_placeAction> pick_action_server_;
-	bool action_is_blocked_;
 
 	// tf
 	tf::TransformListener* tf_listener_;
+	tf::TransformBroadcaster* tf_broadcaster_;
 	tf::Transform to_object_from_lwa_link7_;
 
 	// lwa control
 	lwa_planner_and_executer lwa_;
-	ros::ServiceServer unblock_service_;
 	ros::ServiceClient open_gripper_client, close_gripper_client;
+
+	// todo: remove
+	omnirob_ros_tools::blocker blocker_;
 };
 
 
@@ -688,7 +644,6 @@ class pick_and_place_executer{
 
 		// connect to server
 		ROS_INFO("Waiting 10sec for action server (topic :%s)", topic.c_str());
-		ROS_INFO("Waiting 10sec for action server (topic :%s)", topic.c_str());
 		int cnt=0;
 		ros::Rate rate1Hz(1.0);
 		while(cnt<10.0){
@@ -800,7 +755,7 @@ int main(int argc, char **argv)
 	table_pose.orientation.y=0.0;
 	table_pose.orientation.z=0.0;
 	table_pose.orientation.w=1.0;
-	std::string table_pose_frame = "/world";
+	std::string table_pose_frame = "/base_link";
 
 	lwa_continuous_path_planner planner;
 	ROS_INFO("add collision object");
@@ -823,4 +778,3 @@ int main(int argc, char **argv)
 	return 0;
 
 }// main
-

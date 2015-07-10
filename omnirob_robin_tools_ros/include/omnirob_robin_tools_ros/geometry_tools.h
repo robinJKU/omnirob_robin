@@ -139,6 +139,13 @@ namespace omnirob_geometry_tools{
 			tf::TransformListener *transform_listener_;
 	};// pose transformer class
 
+	tf::Transform calc_tf( geometry_msgs::Pose pose)
+	{
+		tf::Transform pose_tf;
+		tf::poseMsgToTF( pose, pose_tf);
+		return pose_tf;
+	}
+
 }
 
 #endif

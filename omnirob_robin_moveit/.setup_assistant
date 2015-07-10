@@ -5,4 +5,4 @@ moveit_setup_assistant_config:
   SRDF:
     relative_path: config/omnirob_robin.srdf
   CONFIG:
-    generated_timestamp: 1428566856
+    generated_timestamp: 1436532834

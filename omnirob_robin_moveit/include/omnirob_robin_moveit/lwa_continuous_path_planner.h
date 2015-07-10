@@ -7,14 +7,18 @@
 // moveit
 #include <moveit/move_group_interface/move_group.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
+#include <moveit/robot_state/conversions.h>
 
 #include <moveit_msgs/GetPlanningScene.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/CollisionObject.h>
+#include <moveit_msgs/DisplayRobotState.h>
 
 #include <omnirob_robin_tools_ros/ros_tools.h>
 #include <omnirob_robin_tools_ros/geometry_tools.h>
 #include <omnirob_robin_moveit/moveit_tools.h>
+
+
 
 
 /**
@@ -29,7 +33,8 @@ class lwa_continuous_path_planner{
 		lwa_continuous_path_planner():
 			node_handle_(),
 			pose_transformer_(),
-			visualize_plan_after_planning_(true)
+			visualize_plan_after_planning_(true),
+			spinner_(1)
 		{
 			// construct moveit objects
 			lwa_move_group_ = new moveit::planning_interface::MoveGroup("lwa");
@@ -69,11 +74,20 @@ class lwa_continuous_path_planner{
 				ros::NodeHandle node_handle;
 				ros::Publisher temp_publisher = node_handle.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
 				ROS_INFO("wait for at least one subscriber on topic /planning_scene"); // ros needs some time for establishing the connection
-				wait_until_publisher_is_connected( temp_publisher);// this is not the used publisher (@see member variables PlanningSceneInterface), but it is used as measurement who long it takes to establish the connection
+				omnirob_ros_tools::wait_until_publisher_is_connected( temp_publisher);// this is not the used publisher (@see member variables PlanningSceneInterface), but it is used as measurement who long it takes to establish the connection
 			}
+
+			// the state monitor is usually started by the getCurrentState function, however
+			// this function is really slow (sleeps for some secounds). Starting the state monitor
+			// improves the performance a lot
+			lwa_move_group_->startStateMonitor();
 
 			// initialize publisher
 			visualize_trajectory_publisher_ = node_handle_.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
+			visualize_robot_state_publisher_ = node_handle_.advertise<moveit_msgs::DisplayRobotState>("/robot_state", 1, true);
+
+			// start spinning - required by the move group interface
+			spinner_.start();
 
 		}// constructor
 
@@ -141,6 +155,7 @@ class lwa_continuous_path_planner{
 
 			// set start values
 			set_start_state( start_configuration);
+
 			// plan path
 			return plan_to_configuration( plan, goal_configuration);
 		}
@@ -214,30 +229,40 @@ class lwa_continuous_path_planner{
  			}
 
  			// set start configuration
+ 			visualize_current_state();
  			set_start_state( start_configuration);
+ 			visualize_current_state();
 
  			// plan path
  			return plan_path_to_pose(plan, goal_pose, t_frame);
  		}
 
+	public:
+ 		/**
+ 		 * Displays the current state on robot_state topic
+ 		 */
+ 		void visualize_current_state( void)
+ 		{
+ 			visualize_robot_state( *(lwa_move_group_->getCurrentState()));
+ 		}
+
+	private:
+ 		void visualize_robot_state( const robot_state::RobotState &state)
+		{
+			moveit_msgs::DisplayRobotState cur_state_msg;
+			robot_state::robotStateToRobotStateMsg( state, cur_state_msg.state);
+			visualize_robot_state_publisher_.publish( cur_state_msg);
+		}
 
 	private: // state manipulation interface
 		void set_start_state( const std::vector<double> &start_configuration){
-			/*robot_state::RobotState start_state( *(lwa_move_group_->getCurrentState())); // copy current state
-			std::map<std::string,double> start_configuration_map;
-			for(unsigned int module=0; module<7; module++)
-			{
-				start_configuration_map[lwa_names_[module]]=start_configuration[module];
-			}
-			start_state.printStateInfo();
-			start_state.set
-			*/
+			// hint: the get current state function listens on the joint_state topic and does not
+			//       get the state from move_group
 			moveit::core::RobotState start_state( *(lwa_move_group_->getCurrentState()));
 			start_state.setJointGroupPositions( "lwa", start_configuration);
-
-			// start_state.setVariablePositions(start_configuration);
-			// start_state.setVariablePositions( start_configuration_map);
 			lwa_move_group_->setStartState(start_state);
+
+			visualize_robot_state( start_state);
 		}
 
 
@@ -391,9 +416,11 @@ class lwa_continuous_path_planner{
 	private: // member variables
 		// ros
 		ros::NodeHandle node_handle_;
+		ros::AsyncSpinner spinner_;
 
 		// publisher
 		ros::Publisher visualize_trajectory_publisher_;
+		ros::Publisher visualize_robot_state_publisher_;
 
 		// geometry
 		omnirob_geometry_tools::pose_transformer pose_transformer_;
