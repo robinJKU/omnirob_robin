@@ -176,7 +176,7 @@ private:
 		}
 
 		// blocking node todo: remove
-		while( action_is_blocked_)
+		while( action_is_blocked_ && ros::ok() )
 		{
 			ros::Duration(2.0).sleep();
 			lwa_.plan_continuous_path_.visualize_plan();
@@ -224,7 +224,7 @@ private:
 		}
 
 		// blocking node todo: remove
-		while( action_is_blocked_)
+		while( action_is_blocked_ && ros::ok()  )
 		{
 			ros::Duration(2.0).sleep();
 			lwa_.plan_continuous_path_.visualize_plan();
@@ -234,10 +234,13 @@ private:
 
 		// execute first path
 		ROS_INFO("start first execution");
-		lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
+		std::string error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
+		if( !error_message.empty() ){
+			// todo: apport request
+		}
 
 		// blocking node todo: remove
-		while( action_is_blocked_)
+		while( action_is_blocked_ && ros::ok() )
 		{
 			ROS_INFO("blocking");
 			ros::Duration(2.0).sleep();
@@ -250,10 +253,15 @@ private:
 		moveit_tools::print_plan( plan_pick_pose);
 
 		// execute second path
-		lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
+		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
+		if( !error_message.empty() ){
+			// todo: move home
+			// todo: apport request
+		}
+		
 
 		// blocking node todo: remove
-		while( action_is_blocked_)
+		while( action_is_blocked_ && ros::ok() )
 		{
 			ROS_INFO("blocking");
 			ros::Duration(2.0).sleep();
@@ -276,11 +284,11 @@ private:
 		ROS_INFO("reversed path");
 		moveit_tools::print_plan( plan_pick_pose);
 
-		// execute second path
+		// execute second path reverse
 		lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
 
 		// blocking node todo: remove
-		while( action_is_blocked_);
+		while( action_is_blocked_ && ros::ok() );
 		action_is_blocked_ = true;
 
 		ROS_INFO("original path - above pick pose");
@@ -289,7 +297,7 @@ private:
 		ROS_INFO("reversed path");
 		moveit_tools::print_plan( plan_above_pick_pose);
 
-		// execute second path
+		// execute second path reverse
 		lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
 
 	}

@@ -46,7 +46,7 @@ class lwa_controller{
 		lwa_continuos_mode_enabled_subscriber_ = nodehandle_.subscribe("/omnirob_robin/lwa/state/info/continuos_position_tracking_mode_enabled", 10, &lwa_controller::lwa_continuos_mode_enabled_callback, this);
 
 		// initialize lwa
-		ROS_INFO("Wait for initialize modules topic");
+		ROS_INFO("Wait for initialize service");
 		if( ros::service::waitForService( "/omnirob_robin/lwa/control/initialize_modules", ros::Duration(10.0)) ){
 			lwa_initialize_modules_ = nodehandle_.serviceClient<std_srvs::Empty>( "/omnirob_robin/lwa/control/initialize_modules");
 			std_srvs::Empty empty_srvs;

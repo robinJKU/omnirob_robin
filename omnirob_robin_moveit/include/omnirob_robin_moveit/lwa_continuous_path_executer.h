@@ -57,7 +57,7 @@ class lwa_continuous_path_executer{
 
 			// update executing state
 			if( lwa_is_executing_ ){
-				lwa_is_executing_ = has_finished();
+				lwa_is_executing_ = !has_finished();
 			}
 
 			// start execution
@@ -72,8 +72,11 @@ class lwa_continuous_path_executer{
 					lwa_is_executing_ = true;
 				}
 			}else{
-				error_message = "Can't start execution, lwa already executes";
+				error_message = "lwa already executes";
 			}
+			if( !error_message.empty() )
+				ROS_ERROR("Can't start execution: %s", error_message.c_str());
+				
 			return error_message;
 		}
 		/**
@@ -83,17 +86,25 @@ class lwa_continuous_path_executer{
 		* @see moveit::planning_interface::MoveGroup::asyncExecute
 		*/
 		std::string execute_path_blocking( const moveit::planning_interface::MoveGroup::Plan &plan, ros::Duration timeout=ros::Duration(100.0)){
+			moveit_tools::print_plan( plan);
+			
 			std::string error_message = execute_path( plan);
+			
 			if( !error_message.empty())
 				return error_message;
-
+			
 			ros::Rate rate1Hz(1);
 			ros::Time start_time = ros::Time::now();
 			while( !has_finished() && start_time+timeout>ros::Time::now()){
 				rate1Hz.sleep();
 				ros::spinOnce();
-				ROS_INFO("has finished = %s", has_finished()?"true":"false");
 			}
+			
+			if( !has_finished() )
+			{
+				error_message = "trajectory not finished";
+			}
+			
 			return error_message;
 		}
 		/**

@@ -43,8 +43,8 @@
       <child link="${name}/link_1"/>
       <axis xyz="0 0 1"/>     
       <dynamics damping="0.5" friction="1.0" />
-      <limit effort="100" velocity="2.0" lower="-6.25" upper="6.25"/>
-      <safety_controller k_position="20" k_velocity="50" soft_lower_limit="${-6.25 + 0.01}" soft_upper_limit="${6.25 - 0.01}" />
+      <limit effort="100" velocity="2.0" lower="-3.0" upper="3.0"/>
+      <safety_controller k_position="20" k_velocity="50" soft_lower_limit="${-3.0 + 0.01}" soft_upper_limit="${3.0 - 0.01}" />
     </joint>
 
     <link name="${name}/link_1">
@@ -77,8 +77,8 @@
       <child link="${name}/link_2"/>
       <axis xyz="0 0 1"/>
       <dynamics damping="0.5" friction="1.0" />
-      <limit effort="300" velocity="2.0" lower="-1.97" upper="1.97"/>
-      <safety_controller k_position="20" k_velocity="50" soft_lower_limit="${-1.97 + 0.01}"   soft_upper_limit="${1.97 - 0.01}" />
+      <limit effort="300" velocity="2.0" lower="-1.9" upper="1.9"/>
+      <safety_controller k_position="20" k_velocity="50" soft_lower_limit="${-1.9 + 0.01}"   soft_upper_limit="${1.9 - 0.01}" />
     </joint>
 
     <link name="${name}/link_2">
@@ -112,8 +112,8 @@
       <axis xyz="0 0 1"/>
       <dynamics damping="0.5" friction="1.0" />
       <calibration rising="${arm_3_ref}"/>
-      <limit effort="300" velocity="2.0" lower="-6.25" upper="6.25"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-6.25 + 0.01}" soft_upper_limit="${6.25 - 0.01}" />
+      <limit effort="300" velocity="2.0" lower="-3.14" upper="3.14"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-3.14 + 0.1}" soft_upper_limit="${3.14 - 0.1}" />
     </joint>
 
     <link name="${name}/link_3">
@@ -147,8 +147,8 @@
       <axis xyz="0 0 1" />
       <dynamics damping="0.5" friction="1.0" />
       <calibration rising="${arm_4_ref}"/>
-      <limit effort="300" velocity="2.0" lower="-1.97" upper="1.97"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-1.97 + 0.01}" soft_upper_limit="${1.97 - 0.01}" />
+      <limit effort="300" velocity="2.0" lower="-2.44" upper="2.44"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-2.44 + 0.01}" soft_upper_limit="${2.44 - 0.01}" />
     </joint>
 
     <link name="${name}/link_4">
@@ -182,8 +182,8 @@
       <axis xyz="0 0 1" />
      <dynamics damping="0.5" friction="1.0" />
       <calibration rising="${arm_5_ref}"/>
-      <limit effort="300"  velocity="2.0" lower="-6.25" upper="6.25" />
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-6.25 + 0.01}" soft_upper_limit="${6.25 - 0.01}" />
+      <limit effort="300"  velocity="2.0" lower="-3" upper="3" />
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-3 + 0.01}" soft_upper_limit="${3 - 0.01}" />
     </joint>
 
     <link name="${name}/link_5">
@@ -217,8 +217,8 @@
       <axis xyz="0 0 1" />
       <dynamics damping="0.5" friction="1.0" />
       <calibration rising="${arm_6_ref}"/>
-      <limit effort="300" velocity="2.0" lower="-1.97" upper="1.97" />
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-1.97 + 0.01}" soft_upper_limit="${1.97 - 0.01}" />
+      <limit effort="300" velocity="2.0" lower="-2.44" upper="2.44" />
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-2.44 + 0.01}" soft_upper_limit="${2.44 - 0.01}" />
     </joint>
 
     <link name="${name}/link_6">
@@ -252,8 +252,8 @@
       <axis xyz="0 0 1" />
       <dynamics damping="0.5" friction="1.0" />
       <calibration rising="${arm_7_ref}"/>
-      <limit effort="100" velocity="2.0" lower="-6.25" upper="6.25" />
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-6.25 + 0.01}" soft_upper_limit="${6.25 - 0.01}" />
+      <limit effort="100" velocity="2.0" lower="-3" upper="3" />
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${-3 + 0.01}" soft_upper_limit="${3 - 0.01}" />
     </joint>
 
     <link name="${name}/link_7">
