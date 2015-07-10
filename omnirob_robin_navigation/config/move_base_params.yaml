@@ -4,7 +4,7 @@ base_local_planner: "dwa_local_planner/DWAPlannerROS"
 base_global_planner: "global_planner/GlobalPlanner" # "navfn/NavfnROS"
 
 shutdown_costmaps: false
-controller_frequency: 5.0 
+controller_frequency: 3.0 
 oscillation_timeout: 5.0
 oscillation_distance: 0.05
 
