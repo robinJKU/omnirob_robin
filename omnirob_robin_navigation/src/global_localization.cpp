@@ -76,18 +76,13 @@ int main( int argc, char** argv) {
 	  return -1;
   }
   
-<<<<<<< Updated upstream
   std::string marker_localization_topic = "/marker_localization";
-  if( !wait_for_service( marker_localization_topic, 10) ){
+  if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
 	  return -1;
   }    
   marker_localization_client = n.serviceClient<omnirob_robin_msgs::localization>( marker_localization_topic);
   
-  if( !wait_for_service( "/move_base/clear_costmaps", 10) ) {
-=======
-  std::string global_localization_topic = "/marker_localization";
-  if( !omnirob_ros_tools::wait_for_service( global_localization_topic, 10) ){
->>>>>>> Stashed changes
+  if( !omnirob_ros_tools::wait_for_service( "/move_base/clear_costmaps", 10) ) {
 	  return -1;
   }
   

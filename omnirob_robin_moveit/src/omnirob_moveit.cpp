@@ -222,9 +222,6 @@ private:
 		blocker_.block();
 
 		ROS_INFO("start second execution");
-		moveit_tools::print_plan( plan_above_pick_pose);
-		moveit_tools::print_plan( plan_pick_pose);
-
 		// execute second path
 		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
 		if( !error_message.empty() ){
@@ -245,11 +242,7 @@ private:
 			return;
 		}
 
-		ROS_INFO("original path - above pick pose");
-		moveit_tools::print_plan( plan_pick_pose);
 		moveit_tools::reverse_plan( plan_pick_pose);
-		ROS_INFO("reversed path");
-		moveit_tools::print_plan( plan_pick_pose);
 
 		// execute second path reverse
 		lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
@@ -257,11 +250,7 @@ private:
 		// blocking node todo: remove
 		blocker_.block();
 
-		ROS_INFO("original path - above pick pose");
-		moveit_tools::print_plan( plan_above_pick_pose);
 		moveit_tools::reverse_plan( plan_above_pick_pose);
-		ROS_INFO("reversed path");
-		moveit_tools::print_plan( plan_above_pick_pose);
 
 		// execute second path reverse
 		lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
