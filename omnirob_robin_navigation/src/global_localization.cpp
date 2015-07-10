@@ -9,7 +9,8 @@
 #include "std_msgs/String.h"
 
 ros::ServiceServer global_localization_service;
-ros::ServiceClient global_localization_client;
+ros::ServiceClient marker_localization_client;
+ros::ServiceClient clear_costmaps_client;
 
 ros::Publisher hector_initialize_publisher;
 ros::Publisher hector_reset_publisher;
@@ -18,11 +19,11 @@ int globalLocalization(){
 
   // perform a global localization
   ROS_INFO("Perform global localization");
-  omnirob_robin_msgs::localization global_localization_msg;
+  omnirob_robin_msgs::localization marker_localization_msg;
   
-  global_localization_client.call( global_localization_msg);
-  if( !global_localization_msg.response.error_message.empty() ){
-	  ROS_ERROR("Can't initialize robot pose -reason: %s", global_localization_msg.response.error_message.c_str());
+  marker_localization_client.call( marker_localization_msg);
+  if( !marker_localization_msg.response.error_message.empty() ){
+	  ROS_ERROR("Can't initialize robot pose -reason: %s", marker_localization_msg.response.error_message.c_str());
 	  return -1;
   }
   
@@ -31,7 +32,7 @@ int globalLocalization(){
   geometry_msgs::PoseWithCovarianceStamped hector_initialize_msg;
   hector_initialize_msg.header.frame_id = "/map";
   hector_initialize_msg.header.stamp = ros::Time::now();
-  hector_initialize_msg.pose.pose = global_localization_msg.response.base_link;
+  hector_initialize_msg.pose.pose = marker_localization_msg.response.base_link;
   
   
   if( !wait_until_publisher_is_connected( hector_initialize_publisher) ){
@@ -48,6 +49,11 @@ int globalLocalization(){
   
   hector_reset_publisher.publish( hector_reset_msg);
   hector_initialize_publisher.publish( hector_initialize_msg);
+  
+  std_srvs::Empty srv;
+  clear_costmaps_client.call(srv);
+  clear_costmaps_client.call(srv);
+  
   
 }
 
@@ -70,12 +76,18 @@ int main( int argc, char** argv) {
 	  return -1;
   }
   
-  std::string global_localization_topic = "/marker_localization";
-  if( !wait_for_service( global_localization_topic, 10) ){
+  std::string marker_localization_topic = "/marker_localization";
+  if( !wait_for_service( marker_localization_topic, 10) ){
 	  return -1;
-  }  
+  }    
+  marker_localization_client = n.serviceClient<omnirob_robin_msgs::localization>( marker_localization_topic);
   
-  global_localization_client = n.serviceClient<omnirob_robin_msgs::localization>( global_localization_topic);
+  if( !wait_for_service( "/move_base/clear_costmaps", 10) ) {
+	  return -1;
+  }
+  
+  clear_costmaps_client = n.serviceClient<std_srvs::Empty>( "move_base/clear_costmaps" );
+  
   
   hector_initialize_publisher = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("/hector_slam/set_initial_pose", 10);
   hector_reset_publisher = n.advertise<std_msgs::String>("/hector_slam/syscommand", 10);
