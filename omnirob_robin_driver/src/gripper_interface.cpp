@@ -64,7 +64,8 @@ void gripper_is_ready_callback( std_msgs::Float64MultiArray is_ready)
 void joint_state_callback( std_msgs::Float64MultiArray gripper_stroke){
 	if( gripper_stroke.data.size()!=1)
 	{
-		ROS_ERROR("Invalid gripper data size, expected 1 got %u. Discard message.", gripper_stroke.data.size());
+		int size = gripper_stroke.data.size();
+		ROS_ERROR("Invalid gripper data size, expected 1 got %d. Discard message.", size);
 		return;
 	}
 
@@ -186,16 +187,13 @@ int main( int argc, char** argv) {
   ROS_INFO("Initialize gripper");
   std_srvs::Empty srv;
   gripper_init_srv.call(srv);
-  gripper_ref_srv.call(srv);
-  
-  ros::Duration(4.0).sleep();
-  ros::spinOnce();
-
-  if( !gripper_is_ready )
-  {
-	  ROS_ERROR("Gripper is not ready, quit execution");
-	  return -1;
+  //gripper_ref_srv.call(srv);
+      
+  while( !gripper_is_ready ){
+	  ros::Rate(1).sleep();
+	  ros::spinOnce();
   }
+  
   ROS_INFO("Gripper is ready");
 
   //Publisher
