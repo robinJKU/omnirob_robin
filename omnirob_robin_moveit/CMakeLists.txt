@@ -109,6 +109,11 @@ add_dependencies(omnirob_moveit omnirob_robin_moveit_gencpp)
 target_link_libraries(omnirob_moveit ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS omnirob_moveit DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+add_executable(pick_and_place_server src/pick_and_place_server.cpp)
+add_dependencies(pick_and_place_server omnirob_robin_moveit_gencpp)
+target_link_libraries(pick_and_place_server ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+install(TARGETS pick_and_place_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 # This node is for testing rviz and gazebo with the moveit interface
 add_executable(omnirob_moveit_simulation src/omnirob_moveit_simulation.cpp)
 add_dependencies(omnirob_moveit_simulation omnirob_robin_moveit_gencpp)

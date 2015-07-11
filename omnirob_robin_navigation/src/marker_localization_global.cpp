@@ -494,7 +494,7 @@ class AR_Marker_Localization{
 	 * Callback of the localization service
 	 */
 	bool localization_service_callback( omnirob_robin_msgs::localization::Request &req, omnirob_robin_msgs::localization::Response &res ){
-		ROS_INFO("Start global localization -------------------");
+		ROS_INFO("Start marker localization -------------------");
 		// wait for services
 	    std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
 	    if( !omnirob_ros_tools::wait_for_service( pan_tilt_start_motion_srv) ){

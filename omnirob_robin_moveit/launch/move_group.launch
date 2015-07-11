@@ -34,6 +34,9 @@
   <include ns="move_group" file="$(find omnirob_robin_moveit)/launch/include/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
     <arg name="moveit_sensor_manager" value="omnirob_robin" />
   </include>
+  
+  <!-- Start the pick and place server -->
+  <node name="pick_and_place_server" pkg="omnirob_robin_moveit" type="pick_and_place_server" respawn="false" output="screen" />
  
   <!-- Start the actual move_group node/action server -->
   <node name="move_group" launch-prefix="$(arg launch_prefix)" pkg="moveit_ros_move_group" type="move_group" respawn="false" output="screen" args="$(arg command_args)">

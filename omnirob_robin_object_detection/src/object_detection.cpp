@@ -200,7 +200,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
   omnirob_robin_msgs::move_pan_tilt srv;
   
   srv.request.pan_goal = 0.4;
-  srv.request.tilt_goal = 0.6;
+  srv.request.tilt_goal = 0.8;
   
   move_pan_tilt_client.call(srv);
   

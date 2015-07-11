@@ -18,7 +18,7 @@ controller_patience: 15.0 # How long the controller will wait in seconds without
 # configure recovery behaviour
 conservative_reset_dist: 3.0 # The distance away from the robot in meters at which obstacles will be cleared from the costmap when attempting to clear space in the map. Note, this parameter is only used when the default recovery behaviors are used for move_base. 
 recovery_behavior_enabled: true
-clearing_rotation_allowed: true
+clearing_rotation_allowed: false
 
 
 

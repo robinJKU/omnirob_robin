@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- start localization nodes -->
-	<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include>
-	<include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
+	<include file="$(find omnirob_robin_navigation)/launch/complete.launch"></include>
 	
-	<!--start mapping nodes -->
-	<include file="$(find omnirob_robin_navigation)/launch/hector.launch"></include>
+	<!-- start object detection nodes -->
 	
-	<arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena.yaml"/>
-	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
-		<remap from="/map" to="/map"/>
-	</node>
+	<!-- start lwa nodes -->
 	
-	<!-- start move base -->
-	<include file="$(find omnirob_robin_navigation)/launch/move_base.launch"></include>
+	
+	
 
 	<!-- start main demo node -->
 	<node pkg="omnirob_robin_demo" type="pick_and_place_demo" name="pick_and_place_demo" output="screen"></node>
