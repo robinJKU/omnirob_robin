@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 {
 
 	// initialize ros node
-	ros::init(argc, argv, "lwa_pick_and_place");
+	ros::init(argc, argv, "omnirob_moveit");
 
 	pick_and_place_executer lwa_pick_and_place;
 

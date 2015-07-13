@@ -621,7 +621,10 @@ int main(int argc, char **argv)
 {
 
 	// initialize ros node
-	ros::init(argc, argv, "lwa_pick_and_place");
+	ros::init(argc, argv, "pick_and_place_server");
+	
+	ros::AsyncSpinner spinner(4); // required because both the server and the client run in the same node
+	spinner.start();
 	
 	std::string table_id = "table";
 	shape_msgs::SolidPrimitive table_primitive;
