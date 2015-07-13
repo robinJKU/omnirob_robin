@@ -7,6 +7,7 @@
 #include <omnirob_robin_msgs/localization.h>
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Bool.h"
 
 ros::ServiceServer global_localization_service;
 ros::ServiceClient marker_localization_client;
@@ -14,6 +15,9 @@ ros::ServiceClient clear_costmaps_client;
 
 ros::Publisher hector_initialize_publisher;
 ros::Publisher hector_reset_publisher;
+ros::Publisher is_localized_publisher;
+
+bool is_localized;
 
 int globalLocalization(){
 
@@ -53,8 +57,7 @@ int globalLocalization(){
   std_srvs::Empty srv;
   clear_costmaps_client.call(srv);
   clear_costmaps_client.call(srv);
-  
-  
+  is_localized = true;  
 }
 
 bool globalLocalizationCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){ 
@@ -67,6 +70,8 @@ int main( int argc, char** argv) {
    // initialize node
   ros::init(argc, argv, "global_localization");
   ros::NodeHandle n;
+  
+  is_localized = false;
   
   global_localization_service = n.advertiseService("/global_localization", globalLocalizationCallback);
   
@@ -91,10 +96,17 @@ int main( int argc, char** argv) {
   
   hector_initialize_publisher = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("/hector_slam/set_initial_pose", 10);
   hector_reset_publisher = n.advertise<std_msgs::String>("/hector_slam/syscommand", 10);
+  is_localized_publisher = n.advertise<std_msgs::Bool>("/is_localized", 10);
   
   globalLocalization();
-   
-  ros::spin();
+  
+  while(ros::ok()){
+	  ros::Rate(1).sleep();
+	  std_msgs::Bool msg;
+	  msg.data = is_localized;
+	  is_localized_publisher.publish(msg);
+	  ros::spinOnce();
+  } 
 	  
 }
 
