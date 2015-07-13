@@ -14,7 +14,7 @@
 			<parent link="${parent}"/>
       <calibration rising="0.0"/>
       <dynamics damping="0.2" friction="10.0" />
-      <limit effort="10" velocity="0.5"/>
+      <limit effort="10" velocity="0.5" lower="-2.0" upper="2.0"/>
 			<child link="pan_tilt/pan_link" />
 		</joint>
      
@@ -49,7 +49,7 @@
 			<axis xyz="0 1 0"/>   
       <calibration rising="0.0"/>
       <dynamics damping="0.2" friction="10.0" />
-      <limit effort="10" velocity="0.5"/>
+      <limit effort="10" velocity="0.5" lower="-1.57" upper="1.57"/>
 			<parent link="pan_tilt/pan_link"/>
 			<child link="pan_tilt/tilt_link" />
 		</joint>
