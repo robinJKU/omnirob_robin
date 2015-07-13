@@ -203,10 +203,28 @@ int main( int argc, char** argv) {
   gripper_goal_pub = node_handle.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);
   
   //Service Servers
-  closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);
-  openGripper_server = n.advertiseService("gripper/open_srv", openGripperCallback);  
-  moveGripper_server = n.advertiseService("gripper/stroke_srv", moveGripperCallback);
+  closeGripper_server = node_handle.advertiseService("gripper/close_srv", closeGripperCallback);
+  openGripper_server = node_handle.advertiseService("gripper/open_srv", openGripperCallback);
+  moveGripper_server = node_handle.advertiseService("gripper/stroke_srv", moveGripperCallback);
   
+  std::string robot_description;
+  ros::param::get("/robot_description", robot_description);
+
+  // parse limits from urdf
+  if( robot_description.empty())
+  {
+    ROS_WARN("Can't find robot description file, use default limits:[10.0,50.0]mm");
+    closed_pos = 50.0;
+    opened_pos = 10.0;
+  }
+  else
+  {
+    urdf::Model robot_model;
+    robot_model.initString(robot_description);
+    boost::shared_ptr<const urdf::Joint> pan_joint = robot_model.getJoint("gripper/finger_left_joint");
+    opened_pos = 2.0*pan_joint->limits->lower;
+    closed_pos = 2.0*pan_joint->limits->upper;
+  }
   ros::spin();
 
 }
