@@ -8,6 +8,9 @@
 #include <std_srvs/Empty.h>
 #include <omnirob_robin_msgs/move_gripper.h>
 
+// urdf
+#include <urdf/model.h>
+
 ros::ServiceServer closeGripper_server;
 ros::ServiceServer openGripper_server;
 ros::ServiceServer moveGripper_server;
@@ -25,8 +28,8 @@ ros::ServiceClient gripper_enable_p2p_motion_srv;
 bool gripper_is_ready = false;
 bool p2p_motion_enabled = false;
 
-double closed_pos = 50.0; // gripper stroke when the gripper is closed. in mm
-double opened_pos = 10.0; // gripper stroke when the gripper is opened. in mm
+double closed_pos; // gripper stroke when the gripper is closed. in mm
+double opened_pos; // gripper stroke when the gripper is opened. in mm
 
 double stroke = 0.0;
 
@@ -160,7 +163,7 @@ bool moveGripperCallback(omnirob_robin_msgs::move_gripper::Request& request, omn
 int main( int argc, char** argv) {
   // initialize ros node
   ros::init(argc, argv, "gripper_interface");
-  ros::NodeHandle n;
+  ros::NodeHandle node_handle;
 
   ros::NodeHandle private_node_handle("~");
 
@@ -173,16 +176,16 @@ int main( int argc, char** argv) {
   ros::service::waitForService("gripper/control/start_motion");
   ros::service::waitForService("gripper/control/initialize_modules");
   ros::service::waitForService("gripper/control/reference_modules");
-  gripper_start_motion_srv = n.serviceClient<std_srvs::Empty>("gripper/control/start_motion"); 
-  gripper_init_srv = n.serviceClient<std_srvs::Empty>("gripper/control/initialize_modules"); 
-  gripper_ref_srv = n.serviceClient<std_srvs::Empty>("gripper/control/reference_modules");
-  gripper_enable_p2p_motion_srv = n.serviceClient<std_srvs::Empty>("gripper/control/enable_point_to_point_motion");
+  gripper_start_motion_srv = node_handle.serviceClient<std_srvs::Empty>("gripper/control/start_motion");
+  gripper_init_srv = node_handle.serviceClient<std_srvs::Empty>("gripper/control/initialize_modules");
+  gripper_ref_srv = node_handle.serviceClient<std_srvs::Empty>("gripper/control/reference_modules");
+  gripper_enable_p2p_motion_srv = node_handle.serviceClient<std_srvs::Empty>("gripper/control/enable_point_to_point_motion");
   ROS_INFO("gripper_interface: all Services available");
 
   // Topic Subscriber
-  gripper_joint_state_sub = n.subscribe("gripper/state/joint_state_array", 10, joint_state_callback);
-  gripper_is_ready_sub = n.subscribe("gripper/state/info/module_is_ready", 10, gripper_is_ready_callback);
-  p2p_enabled_sub = n.subscribe("gripper/state/info/point_to_point_motion_enabled", 10, p2p_motion_enabled_callback);
+  gripper_joint_state_sub = node_handle.subscribe("gripper/state/joint_state_array", 10, joint_state_callback);
+  gripper_is_ready_sub = node_handle.subscribe("gripper/state/info/module_is_ready", 10, gripper_is_ready_callback);
+  p2p_enabled_sub = node_handle.subscribe("gripper/state/info/point_to_point_motion_enabled", 10, p2p_motion_enabled_callback);
 
   ROS_INFO("Initialize gripper");
   std_srvs::Empty srv;
@@ -197,7 +200,7 @@ int main( int argc, char** argv) {
   ROS_INFO("Gripper is ready");
 
   //Publisher
-  gripper_goal_pub = n.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);  
+  gripper_goal_pub = node_handle.advertise<std_msgs::Float64MultiArray> ("gripper/control/commanded_joint_state", 1);
   
   //Service Servers
   closeGripper_server = n.advertiseService("gripper/close_srv", closeGripperCallback);

@@ -71,13 +71,13 @@ void pan_tilt_callback( std_msgs::Float64MultiArray joint_state_array ){
 }
 
 void gripper_callback( std_msgs::Float64MultiArray joint_state_array ){
-	gripper_joint_state.header.stamp	 = ros::Time::now();
+	gripper_joint_state.header.stamp = ros::Time::now();
 	
 	// fill joint state
 	unsigned int nr_of_modules=1;
 	for( unsigned int module=0; module<nr_of_modules; module++){
-		gripper_joint_state.position[module] = joint_state_array.data[module]/2.0;
-		gripper_joint_state.position[module+1] = joint_state_array.data[module]/2.0;
+		gripper_joint_state.position[module] = joint_state_array.data[module]/2.0*1e-3;
+		gripper_joint_state.position[module+1] = joint_state_array.data[module]/2.0*1e-3;
 	}
 	
 	//publish joint state

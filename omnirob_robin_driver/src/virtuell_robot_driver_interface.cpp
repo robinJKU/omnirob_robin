@@ -3,10 +3,12 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <sensor_msgs/JointState.h>
 #include <std_srvs/Empty.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <omnirob_robin_driver/cubic_trajectory_generator.h>
 #include <control_msgs/JointTrajectoryControllerState.h>
+#include <omnirob_robin_tools_ros/common_cpp_tools.h>
 
 class Modules{
 	protected:
@@ -712,13 +714,37 @@ class PAN_TILT : public Modules{
 	private:
 		ros::Publisher pan_commanded_joint_state_publisher;
 		ros::Publisher tilt_commanded_joint_state_publisher;
+		ros::Publisher joint_state_publisher;
+		ros::Subscriber joint_state_subscriber;
+		std::vector<double> last_state;
 		
 	public:
-		PAN_TILT( ros::NodeHandle handle, std::string group_name, std::string controller_name_pan, std::string controller_name_tilt, std::string emergency_stop_topic )
-			: Modules( handle, group_name, 2, emergency_stop_topic )
+		PAN_TILT( ros::NodeHandle handle, std::string group_name, std::string controller_name_pan, std::string controller_name_tilt, std::string emergency_stop_topic ):
+			Modules( handle, group_name, 2, emergency_stop_topic ),
+			last_state(2,0.0)
 		{
 			pan_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_pan + "/command" ,  1); 
-			tilt_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_tilt + "/command" ,  1); 
+			tilt_commanded_joint_state_publisher = handle.advertise<std_msgs::Float64>( controller_name_tilt + "/command" ,  1);
+			joint_state_publisher = handle.advertise<std_msgs::Float64MultiArray>( group_name + "/state/joint_state_array" ,  1);
+			joint_state_subscriber = handle.subscribe( "/omnirob_robin/joint_states", 1, &PAN_TILT::joint_state_callback, this);
+		}
+
+		void joint_state_callback( sensor_msgs::JointState joint_state )
+		{
+			int pan_index = common_cpp_tools::find_string( joint_state.name, "pan_tilt/pan_joint");
+			int tilt_index = common_cpp_tools::find_string( joint_state.name, "pan_tilt/tilt_joint");
+
+			if( pan_index<0 )
+				ROS_WARN("can't find pan index");
+
+			if( tilt_index<0 )
+				ROS_WARN("can't find tilt index");
+
+			if( pan_index>=0 && tilt_index>=0 )
+			{
+				last_state[0]=joint_state.position[pan_index];
+				last_state[1]=joint_state.position[tilt_index];
+			}
 		}
 		
 		/**
@@ -749,6 +775,16 @@ class PAN_TILT : public Modules{
 							
 		}
 		
+		void publish_module_state( void)
+		{
+			Modules::publish_module_state();
+
+			std_msgs::Float64MultiArray pan_tilt_state;
+			pan_tilt_state.data = last_state;
+
+			joint_state_publisher.publish( pan_tilt_state);
+		}
+
 	
 }; // class PAN TILT
 

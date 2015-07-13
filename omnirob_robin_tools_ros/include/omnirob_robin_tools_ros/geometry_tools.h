@@ -38,7 +38,7 @@ namespace omnirob_geometry_tools{
 	 * This function computes the maximum of the absolut values of the componentwise differences
 	 * @see min_angle_distance.
 	 */
-	float max_angle_distance( const std::vector<double> angle_vec1, const std::vector<double> angle_vec2 ){
+	float max_angle_distance( const std::vector<double> &angle_vec1, const std::vector<double> &angle_vec2 ){
 		// check input
 		if( angle_vec1.size()==0 || angle_vec1.size()!=angle_vec2.size() ){
 			ROS_ERROR("Can't compute max angle distance - size of angle vectors is invalid: angle_vec1.size()=%f, angle_vec2.size()=%f", (double) angle_vec1.size(), (double) angle_vec2.size());

@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   omnirob_robin_msgs
   omnirob_robin_tools_ros
+  sensor_msgs
+  urdf
 )
 
 ## Generate used messages and services
