@@ -26,7 +26,7 @@ bool gripper_is_ready = false;
 bool p2p_motion_enabled = false;
 
 double closed_pos = 50.0; // gripper stroke when the gripper is closed. in mm
-double opened_pos = 5.0; // gripper stroke when the gripper is opened. in mm
+double opened_pos = 10.0; // gripper stroke when the gripper is opened. in mm
 
 double stroke = 0.0;
 
@@ -104,7 +104,7 @@ bool closeGripperCallback(omnirob_robin_msgs::move_gripper::Request& request, om
   ros::Rate rate_10Hz(10.0);
 
   unsigned int cnt=0;
-  while( !gripper_is_closed() && cnt<10 )
+  while( !gripper_is_closed() && cnt<20 )
   {
 	  rate_10Hz.sleep();
 	  ros::spinOnce();
@@ -123,7 +123,7 @@ bool openGripperCallback(omnirob_robin_msgs::move_gripper::Request& request, omn
 	ros::Rate rate_10Hz(10.0);
 
 	unsigned int cnt=0;
-	while( !gripper_is_opened() && cnt<10 )
+	while( !gripper_is_opened() && cnt<20 )
 	{
 	  rate_10Hz.sleep();
 	  ros::spinOnce();
@@ -142,7 +142,7 @@ bool moveGripperCallback(omnirob_robin_msgs::move_gripper::Request& request, omn
 	ros::Rate rate_10Hz(10.0);
 
 	unsigned int cnt=0;
-	while( !gripper_is_at_position( request.stroke) && cnt<10 )
+	while( !gripper_is_at_position( request.stroke) && cnt<20 )
 	{
 	  rate_10Hz.sleep();
 	  ros::spinOnce();
