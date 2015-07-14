@@ -222,9 +222,10 @@ int main( int argc, char** argv) {
     urdf::Model robot_model;
     robot_model.initString(robot_description);
     boost::shared_ptr<const urdf::Joint> pan_joint = robot_model.getJoint("gripper/finger_left_joint");
-    opened_pos = 2.0*pan_joint->limits->lower;
-    closed_pos = 2.0*pan_joint->limits->upper;
+    opened_pos = 2.0*pan_joint->limits->lower*1000;
+    closed_pos = 2.0*pan_joint->limits->upper*1000;
   }
+
   ros::spin();
 
 }
