@@ -134,6 +134,7 @@ private:
 
 		// plan path above pick pose
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose;
+		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose_reversed, plan_pick_pose_reversed;
 
 		geometry_msgs::Pose lwa_link_7_above_target_pose = geometry_msgs::Pose(lwa_link_7_target_pose);
 		lwa_link_7_above_target_pose.position.z += 1e-1;
@@ -196,6 +197,14 @@ private:
 			return;
 		}
 
+		// todo: remove
+		lwa_.plan_continuous_path_.visualize_plan();
+		blocker_.block();
+
+		// reverse plans
+		plan_above_pick_pose_reversed = moveit_tools::reverse_plan( plan_above_pick_pose);
+		plan_pick_pose_reversed = moveit_tools::reverse_plan( plan_pick_pose);
+
 		// open gripper
 		omnirob_robin_msgs::move_gripper move_gripper_msgs;
 		open_gripper_client.call( move_gripper_msgs);
@@ -203,59 +212,84 @@ private:
 		{
 			result.error_message = "Opening gripper failed";
 			ROS_ERROR("%s", result.error_message.c_str());
+
+			// cancel request
 			pick_action_server_.setAborted( result);
 			return;
 		}
 
-		// todo: remove
-		lwa_.plan_continuous_path_.visualize_plan();
-		blocker_.block();
-
-		// execute first path
+		// move to pick pose
 		ROS_INFO("start first execution");
 		std::string error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
 		if( !error_message.empty() ){
-			// todo: apport request
-		}
+			result.error_message = "Execution of plan: above pick pose failed";
+			ROS_ERROR("%s", result.error_message.c_str());
 
-		// blocking node todo: remove
-		blocker_.block();
+			// cancel request
+			pick_action_server_.setAborted( result);
+			return;
+		}
 
 		ROS_INFO("start second execution");
-		// execute second path
 		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
 		if( !error_message.empty() ){
-			// todo: move home
-			// todo: apport request
+			result.error_message = "Execution of plan: pick pose failed";
+			ROS_ERROR("%s", result.error_message.c_str());
+
+			// move home
+			lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose_reversed);
+
+			// cancel request
+			pick_action_server_.setAborted( result);
+			return;
 		}
-		
 
-		// blocking node todo: remove
-		blocker_.block();
-
+		// close gripper
 		close_gripper_client.call( move_gripper_msgs);
 		if( !move_gripper_msgs.response.error_message.empty() )
 		{
 			result.error_message = "Closing  gripper failed";
 			ROS_ERROR("%s", result.error_message.c_str());
+
+			// move home
+			lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose_reversed);
+			lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose_reversed);
+
+			// cancel request
 			pick_action_server_.setAborted( result);
 			return;
 		}
 
-		moveit_tools::reverse_plan( plan_pick_pose);
+		// move home
+		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose_reversed);
+		if( !error_message.empty())
+		{
+			result.error_message = "Execution of plan: pick pose reversed failed";
+			ROS_ERROR("%s", result.error_message.c_str());
 
-		// execute second path reverse
-		lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose);
+			// move home
+			lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose_reversed);
 
-		// blocking node todo: remove
-		blocker_.block();
+			// cancel request
+			pick_action_server_.setAborted( result);
+			return;
+		}
 
-		moveit_tools::reverse_plan( plan_above_pick_pose);
+		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose_reversed);
+		if( !error_message.empty())
+		{
+			result.error_message = "Execution of plan: above pick pose reversed failed";
+			ROS_ERROR("%s", result.error_message.c_str());
 
-		// execute second path reverse
-		lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose);
+			// cancel request
+			pick_action_server_.setAborted( result);
+			return;
+		}
 
+		// finish action
+		pick_action_server_.setSucceeded( result);
 	}
+
 	void pick_and_place_preempt_callback( void)
 	{
 		ROS_ERROR("pick and place action is preempted!");
@@ -306,316 +340,6 @@ private:
 	// todo: remove
 	omnirob_ros_tools::blocker blocker_;
 };
-
-
-tf::TransformListener* pListener;
-tf::Transform to_base_link_from_tcp;
-
-//// Service
-//bool plan_path(omnirob_robin_moveit::PlanPath::Request &req,
-//               omnirob_robin_moveit::PlanPath::Response &resp) {
-//
-//	pListener = new(tf::TransformListener);
-//	std::string objectString = "cylinder_orange0"; //req.tf_object_name;   /////////////////////////////////////////////////////
-//   // string tf_object_name //PlanPath.srv   //////////////////////////////////////////////////////////////////////////////////77
-//
-//	tf::StampedTransform to_base_link_from_object;
-//		try {
-//		  pListener->waitForTransform("base_link", objectString, ros::Time(0), ros::Duration(5.0) );
-//		  pListener->lookupTransform("base_link", objectString, ros::Time(0), to_base_link_from_object);
-//		}
-//		  catch(tf::TransformException e){
-//		  ROS_ERROR("No Transform found from base_link to object");
-//		  resp.success = false;
-//		  return true;
-//		}
-//
-//	tf::Transform to_base_link_from_object_rotated;
-//	to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
-//	to_base_link_from_object_rotated.setRotation(tf::Quaternion(0.0,0.0,0.0,1.0));
-//
-//    static tf::TransformBroadcaster br;
-//    br.sendTransform(tf::StampedTransform(to_base_link_from_object_rotated, ros::Time::now(), "base_link", "object_rotated"));
-//
-//	tf::Transform to_object_rotated_from_gripper;
-//	to_object_rotated_from_gripper.setIdentity();
-//	float alpha = M_PI/2.0;
-//	float cos_alpha = cos(alpha);
-//	float sin_alpha = sin(alpha);
-//	tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -cos_alpha, sin_alpha,    0.0, -sin_alpha, -cos_alpha,   1.0,0.0,0.0);
-// 	to_object_rotated_from_gripper.setBasis( rotated );
-//
-//
-//	float shifted = 0.15; // distance between gripper and tcp
-//	tf::Vector3 shift_vec = tf::Vector3( 0.0, 0.0, -shifted );
-//	to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
-//
-//      br.sendTransform(tf::StampedTransform(to_object_rotated_from_gripper, ros::Time::now(), "object_rotated", "gripper"));
-//
-//	tf::StampedTransform to_gripper_from_tcp;
-//	try {
-//	  pListener->waitForTransform("gripper/center_link", "lwa/link_7", ros::Time(0), ros::Duration(5.0) );
-//	  pListener->lookupTransform("gripper/center_link", "lwa/link_7", ros::Time(0), to_gripper_from_tcp);
-//	}
-//	  catch(tf::TransformException e){
-//	  ROS_ERROR("No Transform found from tcp to gripper");
-//	  resp.success = false;
-//	  return true;
-//	}
-//
-//        to_base_link_from_tcp = to_base_link_from_object_rotated*to_object_rotated_from_gripper;//*to_gripper_from_tcp
-//
-//      br.sendTransform(tf::StampedTransform(to_base_link_from_object_rotated*to_object_rotated_from_gripper, ros::Time::now(), "base_link", "gripper_center_link"));
-//
-//  	geometry_msgs::Pose target_pose;
-//  	tf::poseTFToMsg(to_base_link_from_tcp, target_pose);
-//
-//
-//
-///*
-//	// Anpassen der Quaternions für Ausrichten des Greifers
-//	tf::Quaternion q;
-//	//position: 0.2 -0.5 1.3
-//  	//q.setRPY(0.0, 0.0, 0.0); // Greifer nach oben
-//  	//q.setRPY(0.0, -1.5, 0.0); // Greifer seitlich Richtung Stange
-//
-//  	//position: 0.4 -0.5 1.3
-//  	//q.setRPY(0.0, 1.5, 0.0); // Greifer seitlich weg von Stange
-//
-//  	//position: 0.4 -0.5 1.0
-//  	//q.setRPY(0.0, -3.14, 0.0); // Greifer nach unten
-//
-//  	q.setRPY(0.0, 0.7, 0.0);
-//  	tf::quaternionTFToMsg(q, req.target.orientation);
-//*/
-//
-//	tf::poseTFToMsg(to_base_link_from_tcp, target_pose);
-///*
-//	std::vector<geomeii_msgs::Pose> waypoints;
-//	geomeii_msgs::Pose target_above_pose = target_pose;
-//	target_above_pose.position.x += -0.2;
-//	target_above_pose.position.y += 0.0;
-//	target_above_pose.position.z += 0.15;
-//
-//	waypoints.push_back(target_above_pose);
-//	waypoints.push_back(target_pose);
-//*/
-//
-//
-//	// ################ Planning to a Pose goal ################
-//	// set target to received geomeii_msgs::Pose
-//	// group_lwa->setPoseTarget(target_pose);
-//
-//
-//	moveit_msgs::RobotTrajectory trajectory;
-//
-//	int i;
-//	bool success = false;
-//	for(i=0; i<5; i++){
-//		// Now, we call the planner to compute the plan and visualize it.
-//		/*double fraction = group_lwa->computeCartesianPath(waypoints,
-//							0.01, //eef_step
-//							0.0, //jump_threshold
-//							trajectory);*/
-//		// success =  group_lwa->plan(*my_plan);
-//		if(success) {
-//			//my_plan->trajectory_ = trajectory;
-//			//success = true;
-//			break;
-//		}
-//	}
-//
-//
-//	resp.success = success;
-//	return true; // has to always to be true for service callback
-//  }
-//
-//
-//
-//
-//
-//
-//  // Service
-//  bool plan_path_above(omnirob_robin_moveit::PlanPath::Request &req,
-//	         omnirob_robin_moveit::PlanPath::Response &resp) {
-//
-//
-//	pListener = new(tf::TransformListener);
-//	std::string objectString = "cylinder_orange0"; //req.tf_object_name;   /////////////////////////////////////////////////////
-//   // string tf_object_name //PlanPath.srv   //////////////////////////////////////////////////////////////////////////////////77
-//
-//	tf::StampedTransform to_base_link_from_object;
-//		try {
-//		  pListener->waitForTransform("base_link", objectString, ros::Time(0), ros::Duration(5.0) );
-//		  pListener->lookupTransform("base_link", objectString, ros::Time(0), to_base_link_from_object);
-//		}
-//		  catch(tf::TransformException e){
-//		  ROS_ERROR("No Transform found from base_link to object");
-//		  resp.success = false;
-//		  return true;
-//		}
-//
-//	tf::Transform to_base_link_from_object_rotated;
-//	to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
-//	to_base_link_from_object_rotated.setRotation(tf::Quaternion(0.0,0.0,0.0,1.0));
-//
-//     static tf::TransformBroadcaster br;
-//      br.sendTransform(tf::StampedTransform(to_base_link_from_object_rotated, ros::Time::now(), "base_link", "object_rotated"));
-//
-//
-//	tf::Transform to_object_rotated_from_gripper;
-//	to_object_rotated_from_gripper.setIdentity();
-//	float alpha = M_PI/2.0; //////
-//	float cos_alpha = cos(alpha);
-//	float sin_alpha = sin(alpha);
-//	tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -cos_alpha, sin_alpha,    0.0, -sin_alpha, -cos_alpha,   1.0,0.0,0.0);
-// 	to_object_rotated_from_gripper.setBasis( rotated );
-//
-//
-//	float shifted = 0.15; // distance between gripper and tcp
-//	tf::Vector3 shift_vec = tf::Vector3( 0.0, 0.0, -shifted );
-//	to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
-//
-//      br.sendTransform(tf::StampedTransform(to_object_rotated_from_gripper, ros::Time::now(), "object_rotated", "gripper"));
-//
-//	tf::StampedTransform to_gripper_from_tcp;
-//		try {
-//		  pListener->waitForTransform("gripper/center_link", "lwa/link_7", ros::Time(0), ros::Duration(5.0) );
-//		  pListener->lookupTransform("gripper/center_link", "lwa/link_7", ros::Time(0), to_gripper_from_tcp);
-//
-//
-//		}
-//		  catch(tf::TransformException e){
-//		  ROS_ERROR("No Transform found from tcp to gripper");
-//		  resp.success = false;
-//		  return true;
-//		}
-//
-//        to_base_link_from_tcp = to_base_link_from_object_rotated*to_object_rotated_from_gripper;//*to_gripper_from_tcp
-//
-//      br.sendTransform(tf::StampedTransform(to_base_link_from_object_rotated*to_object_rotated_from_gripper, ros::Time::now(), "base_link", "gripper_center_link"));
-//
-//
-//
-//	geometry_msgs::Pose target_pose;
-//	tf::poseTFToMsg(to_base_link_from_tcp, target_pose);
-//	target_pose.position.x += -0.05;
-//	target_pose.position.y += 0.0;
-//	target_pose.position.z += 0.25;
-//
-//	// ################ Planning to a Pose goal ################
-//	// set target to received geomeii_msgs::Pose
-//	//group_lwa->setPoseTarget(target_pose);
-//
-//	moveit_msgs::RobotTrajectory trajectory;
-//
-//	int i;
-//	bool success = false;
-//	for(i=0; i<5; i++){
-//		//success =  group_lwa->plan(*my_plan);
-//		if(success) {
-//			//my_plan->trajectory_ = trajectory;
-//			//success = true;
-//			break;
-//		}
-//	}
-//
-//
-//	resp.success = success;
-//	return true; // has to always to be true for service callback
-//  }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//  bool execute_path(omnirob_robin_moveit::ExecutePath::Request &req,
-//	         omnirob_robin_moveit::ExecutePath::Response &resp) {
-//	if(req.is_ready){
-//  	  //group_lwa->move();
-//	  // bool success = (bool)
-//	  //group_lwa->execute(*my_plan);
-//	}
-//	resp.success = true;
-//	return true;
-//  }
-//
-//  // Service
-//  bool plan_home(omnirob_robin_moveit::PlanHome::Request &req,
-//	         omnirob_robin_moveit::PlanHome::Response &resp) {
-//
-//	std::vector<double> joint_values (7);
-//	joint_values.at(0)= 0;
-//	joint_values.at(1)= 0.1;
-//	joint_values.at(2)= 0;
-//	joint_values.at(3)= 0.15;
-//	joint_values.at(4)= 0;
-//	joint_values.at(5)= 0.15;
-//	joint_values.at(6)=  M_PI/3.0;
-//
-//	// ################ Planning to a Pose goal ################
-// 	// group_lwa->setJointValueTarget(joint_values); // set target to home
-//
-//	// Now, we call the planner to compute the plan and visualize it.
-//	//bool success =  group_lwa->plan(*my_plan);
-//
-//	bool success;
-//	resp.success = success;
-//	return true; // has to always to be true for service callback
-//  }
-//
-//
-//  bool add_collision(omnirob_robin_moveit::AddCollisionObj::Request &req,
-//	         omnirob_robin_moveit::AddCollisionObj::Response &resp) {
-//
-//	pListener = new(tf::TransformListener);
-//
-//	// First, we will define the collision object message.
-//	moveit_msgs::CollisionObject collision_object;
-//	// collision_object.header.frame_id =  group_lwa->getPlanningFrame();
-//
-//	// The id of the object is used to identify it. /
-//	collision_object.id = req.primitive_id;
-//
-//	collision_object.primitives.push_back(req.primitive);
-//
-//	// get transformation from frame_id to primitive_id
-//	tf::StampedTransform tf_primitive_pose;
-//	try {
-//		//ROS_INFO("######################################## frame_id %s", collision_object.header.frame_id.c_str());
-//		//ROS_INFO("######################################## req.primitive_id %s", req.primitive_id.c_str());
-//	  pListener->waitForTransform(collision_object.header.frame_id, req.primitive_id, ros::Time(0), ros::Duration(5.0) );
-//	  pListener->lookupTransform(collision_object.header.frame_id, req.primitive_id, ros::Time(0), tf_primitive_pose);
-//
-//	}
-//	  catch(tf::TransformException e){
-//	  ROS_ERROR("No Transform found from tcp to gripper");
-//	  resp.success = false;
-//	  return true;
-//	}
-//	geometry_msgs::Pose primitive_pose;
-//	tf::poseTFToMsg(tf_primitive_pose, primitive_pose);
-//
-//	collision_object.primitive_poses.push_back(primitive_pose);
-//	collision_object.operation = collision_object.ADD;
-//
-//	std::vector<moveit_msgs::CollisionObject> collision_objects;
-//	collision_objects.push_back(collision_object);
-//
-//
-//	// Now, let's add the collision object into the world
-//	ROS_INFO("Add an object into the world");
-//	//planning_scene_interface->addCollisionObjects(collision_objects);
-//
-//	resp.success = true;
-//	return true;
-//  }
 
 int main(int argc, char **argv)
 {

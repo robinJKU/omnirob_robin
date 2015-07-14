@@ -11,9 +11,15 @@ namespace moveit_tools
 	/**
 	* Reverse the trajectory specified by plan
 	*/
-	void reverse_plan( moveit::planning_interface::MoveGroup::Plan &plan ){
-		std::reverse( plan.trajectory_.joint_trajectory.points.begin(), plan.trajectory_.joint_trajectory.points.end());
-		plan.start_state_.joint_state.position = plan.trajectory_.joint_trajectory.points.front().positions;
+moveit::planning_interface::MoveGroup::Plan reverse_plan( const moveit::planning_interface::MoveGroup::Plan &plan ){
+		moveit::planning_interface::MoveGroup::Plan reversed_plan;
+		reversed_plan.planning_time_ = plan.planning_time_;
+		reversed_plan.trajectory_ = plan.trajectory_;
+
+		std::reverse( reversed_plan.trajectory_.joint_trajectory.points.begin(), reversed_plan.trajectory_.joint_trajectory.points.end());
+		reversed_plan.start_state_.joint_state.position = reversed_plan.trajectory_.joint_trajectory.points.front().positions;
+
+		return reversed_plan;
 	}
 	void print_plan( const moveit::planning_interface::MoveGroup::Plan &plan )
 	{
