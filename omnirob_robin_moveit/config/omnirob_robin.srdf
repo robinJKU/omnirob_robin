@@ -28,7 +28,7 @@
         <joint name="base_yaw_joint" />
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
-    <group_state name="home_pose" group="lwa">
+    <group_state name="home_configuration" group="lwa">
         <joint name="lwa/joint_1" value="0" />
         <joint name="lwa/joint_2" value="0" />
         <joint name="lwa/joint_3" value="0" />
@@ -37,14 +37,14 @@
         <joint name="lwa/joint_6" value="0" />
         <joint name="lwa/joint_7" value="0" />
     </group_state>
-    <group_state name="gripping_pose" group="lwa">
-        <joint name="lwa/joint_1" value="-0.3506" />
-        <joint name="lwa/joint_2" value="0.9029" />
+    <group_state name="gripping_configuration" group="lwa">
+        <joint name="lwa/joint_1" value="0" />
+        <joint name="lwa/joint_2" value="0.7" />
         <joint name="lwa/joint_3" value="0" />
-        <joint name="lwa/joint_4" value="0.6166" />
+        <joint name="lwa/joint_4" value="1.4" />
         <joint name="lwa/joint_5" value="0" />
-        <joint name="lwa/joint_6" value="1.1892" />
-        <joint name="lwa/joint_7" value="1.5425" />
+        <joint name="lwa/joint_6" value="-0.55" />
+        <joint name="lwa/joint_7" value="1.67" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="gripper" parent_link="gripper/palm_link" group="gripper" parent_group="lwa" />

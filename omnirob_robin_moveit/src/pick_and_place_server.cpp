@@ -146,10 +146,13 @@ private:
 				ROS_INFO("Found valid path");
 				break;
 			}
-			if( !pick_action_server_.isActive())
+			if( (!ros::ok()) || (!pick_action_server_.isActive()))
 				break;
 			ii++;
 		}
+		if( !ros::ok())
+			return;
+
 		if( !pick_action_server_.isActive())
 		{
 			result.error_message = "Action canceled";
@@ -178,10 +181,12 @@ private:
 				ROS_INFO("Found valid path");
 				break;
 			}
-			if( !pick_action_server_.isActive())
+			if( (!ros::ok) || (!pick_action_server_.isActive()))
 				break;
 			ii++;
 		}
+		if( !ros::ok())
+			return;
 		if( !pick_action_server_.isActive())
 		{
 			result.error_message = "Action canceled";

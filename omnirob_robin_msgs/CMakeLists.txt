@@ -42,6 +42,7 @@ find_package(catkin REQUIRED COMPONENTS
    add_marker_srv.srv
    remove_marker_srv.srv
    localization.srv
+   execute.srv
  )
 
 ## Generate actions in the 'action' folder

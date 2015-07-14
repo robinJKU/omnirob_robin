@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   shape_msgs
   omnirob_robin_tools_ros
   omnirob_robin_msgs
+  srdfdom
+  urdf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -130,6 +132,11 @@ add_executable(test_lwa_interface src/test_lwa_interface.cpp)
 add_dependencies(test_lwa_interface omnirob_robin_moveit_gencpp)
 target_link_libraries(test_lwa_interface ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS test_lwa_interface DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_executable(move_home_server src/move_home_server.cpp)
+add_dependencies(move_home_server omnirob_robin_moveit_gencpp)
+target_link_libraries(move_home_server ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+install(TARGETS move_home_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
 ##############################################################
