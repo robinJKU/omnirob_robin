@@ -181,8 +181,7 @@ private:
 		}
 
 		// blocking node todo: remove
-		lwa_.plan_continuous_path_.visualize_plan();
-		blocker_.block();
+		blocker_.block( boost::bind( &pick_and_place_action_server::visualize_plan, this));
 
 		// plan path to pick pose
 		ROS_INFO("Plan path to pick pose");
@@ -225,8 +224,7 @@ private:
 		}
 
 		// todo: remove
-		lwa_.plan_continuous_path_.visualize_plan();
-		blocker_.block();
+		blocker_.block( boost::bind( &pick_and_place_action_server::visualize_plan, this));
 
 		// reverse plans
 		plan_above_pick_pose_reversed = moveit_tools::reverse_plan( plan_above_pick_pose);
@@ -350,6 +348,12 @@ private:
 		geometry_msgs::Pose lwa_link_7_target_pose;
 		tf::poseTFToMsg(to_base_link_from_lwa_link7_desired, lwa_link_7_target_pose);
 		return lwa_link_7_target_pose;
+	}
+
+public:
+	void visualize_plan()
+	{
+		lwa_.plan_continuous_path_.visualize_last_plan();
 	}
 
 private:

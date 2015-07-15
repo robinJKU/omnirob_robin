@@ -68,7 +68,7 @@
 
     <param name="trajectory_execution/execution_duration_monitoring" value="false"/>
 
-    <remap from="/joint_states" to="/omnirob_robin/joint_states"/>
+<!--    <remap from="/joint_states" to="/omnirob_robin/joint_states"/> -->
   </node>
 
 </launch>

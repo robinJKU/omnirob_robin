@@ -84,6 +84,19 @@ namespace omnirob_ros_tools{
 			}
 		}
 
+		void block( boost::function<void()> function_handle)
+		{
+			is_blocked_ = true;
+			ros::Rate rate_10Hz( 10);
+			while( ros::ok() && is_blocked_)
+			{
+				rate_10Hz.sleep();
+				function_handle();
+				ros::spinOnce();
+			}
+
+		}
+
 	private:
 		/**
 		 * Unblock service

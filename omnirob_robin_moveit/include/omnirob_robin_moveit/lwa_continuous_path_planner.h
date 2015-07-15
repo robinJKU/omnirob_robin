@@ -191,6 +191,11 @@ class lwa_continuous_path_planner{
 					return false;
 			}
 
+			// set start state
+			visualize_current_state();
+			set_start_state();
+			visualize_current_state();
+
 			// plan path
 			lwa_move_group_->setPoseTarget( goal_pose_planning_frame);
 
@@ -356,6 +361,12 @@ class lwa_continuous_path_planner{
 		}
 
 	private: // state manipulation interface
+
+ 		void set_start_state( void)
+ 		{
+ 			lwa_move_group_->setStartStateToCurrentState();
+ 		}
+
 		void set_start_state( const std::vector<double> &start_configuration){
 			// hint: the get current state function listens on the joint_state topic and does not
 			//       get the state from move_group
@@ -495,6 +506,9 @@ class lwa_continuous_path_planner{
 		 * This function visualize the last computed plan in rviz.
 		 */
 		void visualize_plan(){
+			visualize_plan( last_plan_);
+		}
+		void visualize_last_plan(){
 			visualize_plan( last_plan_);
 		}
 		/**
