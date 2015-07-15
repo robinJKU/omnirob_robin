@@ -61,7 +61,7 @@ public:
 		tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -sin_alpha, cos_alpha,    0.0, cos_alpha, sin_alpha,   -1.0,0.0,0.0);
 		to_object_rotated_from_gripper.setBasis( rotated );
 
-		float shifted = 0.13; // distance between gripper and tcp
+		float shifted = 0.17; // distance between gripper and tcp
 		tf::Vector3 shift_vec = tf::Vector3( 0.0, 0.0, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
@@ -342,7 +342,7 @@ private:
 		tf::Transform to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
 		to_base_link_from_object_rotated.setRotation( rotate_tangential);
 
-		to_base_link_from_object_rotated.getOrigin()[2] += 6e-2;
+		// to_base_link_from_object_rotated.getOrigin()[2] += 0e-2;
 
 		// calculate grasp
 		tf::Transform to_base_link_from_lwa_link7_desired = to_base_link_from_object_rotated*to_object_from_lwa_link7_;
@@ -381,26 +381,6 @@ int main(int argc, char **argv)
 	ros::AsyncSpinner spinner(4); // required because both the server and the client run in the same node
 	spinner.start();
 	
-	std::string table_id = "table";
-	shape_msgs::SolidPrimitive table_primitive;
-	table_primitive.type = table_primitive.BOX;
-	table_primitive.dimensions.push_back(0.8);
-	table_primitive.dimensions.push_back(0.8);
-	table_primitive.dimensions.push_back(0.72);
-	geometry_msgs::Pose table_pose;
-	table_pose.position.x=1.0;
-	table_pose.position.y=0.0;
-	table_pose.position.z=0.36;
-	table_pose.orientation.x=0.0;
-	table_pose.orientation.y=0.0;
-	table_pose.orientation.z=0.0;
-	table_pose.orientation.w=1.0;
-	std::string table_pose_frame = "/base_link";
-
-	lwa_continuous_path_planner planner;
-	ROS_INFO("add collision object");
-	planner.add_static_object( table_id, table_primitive, table_pose, table_pose_frame);
-
 	pick_and_place_action_server lwa_pick_and_place_server;
 
 	ros::spin();

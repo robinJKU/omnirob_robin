@@ -70,9 +70,9 @@ find_package(Boost REQUIRED system filesystem date_time thread)
 
 # see CMakeLists pr2_moveit_tutorials
 catkin_package(
-#  INCLUDE_DIRS include
-  LIBRARIES omnirob_robin_moveit
-  CATKIN_DEPENDS 
+  INCLUDE_DIRS include
+  # LIBRARIES omnirob_robin_moveit
+   CATKIN_DEPENDS 
     moveit_core
     moveit_ros_planning_interface
     interactive_markers
@@ -141,6 +141,7 @@ install(TARGETS move_home_server DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ##############################################################
 ## aus CMakeList vom setup_assitenten
+install(DIRECTORY include/${PROJECT_NAME}/  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
