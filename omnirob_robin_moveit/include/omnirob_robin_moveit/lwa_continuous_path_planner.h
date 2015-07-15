@@ -204,6 +204,70 @@ class lwa_continuous_path_planner{
 		}
 
 		/**
+		* This blocking function plans a path to the specified goal pose of the end effector link.
+		* @param plan: returns the planned path
+		* @param goal_pose: Goal pose of the end effector link describet in target_frame
+		* @param target_frame: The frame in which the goal pose is specified. default: planning_frame (world)
+		* @return true on success
+		* @see moveit::planning_interface::MoveGroup::plan
+		*/
+		bool plan_path_to_poses( moveit::planning_interface::MoveGroup::Plan &plan, const std::vector<geometry_msgs::Pose> &goal_poses, const std::string &target_frame = "")
+		{
+			std::string t_frame=target_frame;
+
+			// check inputs
+			std::string planning_frame = lwa_move_group_->getPlanningFrame();
+			if( t_frame.empty() )
+				t_frame = planning_frame;
+			for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
+			{
+				if( !omnirob_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
+					ROS_ERROR("Specified goal pose nr %u is invalid, cancel motion plan request", goal_ii);
+					return false;
+				}
+			}
+
+			// transform pose to planning frame
+			std::vector<geometry_msgs::Pose> goal_poses_planning_frame;
+			if( t_frame.compare( planning_frame)==0 )
+			{
+				goal_poses_planning_frame = goal_poses;
+			}
+			else
+			{
+				for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
+				{
+					goal_poses_planning_frame.push_back( pose_transformer_.transform_pose( goal_poses[goal_ii], t_frame, planning_frame));
+					if( !omnirob_geometry_tools::pose_is_valid( goal_poses_planning_frame.back()) )
+						return false;
+				}
+			}
+
+			for( unsigned int goal_ii=0; goal_ii<goal_poses_planning_frame.size(); goal_ii++)
+			{
+				ROS_INFO("goal %u: pos = [%f,%f,%f], or = [%f,%f,%f,%f]",goal_ii,
+					goal_poses_planning_frame[goal_ii].position.x,
+					goal_poses_planning_frame[goal_ii].position.y,
+					goal_poses_planning_frame[goal_ii].position.z,
+					goal_poses_planning_frame[goal_ii].orientation.x,
+					goal_poses_planning_frame[goal_ii].orientation.y,
+					goal_poses_planning_frame[goal_ii].orientation.z,
+					goal_poses_planning_frame[goal_ii].orientation.w );
+			}
+
+			// plan path
+			lwa_move_group_->setPoseTargets( goal_poses_planning_frame);
+
+			bool success = lwa_move_group_->plan(plan);
+			if( success){
+				last_plan_=plan;
+				if( visualize_plan_after_planning_)
+					visualize_plan( plan);
+			}
+			return success;
+		}
+
+		/**
  		 * This blocking function plans a path to the specified goal pose of the end effector link.
  		 * @param plan: returns the planned path
  		 * @param start_configuration: Vector which specifies the initial configuration of the lwa with its 7 elements.
@@ -236,6 +300,43 @@ class lwa_continuous_path_planner{
  			// plan path
  			return plan_path_to_pose(plan, goal_pose, t_frame);
  		}
+
+ 		/**
+		 * This blocking function plans a path to a set of goal poses of the end effector link.
+		 * @param plan: returns the planned path
+		 * @param start_configuration: Vector which specifies the initial configuration of the lwa with its 7 elements.
+		 * @param goal_poses: Goal poses of the end effector link describet in target_frame
+		 * @param target_frame: The frame in which the goal pose is specified. default: planning_frame (world)
+		 * @return true on success
+		 * @see moveit::planning_interface::MoveGroup::plan
+		 */
+		bool plan_path_to_poses( moveit::planning_interface::MoveGroup::Plan &plan, std::vector<double> start_configuration, const std::vector<geometry_msgs::Pose> &goal_poses, const std::string &target_frame = "")
+		{
+			std::string t_frame=target_frame;
+
+			// check inputs
+			std::string planning_frame = lwa_move_group_->getPlanningFrame();
+			if( t_frame.empty() )
+				t_frame = planning_frame;
+			for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
+			{
+				if( !omnirob_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
+					ROS_ERROR("Specified goal pose nr %u is invalid, cancel motion plan request", goal_ii);
+					return false;
+				}
+			}
+			if( start_configuration.size()!=7){
+				ROS_ERROR("Unexpected number of goal configurations, got %u expected %u. Cancel motion plan request", (unsigned int) start_configuration.size(), (unsigned int) 7);
+			}
+
+			// set start configuration
+			visualize_current_state();
+			set_start_state( start_configuration);
+			visualize_current_state();
+
+			// plan path
+			return plan_path_to_poses(plan, goal_poses, t_frame);
+		}
 
 	public:
  		/**

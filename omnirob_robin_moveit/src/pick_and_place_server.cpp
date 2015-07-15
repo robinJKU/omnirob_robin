@@ -61,7 +61,7 @@ public:
 		tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -sin_alpha, cos_alpha,    0.0, cos_alpha, sin_alpha,   -1.0,0.0,0.0);
 		to_object_rotated_from_gripper.setBasis( rotated );
 
-		float shifted = 0.15; // distance between gripper and tcp
+		float shifted = 0.13; // distance between gripper and tcp
 		tf::Vector3 shift_vec = tf::Vector3( 0.0, 0.0, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
@@ -138,10 +138,22 @@ private:
 
 		geometry_msgs::Pose lwa_link_7_above_target_pose = geometry_msgs::Pose(lwa_link_7_target_pose);
 		lwa_link_7_above_target_pose.position.z += 1e-1;
+
 		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_above_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose_above")); // todo: remove
+
 		ROS_INFO("Plan path to intermediate point");
 		unsigned int ii=0;
 		while(ii<5){
+			moveit_msgs::Constraints constraints;
+			constraints.joint_constraints.resize(1);
+			constraints.joint_constraints[0].joint_name = "lwa/joint_3";
+			constraints.joint_constraints[0].weight = 1.0;
+			constraints.joint_constraints[0].position = 0.0;
+			constraints.joint_constraints[0].tolerance_above = 0.1;
+			constraints.joint_constraints[0].tolerance_below = 0.1;
+
+			lwa_.plan_continuous_path_.lwa_move_group_->setPathConstraints( constraints);
+
 			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_above_pick_pose, lwa_link_7_above_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
 				break;
@@ -177,6 +189,16 @@ private:
 		ii=0;
 		std::vector<double> last_configuration = plan_above_pick_pose.trajectory_.joint_trajectory.points.back().positions;
 		while(ii<5){
+			moveit_msgs::Constraints constraints;
+			constraints.joint_constraints.resize(1);
+			constraints.joint_constraints[0].joint_name = "lwa/joint_3";
+			constraints.joint_constraints[0].weight = 1.0;
+			constraints.joint_constraints[0].position = 0.0;
+			constraints.joint_constraints[0].tolerance_above = 0.1;
+			constraints.joint_constraints[0].tolerance_below = 0.1;
+
+			lwa_.plan_continuous_path_.lwa_move_group_->setPathConstraints( constraints);
+
 			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_pick_pose, last_configuration, lwa_link_7_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
 				break;
@@ -265,6 +287,8 @@ private:
 			return;
 		}
 
+		blocker_.block();
+
 		// move home
 		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose_reversed);
 		if( !error_message.empty())
@@ -318,6 +342,8 @@ private:
 		tf::Transform to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
 		to_base_link_from_object_rotated.setRotation( rotate_tangential);
 
+		to_base_link_from_object_rotated.getOrigin()[2] += 6e-2;
+
 		// calculate grasp
 		tf::Transform to_base_link_from_lwa_link7_desired = to_base_link_from_object_rotated*to_object_from_lwa_link7_;
 
@@ -360,11 +386,11 @@ int main(int argc, char **argv)
 	table_primitive.type = table_primitive.BOX;
 	table_primitive.dimensions.push_back(0.8);
 	table_primitive.dimensions.push_back(0.8);
-	table_primitive.dimensions.push_back(0.8);
+	table_primitive.dimensions.push_back(0.72);
 	geometry_msgs::Pose table_pose;
 	table_pose.position.x=1.0;
 	table_pose.position.y=0.0;
-	table_pose.position.z=0.4;
+	table_pose.position.z=0.36;
 	table_pose.orientation.x=0.0;
 	table_pose.orientation.y=0.0;
 	table_pose.orientation.z=0.0;

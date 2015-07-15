@@ -89,6 +89,13 @@ class lwa_continuous_path_executer{
 			moveit_tools::print_plan( plan);
 			
 			std::string error_message = execute_path( plan);
+			if( !error_message.empty())
+			{
+				// try a last time
+				ros::Rate rate1Hz(1.0);
+				rate1Hz.sleep();
+				error_message = execute_path( plan);
+			}
 			
 			if( !error_message.empty())
 				return error_message;
