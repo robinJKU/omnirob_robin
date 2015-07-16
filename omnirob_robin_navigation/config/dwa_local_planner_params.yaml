@@ -6,7 +6,7 @@ DWAPlannerROS:
   max_vel_y:  0.0
   min_vel_y:  0.0
   max_trans_vel: 0.3  # choose slightly less than the base's capability
-  min_trans_vel: 0.01 # this is the min trans velocity when there is negligible rotational velocity
+  min_trans_vel: 0.05 # this is the min trans velocity when there is negligible rotational velocity
   trans_stopped_vel: 0.01
   # Warning!
   # do not set min_trans_vel to 0.0 otherwise dwa will always think translational velocities
