@@ -247,7 +247,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	move_pan_tilt_client.call(srv);
 
 	srv.request.pan_goal = 0.4;
-	srv.request.tilt_goal = 1.1;
+	srv.request.tilt_goal = 1.05;
 
 	move_pan_tilt_client.call(srv);
 
