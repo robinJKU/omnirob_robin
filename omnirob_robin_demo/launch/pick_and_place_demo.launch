@@ -4,10 +4,12 @@
 	<include file="$(find omnirob_robin_navigation)/launch/complete.launch"></include>
 	
 	<!-- start object detection nodes -->
+ 	<include file="$(find omnirob_robin_object_detection)/launch/object_detection.launch"></include>	
+
 	
-	<!-- start lwa nodes -->
-	
-	
+	<!-- start lwa nodes 
+	<include file="$(find omnirob_robin_moveit)/launch/move_group.launch"></include>
+	-->
 	
 
 	<!-- start main demo node -->

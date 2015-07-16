@@ -41,9 +41,11 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>omnirob_robin_msgs</build_depend>
+  <build_depend>omnirob_robin_moveit</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>omnirob_robin_tools_ros</build_depend>
   <run_depend>omnirob_robin_tools_ros</run_depend>
+  
 
 
   <!-- The export tag contains other, unspecified, tags -->
