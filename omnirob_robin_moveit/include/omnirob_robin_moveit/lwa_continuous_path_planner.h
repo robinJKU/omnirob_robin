@@ -159,15 +159,9 @@ class lwa_continuous_path_planner{
 			// plan path
 			return plan_to_configuration( plan, goal_configuration);
 		}
-		/**
-		* This blocking function plans a path to the specified goal pose of the end effector link.
-		* @param plan: returns the planned path
-		* @param goal_pose: Goal pose of the end effector link describet in target_frame
-		* @param target_frame: The frame in which the goal pose is specified. default: planning_frame (world)
-		* @return true on success
-		* @see moveit::planning_interface::MoveGroup::plan
-		*/
-		bool plan_path_to_pose( moveit::planning_interface::MoveGroup::Plan &plan, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "")
+
+	private:
+		bool plan_path( moveit::planning_interface::MoveGroup::Plan &plan, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "")
 		{
 			std::string t_frame=target_frame;
 
@@ -191,11 +185,6 @@ class lwa_continuous_path_planner{
 					return false;
 			}
 
-			// set start state
-			visualize_current_state();
-			set_start_state();
-			visualize_current_state();
-
 			// plan path
 			lwa_move_group_->setPoseTarget( goal_pose_planning_frame);
 
@@ -206,6 +195,26 @@ class lwa_continuous_path_planner{
 					visualize_plan( plan);
 			}
 			return success;
+		}
+
+	public:
+		/**
+		* This blocking function plans a path to the specified goal pose of the end effector link.
+		* @param plan: returns the planned path
+		* @param goal_pose: Goal pose of the end effector link describet in target_frame
+		* @param target_frame: The frame in which the goal pose is specified. default: planning_frame (world)
+		* @return true on success
+		* @see moveit::planning_interface::MoveGroup::plan
+		*/
+		bool plan_path_to_pose( moveit::planning_interface::MoveGroup::Plan &plan, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "")
+		{
+			// set start state
+			visualize_current_state();
+			set_start_state();
+			visualize_current_state();
+
+			// plan path
+			return plan_path( plan, goal_pose, target_frame);
 		}
 
 		/**
@@ -303,7 +312,7 @@ class lwa_continuous_path_planner{
  			visualize_current_state();
 
  			// plan path
- 			return plan_path_to_pose(plan, goal_pose, t_frame);
+ 			return plan_path( plan, goal_pose, t_frame);
  		}
 
  		/**

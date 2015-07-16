@@ -62,7 +62,7 @@ public:
 		to_object_rotated_from_gripper.setBasis( rotated );
 
 		float shifted = 0.17; // distance between gripper and tcp
-		tf::Vector3 shift_vec = tf::Vector3( 0.0, -0.04, -shifted );
+		tf::Vector3 shift_vec = tf::Vector3( 0.0, -0.05, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
 		// define transformation between object frame and lwa link
@@ -200,7 +200,7 @@ private:
 
 			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_pick_pose, last_configuration, lwa_link_7_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
-				break;
+				break;//
 			}
 			if( (!ros::ok) || (!pick_action_server_.isActive()))
 				break;
@@ -242,6 +242,8 @@ private:
 			pick_action_server_.setAborted( result);
 			return;
 		}
+
+		blocker_.block();
 
 		// move to pick pose
 		ROS_INFO("start first execution");
