@@ -62,7 +62,7 @@ public:
 		to_object_rotated_from_gripper.setBasis( rotated );
 
 		float shifted = 0.17; // distance between gripper and tcp
-		tf::Vector3 shift_vec = tf::Vector3( 0.0, 0.0, -shifted );
+		tf::Vector3 shift_vec = tf::Vector3( 0.0, -0.04, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
 		// define transformation between object frame and lwa link

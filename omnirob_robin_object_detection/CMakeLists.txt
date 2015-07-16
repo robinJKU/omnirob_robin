@@ -38,3 +38,4 @@ target_link_libraries(omnirob_robin_object_detection ${catkin_LIBRARIES})
 
 add_executable(marker_calibration src/marker_calibration.cpp)
 target_link_libraries(marker_calibration ${catkin_LIBRARIES})
+add_dependencies(marker_calibration omnirob_robin_msgs_gencpp)

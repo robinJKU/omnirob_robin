@@ -4,7 +4,7 @@
     <rosparam command="load" file="$(find omnirob_robin_object_detection)/objects/objects.yaml" />
 
     <node name="omnirob_robin_object_detection" pkg="omnirob_robin_object_detection" type="omnirob_robin_object_detection" ns="omnirob_robin" respawn="false" output="screen">
-      <remap from="/input_cloud" to="/kinect2/depth_lowres/points" /> 
+      <remap from="/input_cloud" to="/kinect2/hd/points" /> 
     </node>
     
 </launch>

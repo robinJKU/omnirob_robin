@@ -25,8 +25,8 @@
     <!-- verweiste auf die mitte des lwa unterhalb der befestigungsplatte
          x = roboterlaenge / 2 - plattenlaenge halbe - versatz
          y = mittig
-         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhoehe + profilhoehe -->   
-    <origin xyz="${0.7/2-0.355/2-0.094} 0 ${0.254/2+0.09+0.457+0.04}" rpy="${M_PI} 0 0"/> 
+         z = raddurchmesser/2 + achsabstand zur unterseite der platform + platformhoehe + profilhoehe + Sockeloffset -->   
+    <origin xyz="${0.7/2-0.355/2-0.094} 0 ${0.254/2+0.09+0.457+0.04+0.06}" rpy="${M_PI} 0 0"/> 
   </xacro:property>
   
   <xacro:property name="gripper_origin"> 

@@ -19,7 +19,7 @@ void robin_odlib::seperateTable(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poi
   
   //remove everything below minimum table height and eventual the robot  
   cropBoxFilter.setMin(Eigen::Vector4f(0.045, -5, -0.1, 0.0));
-  cropBoxFilter.setMax(Eigen::Vector4f(5, 5, min_table_height, 0.0));	
+  cropBoxFilter.setMax(Eigen::Vector4f(1.6, 5, min_table_height, 0.0));
   
   cropBoxFilter.setNegative(true);
   cropBoxFilter.filter(*cloud);
@@ -125,7 +125,7 @@ void robin_odlib::seperateTable(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poi
   
   //remove table and set table cloud  
   //remove everything below the table plane
-  cropBoxFilter.setMin(Eigen::Vector4f(0.0, -5.0, z-0.005, 0.0));
+  cropBoxFilter.setMin(Eigen::Vector4f(0.35, -5.0, z-0.005, 0.0));
   cropBoxFilter.setMax(Eigen::Vector4f(5.0, 5.0, z+1, 0.0));
   
   cropBoxFilter.setTranslation(Eigen::Vector3f (0, 0, 0));
@@ -139,7 +139,7 @@ void robin_odlib::seperateTable(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poi
   
   //seperate the table for visualisation
   cropBoxFilter.setMin(Eigen::Vector4f(0.0, -5.0, z-0.005, 0.0));
-  cropBoxFilter.setMax(Eigen::Vector4f(5.0, 5.0, z+0.005, 0.0));
+  cropBoxFilter.setMax(Eigen::Vector4f(5.0, 5.0, z+0.02, 0.0));
     
   cropBoxFilter.setNegative(false);
   cropBoxFilter.filter(*table_cloud); 
@@ -161,13 +161,63 @@ void robin_odlib::Segmentation(pcl::PointCloud<PointType>::Ptr  cloud,  std::vec
     pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
     tree->setInputCloud (cloud);
 
+	//remove all clusters smaller than 100 points
     pcl::EuclideanClusterExtraction<PointType> ec;
-    ec.setClusterTolerance (0.02); // 20mm distance between points
-    ec.setMinClusterSize (100);
-    ec.setMaxClusterSize (4000);
+    ec.setClusterTolerance (0.005); // 10mm distance between points
+    ec.setMinClusterSize (1);
+    ec.setMaxClusterSize (10000);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
-    ec.extract (clusters);        
+    ec.extract (clusters);    
+    
+    printf("number of clusters with 1 or more points %d \n", clusters.size());
+    
+
+
+    if(clusters.size() > 0){
+		pcl::PointIndices clean_cluster;
+		clean_cluster.header = clusters[0].header;
+		//extract all cluster into new cloud
+		for(int i = 0; i < clusters.size(); i++){
+			printf("clusters size = %d \n", clusters[i].indices.size());
+			if(clusters[i].indices.size() > 400){
+			clean_cluster.indices.reserve( clean_cluster.indices.size() + clusters[i].indices.size());
+			clean_cluster.indices.insert(clean_cluster.indices.end(), clusters[i].indices.begin(), clusters[i].indices.end());		
+			}
+		}
+		
+	pcl::PointCloud<PointType>::Ptr objectsCloud (new pcl::PointCloud<PointType>);	
+	pcl::ExtractIndices<PointType> extract_indices; 
+	pcl::IndicesPtr object_indices (new std::vector <int>);
+	*object_indices = clean_cluster.indices; 
+
+	printf("number of points before filtering %d \n", cloud->size());
+  
+	extract_indices.setInputCloud (cloud);
+	extract_indices.setIndices (object_indices);
+	extract_indices.setNegative (false);
+	extract_indices.filter(*cloud);
+	
+	printf("number of points afterfiltering %d \n", objectsCloud->size());
+
+	clusters.clear();
+	
+	tree = pcl::search::KdTree<PointType>::Ptr(new pcl::search::KdTree<PointType>);
+	ec = pcl::EuclideanClusterExtraction<PointType>();
+	tree->setInputCloud (cloud);
+	
+	//remove all clusters smaller than 100 points
+    ec.setClusterTolerance (0.02); // 20mm distance between points
+    ec.setMinClusterSize (1000);
+    ec.setMaxClusterSize (10000);
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (cloud);
+    ec.extract (clusters);
+
+
+    //clusters.push_back(clean_cluster);
+		     
+    }    
     
     int size = clusters.size();
     printf("%d clusters found \n", size);
@@ -187,15 +237,18 @@ bool robin_odlib::searchObject(pcl::PointCloud<PointType>::Ptr  cloud, pcl::Poin
   *object_indices = cluster.indices; 
   
   extract_indices.setInputCloud (cloud);
-	extract_indices.setIndices (object_indices);
-	extract_indices.setNegative (false);
-	extract_indices.filter(*objectCloud);
+  extract_indices.setIndices (object_indices);
+  extract_indices.setNegative (false);
+  extract_indices.filter(*objectCloud);
   
   std::vector <double> size;
   
+  printf("Fitting Bounding box to object pointcloud \n");
   fitBoundingBox(objectCloud, size, pose, table_height);
   
   std::vector <double> rpy;
+
+  printf("comparing size for correct orientation \n");
   compareSize(size, object.getSize(), rpy);
   pose[3] = rpy[0];
   pose[4] = rpy[1];
@@ -240,6 +293,8 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
     centroid[1] = min[1] + size[1]/2.0; 
     centroid[2] = table_height + size[2]/2.0; 
     
+    
+    
     double vol = size[0]*size[1]*size[2];
     if(vol < 0){
       
@@ -260,11 +315,13 @@ void robin_odlib::fitBoundingBox(pcl::PointCloud<PointType>::Ptr cloud, std::vec
   pcl::getMinMax3D(*cloud_transformed, min, max); 
   size[0] = max[0]-min[0];
   size[1] = max[1]-min[1];
-  size[2] = max[2]-table_height;  
+  size[2] = max[2]-table_height; 
+  
+  printf("object size %f %f %f \n", size[0], size[1], size[2]);
   
   centroid[0] = min[0] + size[0]/2.0; 
   centroid[1] = min[1] + size[1]/2.0; 
-  centroid[2] = table_height + size[2]/2.0; 
+  centroid[2] = table_height + size[2]/2.0;
   
   //rotate center back to inertial frame
   centroid = transform.inverse()*centroid;
@@ -285,14 +342,16 @@ bool robin_odlib::compareSize(std::vector <double> size, std::vector <double> ob
   double vol = size[0] * size[1] * size[2];
   double object_vol = object_size[0] * object_size[1] * object_size[2];
   
+  printf("vol %f object_vol %f", vol, object_vol);
+  
   rpy.resize(3);
   rpy[0] = 0;
   rpy[1] = 0;
   rpy[2] = 0;
   
    
-  if(fabs(vol - object_vol) < object_vol * 0.2){
-    printf("Checking Bounding Box orientation \n");    
+  if(fabs(vol - object_vol) < object_vol * 0.4){
+   printf("Checking Bounding Box orientation \n");    
     
    int i;
    double error = 10;
