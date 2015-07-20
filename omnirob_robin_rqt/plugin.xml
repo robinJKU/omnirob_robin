@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="OmnirobDashboard" type="omnirob_dashboard.omnirob_dashboard.OmnirobDashboard" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Dashboard for our Omnirob providing service callers.
+    </description>
+    <qtgui>
+      <!-- optional grouping...
+      <group>
+        <label>Group</label>
+      </group>
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>My first Python Plugin</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Great user interface to provide real value.</statustip>
+    </qtgui>
+  </class>
+</library>
