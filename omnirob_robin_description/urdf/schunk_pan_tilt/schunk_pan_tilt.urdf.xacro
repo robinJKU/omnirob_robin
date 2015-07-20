@@ -12,7 +12,7 @@
 			<insert_block name="origin"/> 
 			<axis xyz="0 0 1"/> 
 			<parent link="${parent}"/>
-      <calibration rising="0.0"/>
+      <calibration rising="0.0" falling="0.0"/>
       <dynamics damping="0.2" friction="10.0" />
       <limit effort="10" velocity="0.5" lower="-2.0" upper="2.0"/>
 			<child link="pan_tilt/pan_link" />
@@ -47,7 +47,7 @@
     <joint name="pan_tilt/tilt_joint" type="continuous">
 			<origin xyz="0 0 0.0951" rpy="0 0 0" />  
 			<axis xyz="0 1 0"/>   
-      <calibration rising="0.0"/>
+      <calibration rising="0.0" falling="0.0"/>
       <dynamics damping="0.2" friction="10.0" />
       <limit effort="10" velocity="0.5" lower="-1.57" upper="1.57"/>
 			<parent link="pan_tilt/pan_link"/>

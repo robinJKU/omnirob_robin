@@ -4,9 +4,9 @@
    
   <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.library.xacro" />
 
-  <!-- load the base of the robot -->
+  <!-- load the base of the robot   -->
   <xacro:base />
-  
+
   
   <xacro:camera_mast parent="base_link">
     <!-- set in properties xacro -->
