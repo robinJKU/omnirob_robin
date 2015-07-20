@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- start diagnostics node -->
+	<node pkg="omnirob_robin_diagnostics" type="omnirob_robin_diagnostics" name="omnirob_robin_diagnostics" output="screen"></node>
+	
+	<node pkg="diagnostic_aggregator" type="aggregator_node" name="diag_agg" >
+		<rosparam command="load" file="$(find omnirob_robin_diagnostics)/config/analyzer.yaml" />
+	</node>
+	
+</launch>

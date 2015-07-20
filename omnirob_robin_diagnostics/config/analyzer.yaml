@@ -1,0 +1,17 @@
+analyzers:
+  lwa:
+    type: GenericAnalyzer
+    path: lwa
+    startswith: lwa
+    num_items: 15
+  gripper:
+    type: GenericAnalyzer
+    path: gripper
+    startswith: gripper
+    num_items: 15
+  pan_tilt:
+    type: GenericAnalyzer
+    path: pan_tilt
+    startswith: pan_tilt
+    num_items: 15
+
