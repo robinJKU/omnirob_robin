@@ -6,8 +6,8 @@ import time
 import roslib
 
 from python_qt_binding import loadUi
-from python_qt_binding.QtCore import Qt, Slot, qWarning, QTimer
-from python_qt_binding.QtGui import QIcon, QMenu, QTreeWidgetItem, QWidget, QLabel
+from python_qt_binding.QtCore import Qt, Slot, qWarning, QTimer, QEvent
+from python_qt_binding.QtGui import QIcon, QMenu, QTreeWidgetItem, QWidget, QLabel, QCheckBox
 
 import rospkg
 import rospy
@@ -17,6 +17,7 @@ import rosservice
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 from urdf_parser_py.urdf import URDF
 from std_msgs.msg import Float64MultiArray
+from geometry_msgs.msg import Twist
 
 
 class OmnirobDashboardWidget(QWidget):
@@ -25,7 +26,7 @@ class OmnirobDashboardWidget(QWidget):
     def __init__(self):
         super(OmnirobDashboardWidget, self).__init__()
         self.setObjectName('OmnirobDashboardWidget')
-
+        
         # create context for the expression eval statement
         self._eval_locals = {}
         for module in (math, random, time):
@@ -78,35 +79,31 @@ class OmnirobDashboardWidget(QWidget):
         rospy.Subscriber('omnirob_robin/lwa/state/joint_state_array', Float64MultiArray, self.lwa_state_callback)
         rospy.Subscriber('omnirob_robin/pan_tilt/state/joint_state_array', Float64MultiArray, self.pan_tilt_state_callback)
         rospy.Subscriber('omnirob_robin/gripper/state/joint_state_array', Float64MultiArray, self.gripper_state_callback)
+           
+        self.base_active.stateChanged.connect(self.on_base_active_stateChanged)
+        self._twist = Twist() 
+        self.base_activated = False
+        self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1) 
                 
         self._timer_refresh_state = QTimer(self)
-        self._timer_refresh_state.timeout.connect(self._kick_refresh_state)
-        #self.start()
+        self._timer_refresh_state.timeout.connect(self._publish_twist)
+        self.start()
         
     def start(self):
         self._timer_refresh_state.start(100)                  
 
-    def save_settings(self, plugin_settings, instance_settings):
-        instance_settings.set_value('splitter_orientation', self.splitter.orientation())
-        
+    #def save_settings(self, plugin_settings, instance_settings):
+
     def shutdown_plugin(self):
         self._timer_refresh_state.stop()
 
-    def restore_settings(self, plugin_settings, instance_settings):
-        if int(instance_settings.value('splitter_orientation', Qt.Vertical)) == int(Qt.Vertical):
-            self.splitter.setOrientation(Qt.Vertical)
-        else:
-            self.splitter.setOrientation(Qt.Horizontal)
+    #def restore_settings(self, plugin_settings, instance_settings):
 
-    def trigger_configuration(self):
-        new_orientation = Qt.Vertical if self.splitter.orientation() == Qt.Horizontal else Qt.Horizontal
-        self.splitter.setOrientation(new_orientation) 
-        
-    def _kick_refresh_state(self):
-        try:
-            self.refresh_state()
-        except Exception as e:
-            self.sig_sysmsg.emit(e.message)  
+    #def trigger_configuration(self):
+
+    def _publish_twist(self):
+        if self.base_activated:
+            self._pub.publish(self._twist)
             
     def lwa_state_callback(self, data):
         self.lwa_state_1.setText("{:.3f}".format(data.data[0]))
@@ -123,8 +120,7 @@ class OmnirobDashboardWidget(QWidget):
         
     def gripper_state_callback(self, data):
         self.gripper_state.setText("{:.3f}".format(data.data[0]))
-        
-    
+       
         
     @Slot()
     def refresh_state(self):
@@ -188,7 +184,110 @@ class OmnirobDashboardWidget(QWidget):
 
         return item
 
-            
+
+##### Base
+    def _base_move(self, x, y, yaw):
+        twist = Twist()
+        twist.linear.x = x;
+        twist.linear.y = y;
+        twist.angular.x = 0.0;
+        twist.angular.y = 0.0;
+        twist.angular.z = yaw; 
+        self._twist =  twist
+
+    def _base_stop_motion(self):
+        self._base_move(0.0, 0.0, 0.0)
+        
+    @Slot()
+    def on_base_active_stateChanged(self):
+        if self.base_active.isChecked():
+           self.base_activated = True
+        else:
+           self.base_activated = False
+        
+    @Slot()
+    def on_base_forward_pressed(self):
+        self._base_move(0.3, 0.0, 0.0)
+ 
+    @Slot()
+    def on_base_forward_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_back_pressed(self):
+        self._base_move(-0.3, 0.0, 0.0)
+ 
+    @Slot()
+    def on_base_back_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_left_pressed(self):
+        self._base_move(0.0, 0.2, 0.0)
+ 
+    @Slot()
+    def on_base_left_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_right_pressed(self):
+        self._base_move(0.0, -0.2, 0.0)
+ 
+    @Slot()
+    def on_base_right_released(self):
+        self._base_stop_motion()
+
+    @Slot()
+    def on_base_turn_left_pressed(self):
+        self._base_move(0.0, 0.0, 1.0)
+ 
+    @Slot()
+    def on_base_turn_left_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_turn_right_pressed(self):
+        self._base_move(0.0, 0.0, -1.0)
+ 
+    @Slot()
+    def on_base_turn_right_released(self):
+        self._base_stop_motion()
+        
+    #diagonal
+    @Slot()
+    def on_base_forward_left_pressed(self):
+        self._base_move(0.2, 0.2, 0.0)
+     
+    @Slot()
+    def on_base_forward_left_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_forward_right_pressed(self):
+        self._base_move(0.2, -0.2, 0.0)
+     
+    @Slot()
+    def on_base_forward_right_released(self):
+        self._base_stop_motion()
+        
+     
+    @Slot()   
+    def on_base_back_left_pressed(self):
+        self._base_move(-0.2, 0.2, 0.0)
+     
+    @Slot()
+    def on_base_back_left_released(self):
+        self._base_stop_motion()
+        
+    @Slot()
+    def on_base_back_right_pressed(self):
+        self._base_move(-0.2, -0.2, 0.0)
+     
+    @Slot()
+    def on_base_back_right_released(self):
+        self._base_stop_motion()
+       
+        
             
             
 ##### LWA
