@@ -42,39 +42,40 @@ class OmnirobDashboardWidget(QWidget):
         self._column_index = {}
         for column_name in self.column_names:
             self._column_index[column_name] = len(self._column_index)
-               
-        robot = URDF.from_parameter_server()
-        for joint in robot.joints:          
-            if joint.name == 'lwa/joint_1':
-                self.lwa_goal_1.setMinimum(joint.limit.lower)
-                self.lwa_goal_1.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_2':
-                self.lwa_goal_2.setMinimum(joint.limit.lower)
-                self.lwa_goal_2.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_3':
-                self.lwa_goal_3.setMinimum(joint.limit.lower)
-                self.lwa_goal_3.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_4':
-                self.lwa_goal_4.setMinimum(joint.limit.lower)
-                self.lwa_goal_4.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_5':
-                self.lwa_goal_5.setMinimum(joint.limit.lower)
-                self.lwa_goal_5.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_6':
-                self.lwa_goal_6.setMinimum(joint.limit.lower)
-                self.lwa_goal_6.setMaximum(joint.limit.upper)
-            if joint.name == 'lwa/joint_7':
-                self.lwa_goal_7.setMinimum(joint.limit.lower)
-                self.lwa_goal_7.setMaximum(joint.limit.upper)
-            if joint.name == 'pan_tilt/pan_joint':
-                self.pan_tilt_goal_1.setMinimum(joint.limit.lower)
-                self.pan_tilt_goal_1.setMaximum(joint.limit.upper)
-            if joint.name == 'pan_tilt/tilt_joint':
-                self.pan_tilt_goal_2.setMinimum(joint.limit.lower)
-                self.pan_tilt_goal_2.setMaximum(joint.limit.upper)
-            if joint.name == 'gripper/finger_left_joint':
-                self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
-                self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
+        
+        if rospy.has_param('robot_description'):     
+            robot = URDF.from_parameter_server()
+            for joint in robot.joints:          
+                if joint.name == 'lwa/joint_1':
+                    self.lwa_goal_1.setMinimum(joint.limit.lower)
+                    self.lwa_goal_1.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_2':
+                    self.lwa_goal_2.setMinimum(joint.limit.lower)
+                    self.lwa_goal_2.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_3':
+                    self.lwa_goal_3.setMinimum(joint.limit.lower)
+                    self.lwa_goal_3.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_4':
+                    self.lwa_goal_4.setMinimum(joint.limit.lower)
+                    self.lwa_goal_4.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_5':
+                    self.lwa_goal_5.setMinimum(joint.limit.lower)
+                    self.lwa_goal_5.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_6':
+                    self.lwa_goal_6.setMinimum(joint.limit.lower)
+                    self.lwa_goal_6.setMaximum(joint.limit.upper)
+                if joint.name == 'lwa/joint_7':
+                    self.lwa_goal_7.setMinimum(joint.limit.lower)
+                    self.lwa_goal_7.setMaximum(joint.limit.upper)
+                if joint.name == 'pan_tilt/pan_joint':
+                    self.pan_tilt_goal_1.setMinimum(joint.limit.lower)
+                    self.pan_tilt_goal_1.setMaximum(joint.limit.upper)
+                if joint.name == 'pan_tilt/tilt_joint':
+                    self.pan_tilt_goal_2.setMinimum(joint.limit.lower)
+                    self.pan_tilt_goal_2.setMaximum(joint.limit.upper)
+                if joint.name == 'gripper/finger_left_joint':
+                    self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
+                    self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
                 
         rospy.Subscriber('omnirob_robin/lwa/state/joint_state_array', Float64MultiArray, self.lwa_state_callback)
         rospy.Subscriber('omnirob_robin/pan_tilt/state/joint_state_array', Float64MultiArray, self.pan_tilt_state_callback)
@@ -127,64 +128,18 @@ class OmnirobDashboardWidget(QWidget):
         self.test_label.setText('test')   
         
     def call_service( self, string ):
-        self.response_tree_widget.clear()
         service_name = string
         service_class = rosservice.get_service_class_by_name( service_name )
-        reference_pan_tilt = rospy.ServiceProxy(service_name, service_class)
+        service = rospy.ServiceProxy(service_name, service_class)
         request = service_class._request_class()
-        #self.fill_message_slots(request, service_name, self._service_info['expressions'], self._service_info['counter'])
         try:
-            response = reference_pan_tilt()
+            response = service()
         except rospy.ServiceException as e:
-            qWarning('OmnirobDashboard.on_call_service_button_clicked(): request:\n%r' % (request))
-            qWarning('OmnirobDashboard.on_call_service_button_clicked(): error calling service "%s":\n%s' % (self._service_info['service_name'], e))
-            top_level_item = QTreeWidgetItem()
-            top_level_item.setText(self._column_index['service'], 'ERROR')
-            top_level_item.setText(self._column_index['type'], 'rospy.ServiceException')
-            top_level_item.setText(self._column_index['expression'], str(e))
-        else:
-            #qDebug('OmnirobDashboard.on_call_service_button_clicked(): response: %r' % (response))
-            top_level_item = self._recursive_create_widget_items(None, '/', response._type, response, is_editable=False)
-
-        self.response_tree_widget.addTopLevelItem(top_level_item)
-        # resize columns
-        self.response_tree_widget.expandAll()
-        for i in range(self.response_tree_widget.columnCount()):
-            self.response_tree_widget.resizeColumnToContents(i)
+            qWarning('service_caller: request:\n%r' % (request))
+            qWarning('service_caller: error calling service "%s":\n%s' % (self._service_info['service_name'], e))           
+        #else:
+            #print(response)
             
-    def _recursive_create_widget_items(self, parent, topic_name, type_name, message, is_editable=True):
-        item = QTreeWidgetItem(parent)
-        if is_editable:
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
-        else:
-            item.setFlags(item.flags() & (~Qt.ItemIsEditable))
-
-        if parent is None:
-            # show full topic name with preceding namespace on toplevel item
-            topic_text = topic_name
-        else:
-            topic_text = topic_name.split('/')[-1]
-
-        item.setText(self._column_index['service'], topic_text)
-        item.setText(self._column_index['type'], type_name)
-
-        item.setData(0, Qt.UserRole, topic_name)
-
-        if hasattr(message, '__slots__') and hasattr(message, '_slot_types'):
-            for slot_name, type_name in zip(message.__slots__, message._slot_types):
-                self._recursive_create_widget_items(item, topic_name + '/' + slot_name, type_name, getattr(message, slot_name), is_editable)
-
-        elif type(message) in (list, tuple) and (len(message) > 0) and hasattr(message[0], '__slots__'):
-            type_name = type_name.split('[', 1)[0]
-            for index, slot in enumerate(message):
-                self._recursive_create_widget_items(item, topic_name + '[%d]' % index, type_name, slot, is_editable)
-
-        else:
-            item.setText(self._column_index['expression'], repr(message))
-
-        return item
-
-
 ##### Base
     def _base_move(self, x, y, yaw):
         twist = Twist()
@@ -197,6 +152,19 @@ class OmnirobDashboardWidget(QWidget):
 
     def _base_stop_motion(self):
         self._base_move(0.0, 0.0, 0.0)
+        
+    @Slot()
+    def on_base_can_start_clicked(self):
+        print('test')
+        self.call_service( '/omnirob_robin/base/canserver/start' )
+        rospy.sleep(1.0)
+        self.call_service( '/omnirob_robin/base/drives/control/start' )
+     
+    @Slot()    
+    def on_base_can_stop_clicked(self):
+        self.call_service( '/omnirob_robin/base/drives/control/stop' )
+        rospy.sleep(1.0)
+        self.call_service( '/omnirob_robin/base/canserver/stop' )
         
     @Slot()
     def on_base_active_stateChanged(self):
@@ -451,6 +419,17 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_gripper_enable_point_clicked(self):
         self.call_service( '/omnirob_robin/gripper/control/enable_point_to_point_motion' )
+        
+    @Slot()
+    def on_gripper_move_clicked(self):
+        pub = rospy.Publisher('omnirob_robin/gripper/control/commanded_joint_state', Float64MultiArray, queue_size=1)
+        msg = Float64MultiArray()
+        msg.data = [0.0]
+        msg.data[0] = self.gripper_goal.value()   
+        rospy.sleep(1.0)
+        pub.publish(msg)
+        rospy.sleep(1.0)
+        self._gripper_start_motion()
         
     @Slot()
     def on_gripper_open_clicked(self):
