@@ -105,6 +105,10 @@ class pick_and_place_executer{
 		state_=IDLE;
 	}
 
+	void cancel_goal(){
+		pick_action_client_.cancelGoal();
+	}
+
 	public: // state monitoring
 		enum State {IDLE, EXECUTING};
 		/**
@@ -140,9 +144,10 @@ int main(int argc, char **argv)
 	object_primitive.dimensions.push_back(4e-2); // radius
 
 	ROS_INFO("give call");
-	lwa_pick_and_place.pick_object( object_id, object_primitive);
+	lwa_pick_and_place.pick_object( object_id, object_primitive, false);
 
 	ros::spin();
+
 	return 0;
 
 }// main

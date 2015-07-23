@@ -95,7 +95,7 @@ public:
 	}
 
 private:
-	void pick_and_place_goal_callback( void)
+	void pick_and_place_goal_callback( void )
 	{
 		ROS_INFO("got pick request");
 		omnirob_robin_moveit::pick_and_placeResult result;
@@ -137,7 +137,7 @@ private:
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose_reversed, plan_pick_pose_reversed;
 
 		geometry_msgs::Pose lwa_link_7_above_target_pose = geometry_msgs::Pose(lwa_link_7_target_pose);
-		lwa_link_7_above_target_pose.position.z += 1e-1;
+		lwa_link_7_above_target_pose.position.z += 0.15;
 
 		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_above_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose_above")); // todo: remove
 
@@ -165,13 +165,7 @@ private:
 		if( !ros::ok())
 			return;
 
-		if( !pick_action_server_.isActive())
-		{
-			result.error_message = "Action canceled";
-			ROS_ERROR("%s", result.error_message.c_str());
-			pick_action_server_.setAborted( result);
-			return;
-		}
+
 		if(ii==5)
 		{
 			result.error_message = "Can't find a valid path to the intermediate point";
@@ -182,6 +176,10 @@ private:
 
 		// blocking node todo: remove
 		blocker_.block( boost::bind( &pick_and_place_action_server::visualize_plan, this));
+		if( !pick_action_server_.isActive())
+			{
+				return;
+			}
 
 		// plan path to pick pose
 		ROS_INFO("Plan path to pick pose");
@@ -208,13 +206,7 @@ private:
 		}
 		if( !ros::ok())
 			return;
-		if( !pick_action_server_.isActive())
-		{
-			result.error_message = "Action canceled";
-			ROS_ERROR("%s", result.error_message.c_str());
-			pick_action_server_.setAborted( result);
-			return;
-		}
+
 		if(ii==5)
 		{
 			result.error_message = "Can't find a valid path to the intermediate point";
@@ -225,6 +217,10 @@ private:
 
 		// todo: remove
 		blocker_.block( boost::bind( &pick_and_place_action_server::visualize_plan, this));
+		if( !pick_action_server_.isActive())
+			{
+				return;
+			}
 
 		// reverse plans
 		plan_above_pick_pose_reversed = moveit_tools::reverse_plan( plan_above_pick_pose);
@@ -232,18 +228,24 @@ private:
 
 		// open gripper
 		omnirob_robin_msgs::move_gripper move_gripper_msgs;
-		open_gripper_client.call( move_gripper_msgs);
+		open_gripper_client.call( move_gripper_msgs );
 		if( !move_gripper_msgs.response.error_message.empty() )
 		{
 			result.error_message = "Opening gripper failed";
 			ROS_ERROR("%s", result.error_message.c_str());
 
 			// cancel request
-			pick_action_server_.setAborted( result);
+			pick_action_server_.setAborted(result);
 			return;
 		}
 
+
+
 		blocker_.block();
+		if( !pick_action_server_.isActive())
+			{
+				return;
+			}
 
 		// move to pick pose
 		ROS_INFO("start first execution");
@@ -278,6 +280,8 @@ private:
 			result.error_message = "Closing  gripper failed";
 			ROS_ERROR("%s", result.error_message.c_str());
 
+			blocker_.block();
+
 			// move home
 			lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose_reversed);
 			lwa_.execute_continuous_path_.execute_path_blocking( plan_above_pick_pose_reversed);
@@ -288,6 +292,10 @@ private:
 		}
 
 		blocker_.block();
+		if( !pick_action_server_.isActive())
+			{
+				return;
+			}
 
 		// move home
 		error_message = lwa_.execute_continuous_path_.execute_path_blocking( plan_pick_pose_reversed);
@@ -321,8 +329,10 @@ private:
 
 	void pick_and_place_preempt_callback( void)
 	{
-		ROS_ERROR("pick and place action is preempted!");
-		pick_action_server_.setPreempted();
+		omnirob_robin_moveit::pick_and_placeResult result;
+		result.error_message = "Goal preempted received new goal";
+		ROS_ERROR("pick and place action is preempted");
+		pick_action_server_.setPreempted(result);
 	}
 
 private:
