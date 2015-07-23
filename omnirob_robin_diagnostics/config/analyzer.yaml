@@ -3,15 +3,15 @@ analyzers:
     type: GenericAnalyzer
     path: lwa
     startswith: lwa
-    num_items: 15
+    num_items: 16
   gripper:
     type: GenericAnalyzer
     path: gripper
     startswith: gripper
-    num_items: 15
+    num_items: 16
   pan_tilt:
     type: GenericAnalyzer
     path: pan_tilt
     startswith: pan_tilt
-    num_items: 15
+    num_items: 16
 

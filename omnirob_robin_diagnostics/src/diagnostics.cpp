@@ -14,7 +14,7 @@
 // global variables
 ros::Publisher diagnostics_pub; // diagnostics publisher
 
-void publish_msg(std_msgs::Float64MultiArray msg, std::string name, std::string id, int status, int correct_value){
+void publish_msg(std_msgs::Float64MultiArray msg, std::string name, std::string id, int status, int correct_value, int precision){
 	diagnostic_msgs::DiagnosticArray diag_arr;
 	diag_arr.header.stamp = ros::Time::now();
 	diagnostic_msgs::DiagnosticStatus diag_status;
@@ -33,8 +33,8 @@ void publish_msg(std_msgs::Float64MultiArray msg, std::string name, std::string 
 		ss << diag_status.name << "_" << i;
 		key_val.key = ss.str();
 		ss.str(std::string());
-		ss << (int) msg.data[i];
-		message << (int) msg.data[i];
+		ss << std::fixed << std::setprecision( precision ) << msg.data[i];
+		message << std::fixed << std::setprecision( precision ) <<  msg.data[i];
 		if(i < msg.data.size() -1){
 			message << ", ";
 		}
@@ -52,15 +52,19 @@ void publish_msg(std_msgs::Float64MultiArray msg, std::string name, std::string 
 }
 
 void publish_error(std_msgs::Float64MultiArray msg, std::string name, std::string id, int correct_val){
-	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::ERROR, correct_val);
+	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::ERROR, correct_val, 0);
 }
 
 void publish_warning(std_msgs::Float64MultiArray msg, std::string name, std::string id){
-	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::WARN, 0);
+	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::WARN, 0, 0);
 }
 
 void publish_info(std_msgs::Float64MultiArray msg, std::string name, std::string id){
-	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::OK, 1);
+	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::OK, 1, 0);
+}
+
+void publish_info_float(std_msgs::Float64MultiArray msg, std::string name, std::string id){
+	publish_msg(msg, name, id, diagnostic_msgs::DiagnosticStatus::OK, 1, 2);
 }
 
 void publish_info(std_msgs::Bool msg, std::string name, std::string id){
@@ -71,7 +75,7 @@ void publish_info(std_msgs::Bool msg, std::string name, std::string id){
 		msg2.data.push_back(0);
 	}
 
-	publish_msg(msg2, name, id, diagnostic_msgs::DiagnosticStatus::ERROR, 1);
+	publish_msg(msg2, name, id, diagnostic_msgs::DiagnosticStatus::ERROR, 1, 0);
 }
 
 
@@ -172,7 +176,7 @@ void cb_gripper_error_module_not_referenced(std_msgs::Float64MultiArray msg) {
 }
 
 void cb_gripper_error_move_blocked(std_msgs::Float64MultiArray msg) {
-	publish_error(msg, "gripper_move_blocked", "gripper", 0);
+    publish_info(msg, "gripper_move_blocked", "gripper");
 }
 
 void cb_gripper_error_tow_error(std_msgs::Float64MultiArray msg) {
@@ -212,7 +216,7 @@ void cb_gripper_info_position_reached(std_msgs::Float64MultiArray msg) {
 }
 
 void cb_gripper_info_joint_state_array(std_msgs::Float64MultiArray msg) {
-	publish_info(msg, "gripper_joint_state_array", "gripper");
+	publish_info_float(msg, "gripper_joint_state_array", "gripper");
 }
 
 
@@ -282,7 +286,7 @@ void cb_lwa_info_position_reached(std_msgs::Float64MultiArray msg) {
 }
 
 void cb_lwa_info_joint_state_array(std_msgs::Float64MultiArray msg) {
-	publish_info(msg, "lwa_joint_state_array", "lwa");
+	publish_info_float(msg, "lwa_joint_state_array", "lwa");
 }
 
 
@@ -353,7 +357,7 @@ void cb_pan_tilt_info_position_reached(std_msgs::Float64MultiArray msg) {
 }
 
 void cb_pan_tilt_info_joint_state_array(std_msgs::Float64MultiArray msg) {
-	publish_info(msg, "pan_tilt_joint_state_array", "pan_tilt");
+	publish_info_float(msg, "pan_tilt_joint_state_array", "pan_tilt");
 }
 
 
@@ -385,7 +389,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub_gripper_info_module_is_enabled = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/gripper/state/info/module_is_enabled", 1000, cb_gripper_info_module_is_enabled);
 	ros::Subscriber sub_gripper_info_module_is_ready = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/gripper/state/info/module_is_ready", 1000, cb_gripper_info_module_is_ready);
 	ros::Subscriber sub_gripper_info_position_reached = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/gripper/state/info/position_reached", 1000, cb_gripper_info_position_reached);
-	ros::Subscriber sub_gripper_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/gripper/state/info/joint_state_array", 1000, cb_gripper_info_joint_state_array);
+	ros::Subscriber sub_gripper_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/gripper/state/joint_state_array", 1000, cb_gripper_info_joint_state_array);
 	
     // LWA subscribers
 	ros::Subscriber sub_lwa_error_initialization_error = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/error/initialization_error", 1000, cb_lwa_error_initialization_error);
@@ -403,7 +407,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub_lwa_info_module_is_enabled = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/info/module_is_enabled", 1000, cb_lwa_info_module_is_enabled);
 	ros::Subscriber sub_lwa_info_module_is_ready = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/info/module_is_ready", 1000, cb_lwa_info_module_is_ready);
 	ros::Subscriber sub_lwa_info_position_reached = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/info/position_reached", 1000, cb_lwa_info_position_reached);
-	ros::Subscriber sub_lwa_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/info/joint_state_array", 1000, cb_lwa_info_joint_state_array);
+	ros::Subscriber sub_lwa_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/lwa/state/joint_state_array", 1000, cb_lwa_info_joint_state_array);
 	
     // Pan-tilt subscribers
 	ros::Subscriber sub_pan_tilt_error_initialization_error = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/error/initialization_error", 1000, cb_pan_tilt_error_initialization_error);
@@ -421,7 +425,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub_pan_tilt_info_module_is_enabled = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/info/module_is_enabled", 1000, cb_pan_tilt_info_module_is_enabled);
 	ros::Subscriber sub_pan_tilt_info_module_is_ready = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/info/module_is_ready", 1000, cb_pan_tilt_info_module_is_ready);
 	ros::Subscriber sub_pan_tilt_info_position_reached = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/info/position_reached", 1000, cb_pan_tilt_info_position_reached);
-	ros::Subscriber sub_pan_tilt_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/info/joint_state_array", 1000, cb_pan_tilt_info_joint_state_array);
+	ros::Subscriber sub_pan_tilt_info_joint_state_array = n.subscribe<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/state/joint_state_array", 1000, cb_pan_tilt_info_joint_state_array);
 	
 	while(ros::ok()) {
 		ros::spinOnce();
