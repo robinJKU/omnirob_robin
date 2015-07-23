@@ -18,7 +18,7 @@
  * Supervised by: Christian Connette, email:christian.connette@ipa.fhg.de
  *
  * Date of creation: Jan 2009
- * ToDo:
+ *
  *
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
