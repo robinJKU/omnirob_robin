@@ -161,12 +161,13 @@ class lwa_continuous_path_planner{
 		}
 
 	private:
-		bool plan_path( moveit::planning_interface::MoveGroup::Plan &plan, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "")
+		bool plan_path( moveit::planning_interface::MoveGroup::Plan &plan, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "", bool oriented = false)
 		{
 			std::string t_frame=target_frame;
 
 			// check inputs
 			std::string planning_frame = lwa_move_group_->getPlanningFrame();
+
 			if( t_frame.empty() )
 				t_frame = planning_frame;
 
@@ -185,8 +186,44 @@ class lwa_continuous_path_planner{
 					return false;
 			}
 
+			if(oriented){
+				/*
+				moveit_msgs::Constraints constraints;
+				constraints.name = "gripper constrain";
+				moveit_msgs::OrientationConstraint gripper_constrain;
+
+				gripper_constrain.header.frame_id = "/world";
+				gripper_constrain.link_name = "gripper/palm_link";
+				gripper_constrain.orientation.x = goal_pose_planning_frame.orientation.x;
+				gripper_constrain.orientation.y = goal_pose_planning_frame.orientation.y;
+				gripper_constrain.orientation.z = goal_pose_planning_frame.orientation.z;
+				gripper_constrain.orientation.w = goal_pose_planning_frame.orientation.w;
+				gripper_constrain.absolute_x_axis_tolerance = 1.0;
+				gripper_constrain.absolute_y_axis_tolerance = 1.0;
+				gripper_constrain.absolute_z_axis_tolerance = 0.15;
+				gripper_constrain.weight = 1.0;
+				constraints.orientation_constraints.resize(1);
+				constraints.orientation_constraints[0] = gripper_constrain;
+
+				lwa_move_group_->setPathConstraints(constraints);
+				*/
+				//lwa_move_group_->setPoseTarget( goal_pose_planning_frame );
+				std::vector<geometry_msgs::Pose> waypoints;
+				waypoints.push_back(goal_pose_planning_frame);
+
+				double success = lwa_move_group_->computeCartesianPath(waypoints, 0.1, 1.2, plan.trajectory_);
+				if (success != -1.0){
+					last_plan_= plan;
+					if( visualize_plan_after_planning_){
+						visualize_plan( plan );
+					}
+					return true;
+				}
+				return false;
+			}
+
 			// plan path
-			lwa_move_group_->setPoseTarget( goal_pose_planning_frame);
+			lwa_move_group_->setPoseTarget( goal_pose_planning_frame );
 
 			bool success = lwa_move_group_->plan(plan);
 			if( success){
@@ -216,6 +253,7 @@ class lwa_continuous_path_planner{
 			// plan path
 			return plan_path( plan, goal_pose, target_frame);
 		}
+
 
 		/**
 		* This blocking function plans a path to the specified goal pose of the end effector link.
@@ -314,6 +352,36 @@ class lwa_continuous_path_planner{
  			// plan path
  			return plan_path( plan, goal_pose, t_frame);
  		}
+
+ 		bool plan_path_to_pose_oriented( moveit::planning_interface::MoveGroup::Plan &plan, std::vector<double> start_configuration, const geometry_msgs::Pose &goal_pose, const std::string &target_frame = "")
+			{
+				std::string t_frame=target_frame;
+
+				// check inputs
+				std::string planning_frame = lwa_move_group_->getPlanningFrame();
+				if( t_frame.empty() )
+					t_frame = planning_frame;
+				if( !omnirob_geometry_tools::pose_is_valid( goal_pose) ){
+					ROS_ERROR("Specified goal pose is invalid, cancel motion plan request");
+					return false;
+				}
+				if( start_configuration.size()!=7){
+					ROS_ERROR("Unexpected number of goal configurations, got %u expected %u. Cancel motion plan request", (unsigned int) start_configuration.size(), (unsigned int) 7);
+				}
+
+				moveit::core::RobotState start_state( *(lwa_move_group_->getCurrentState()));
+				start_state.setJointGroupPositions( "lwa", start_configuration);
+				moveit::core::robotStateToRobotStateMsg(start_state, plan.start_state_);
+				plan.planning_time_ = 0.1;
+
+				// set start configuration
+				visualize_current_state();
+				set_start_state( start_configuration);
+				visualize_current_state();
+
+				// plan path
+				return plan_path( plan, goal_pose, t_frame, true);
+			}
 
  		/**
 		 * This blocking function plans a path to a set of goal poses of the end effector link.

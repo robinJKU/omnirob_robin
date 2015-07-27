@@ -53,6 +53,7 @@ public:
 		tf_broadcaster_ = new(tf::TransformBroadcaster);
 
 		// define transformation between object frame and gripper frame
+		// we will grasp around the object z axis!
 		tf::Transform to_object_rotated_from_gripper;
 		to_object_rotated_from_gripper.setIdentity();
 		float alpha = 0.0;
@@ -61,22 +62,22 @@ public:
 		tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -sin_alpha, cos_alpha,    0.0, cos_alpha, sin_alpha,   -1.0,0.0,0.0);
 		to_object_rotated_from_gripper.setBasis( rotated );
 
-		float shifted = 0.17; // distance between gripper and tcp
+		float shifted = 0.0; // distance between gripper and tcp
 		tf::Vector3 shift_vec = tf::Vector3( 0.0, -0.05, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
 		// define transformation between object frame and lwa link
-		tf::StampedTransform to_gripper_from_lwa_link7_stamped;
+		tf::StampedTransform to_gripper_center_from_gripper_palm_link_stamped;
 		try {
-		  tf_listener_->waitForTransform("gripper/center_link", "lwa/link_7", ros::Time(0), ros::Duration(5.0) );
-		  tf_listener_->lookupTransform("gripper/center_link", "lwa/link_7", ros::Time(0), to_gripper_from_lwa_link7_stamped);
+		  tf_listener_->waitForTransform("gripper/center_link", "gripper/palm_link", ros::Time(0), ros::Duration(5.0) );
+		  tf_listener_->lookupTransform("gripper/center_link", "gripper/palm_link", ros::Time(0), to_gripper_center_from_gripper_palm_link_stamped);
 		}
 		  catch(tf::TransformException &e){
-		  ROS_ERROR("No Transform found from lwa/link_7 to gripper/center_link: %s . Can't plan pick and place paths", e.what());
+		  ROS_ERROR("No Transform found from gripper/palm_link to gripper/center_link: %s . Can't plan pick and place paths", e.what());
 		  return;
 		}
-		to_object_from_lwa_link7_ = to_object_rotated_from_gripper*to_gripper_from_lwa_link7_stamped;
-		to_object_from_lwa_link7_ = to_object_rotated_from_gripper;
+
+		to_object_from_palm_link_ = to_object_rotated_from_gripper*to_gripper_center_from_gripper_palm_link_stamped;
 
 		// start server
 		ROS_INFO("Start server");
@@ -129,17 +130,18 @@ private:
 		}
 
 		// plan grasp
-		geometry_msgs::Pose lwa_link_7_target_pose = calc_grasp( to_base_link_from_object);
-		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose")); // todo: remove
+		geometry_msgs::Pose palm_link_target_pose = calc_grasp( to_base_link_from_object);
 
 		// plan path above pick pose
-		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose;
+		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose, plan_home_pose;
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose_reversed, plan_pick_pose_reversed;
 
-		geometry_msgs::Pose lwa_link_7_above_target_pose = geometry_msgs::Pose(lwa_link_7_target_pose);
-		lwa_link_7_above_target_pose.position.z += 0.15;
+		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_target_pose), ros::Time::now(), "base_link", "palm_link/target_pose"));
 
-		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( lwa_link_7_above_target_pose), ros::Time::now(), "base_link", "lwa/link_7/target_pose_above")); // todo: remove
+		geometry_msgs::Pose palm_link_above_target_pose = geometry_msgs::Pose(palm_link_target_pose);
+		palm_link_above_target_pose.position.z += 0.15;
+
+		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_above_target_pose), ros::Time::now(), "base_link", "palm_link/above_target_pose")); // todo: remove
 
 		ROS_INFO("Plan path to intermediate point");
 		unsigned int ii=0;
@@ -154,7 +156,7 @@ private:
 
 			lwa_.plan_continuous_path_.lwa_move_group_->setPathConstraints( constraints);
 
-			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_above_pick_pose, lwa_link_7_above_target_pose, "/base_link") ){
+			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_above_pick_pose, palm_link_above_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
 				break;
 			}
@@ -196,7 +198,7 @@ private:
 
 			lwa_.plan_continuous_path_.lwa_move_group_->setPathConstraints( constraints);
 
-			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_pick_pose, last_configuration, lwa_link_7_target_pose, "/base_link") ){
+			if( lwa_.plan_continuous_path_.plan_path_to_pose_oriented( plan_pick_pose, last_configuration, palm_link_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
 				break;//
 			}
@@ -214,6 +216,7 @@ private:
 			pick_action_server_.setAborted( result);
 			return;
 		}
+
 
 		// todo: remove
 		blocker_.block( boost::bind( &pick_and_place_action_server::visualize_plan, this));
@@ -238,8 +241,6 @@ private:
 			pick_action_server_.setAborted(result);
 			return;
 		}
-
-
 
 		blocker_.block();
 		if( !pick_action_server_.isActive())
@@ -352,14 +353,12 @@ private:
 		tf::Transform to_base_link_from_object_rotated = tf::Transform(to_base_link_from_object);
 		to_base_link_from_object_rotated.setRotation( rotate_tangential);
 
-		// to_base_link_from_object_rotated.getOrigin()[2] += 0e-2;
-
 		// calculate grasp
-		tf::Transform to_base_link_from_lwa_link7_desired = to_base_link_from_object_rotated*to_object_from_lwa_link7_;
+		tf::Transform to_base_link_from_gripper_palm_link = to_base_link_from_object_rotated*to_object_from_palm_link_;
 
-		geometry_msgs::Pose lwa_link_7_target_pose;
-		tf::poseTFToMsg(to_base_link_from_lwa_link7_desired, lwa_link_7_target_pose);
-		return lwa_link_7_target_pose;
+		geometry_msgs::Pose palm_link_target_pose;
+		tf::poseTFToMsg(to_base_link_from_gripper_palm_link, palm_link_target_pose);
+		return palm_link_target_pose;
 	}
 
 public:
@@ -378,7 +377,7 @@ private:
 	// tf
 	tf::TransformListener* tf_listener_;
 	tf::TransformBroadcaster* tf_broadcaster_;
-	tf::Transform to_object_from_lwa_link7_;
+	tf::Transform to_object_from_palm_link_;
 
 	// lwa control
 	lwa_planner_and_executer lwa_;
@@ -399,6 +398,30 @@ int main(int argc, char **argv)
 	
 	pick_and_place_action_server lwa_pick_and_place_server;
 
+	/*
+
+	std::string table_id = "table";
+	shape_msgs::SolidPrimitive table_primitive;
+	table_primitive.type = table_primitive.BOX;
+	table_primitive.dimensions.push_back(0.8);
+	table_primitive.dimensions.push_back(0.8);
+	table_primitive.dimensions.push_back(0.8);
+	geometry_msgs::Pose table_pose;
+	table_pose.position.x=1.0;
+	table_pose.position.y=0.0;
+	table_pose.position.z=0.4;
+	table_pose.orientation.x=0.0;
+	table_pose.orientation.y=0.0;
+	table_pose.orientation.z=0.0;
+	table_pose.orientation.w=1.0;
+	std::string table_pose_frame = "/base_link";
+
+
+
+	lwa_continuous_path_planner planner;
+	ROS_INFO("add collision object");
+	planner.add_static_object( table_id, table_primitive, table_pose, table_pose_frame);
+    */
 	ros::spin();
 	return 0;
 
