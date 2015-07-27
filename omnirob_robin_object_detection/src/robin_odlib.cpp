@@ -165,7 +165,7 @@ void robin_odlib::Segmentation(pcl::PointCloud<PointType>::Ptr  cloud,  std::vec
     pcl::EuclideanClusterExtraction<PointType> ec;
     ec.setClusterTolerance (0.005); // 10mm distance between points
     ec.setMinClusterSize (1);
-    ec.setMaxClusterSize (10000);
+    ec.setMaxClusterSize (50000);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
     ec.extract (clusters);    
@@ -209,7 +209,7 @@ void robin_odlib::Segmentation(pcl::PointCloud<PointType>::Ptr  cloud,  std::vec
 	//remove all clusters smaller than 100 points
     ec.setClusterTolerance (0.02); // 20mm distance between points
     ec.setMinClusterSize (1000);
-    ec.setMaxClusterSize (10000);
+    ec.setMaxClusterSize (50000);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
     ec.extract (clusters);

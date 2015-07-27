@@ -2,10 +2,19 @@
 # add objects only to detactable objects if they are part of the scene
 detectable_objects: [cylinder_orange]
 objects:
-  cylinder_orange:
+  cylinder_orange_old:
       color: orange
       RGBcolor:  [255, 140, 0]
       primitive0_type: cylinder
       primitive0_size: [0.04, 0.04, 0.15]
       primitive0_position: [0.0, 0.0, 0.0]
       primitive0_orientation: [0.0, 0.0, 0.0]
+  cylinder_orange:
+      color: white
+      RGBcolor:  [255, 140, 0]
+      primitive0_type: cylinder
+      primitive0_size: [0.08, 0.08, 0.175]
+      primitive0_position: [0.0, 0.0, 0.0]
+      primitive0_orientation: [0.0, 0.0, 0.0]
+
+
