@@ -121,8 +121,8 @@ namespace omnirob_geometry_tools{
 				
 				// lookup transform
 				tf::StampedTransform to_target_frame_from_original_frame_tf;
+				transform_listener_->waitForTransform(target_frame, original_frame, ros::Time(0), ros::Duration(3.0));
 				try{
-					transform_listener_->lookupTransform( target_frame, original_frame, ros::Time(0), to_target_frame_from_original_frame_tf);
 					transform_listener_->lookupTransform( target_frame, original_frame, ros::Time(0), to_target_frame_from_original_frame_tf);
 				}
 				catch (tf::TransformException ex){
