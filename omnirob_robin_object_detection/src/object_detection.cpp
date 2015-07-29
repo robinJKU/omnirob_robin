@@ -17,13 +17,11 @@
 //services und messages
 #include <std_srvs/Empty.h>
 #include <omnirob_robin_msgs/get_object_pose.h>
-#include <omnirob_robin_msgs/move_pan_tilt.h>
 #include <omnirob_robin_msgs/HackObjRecAction.h>
 #include <omnirob_robin_msgs/add_marker_srv.h>
 
 //robin object detection library
 #include <robin_odlib.h>
-#include <robin_odlib_ros.h>
 
 typedef pcl::PointXYZRGB PointType;
 typedef pcl::Normal NormalType;
@@ -33,12 +31,13 @@ ros::Subscriber pointcloud_sub;
 
 ros::Publisher table_pub;
 ros::Publisher objects_pub;
+ros::Publisher test_pub;
 ros::Publisher pan_tilt_goal_pub;
 
 ros::ServiceServer detectObjectsService;
 ros::ServiceServer getObjectPoseService;
 
-ros::ServiceClient move_pan_tilt_client;
+
 ros::ServiceClient add_marker_client;
 
 tf::TransformListener* pListener;
@@ -52,7 +51,6 @@ pcl::PointCloud<PointType>::Ptr objectCloud;
 pcl::PointCloud<PointType>::Ptr tableCloud;
 std::vector <tf::Transform> transforms;
 std::vector <std::string> transform_names;
-tf::StampedTransform odom_base_link;
 
 //function definitions
 void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud);
@@ -86,7 +84,6 @@ void addMarker(std::vector <double> size, tf::Transform transform){
 	srv.request.pose.orientation.w = transform.getRotation().getW();
 
 	add_marker_client.call(srv);
-
 }
 
 
@@ -120,18 +117,24 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 	detecting = false;
 
 	sensor_msgs::PointCloud2::Ptr cloud_transformed (new sensor_msgs::PointCloud2);
-	//Transform cloud to origin frame
-	try {
-		pListener->waitForTransform("/base_link", (*input_cloud).header.frame_id, ros::Time::now(), ros::Duration(60.0) );
-		pcl_ros::transformPointCloud ("/base_link", *input_cloud, *cloud_transformed, *pListener);
-	}
-	catch(tf::TransformException e){
-		ROS_INFO("Transform_PointCloud Error: %s", e.what());
-	}
+	//Transform cloud to target frame
 
-	pcl::fromROSMsg (*cloud_transformed, *cloud);
-	if(cloud->size() > 0){
-		newCloud = true;
+	if(input_cloud->data.size() > 0){
+
+		try {
+			pListener->waitForTransform("/table_1", (*input_cloud).header.frame_id, ros::Time::now(), ros::Duration(60.0) );
+			pcl_ros::transformPointCloud ("/table_1", *input_cloud, *cloud_transformed, *pListener);
+		}
+		catch(tf::TransformException e){
+			ROS_INFO("Transform_PointCloud Error: %s", e.what());
+		}
+
+		pcl::fromROSMsg (*cloud_transformed, *cloud);
+
+		if(cloud->size() > 0){
+			newCloud = true;
+		}
+
 	}
 }
 
@@ -139,18 +142,21 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 void detectObjects(){
 
 	tableCloud = pcl::PointCloud<PointType>::Ptr(new pcl::PointCloud<PointType>());
-
-
+	ROS_INFO("detecting table");
 	//seperate the table from the cloud
+
 	double table_height;
 	robin_odlib::seperateTable(cloud, tableCloud, table_height);
 
 	//publish table
+
 	sensor_msgs::PointCloud2::Ptr output_cloud (new sensor_msgs::PointCloud2);
 	pcl::toROSMsg (*tableCloud, *output_cloud);
 	output_cloud->header.stamp = ros::Time::now();
-	output_cloud->header.frame_id = "/base_link";
+	output_cloud->header.frame_id = "/table_1";
 	table_pub.publish(output_cloud);
+
+
 
 	//calculate table bounding box
 	std::vector <double> table_size;
@@ -211,23 +217,29 @@ void detectObjects(){
 				extract_indices.setNegative (false);
 				extract_indices.filter(*objectCloud);
 
+
 				pcl::toROSMsg (*objectCloud, *output_cloud);
 				output_cloud->header.stamp = ros::Time::now();
-				output_cloud->header.frame_id = "/base_link";
+				output_cloud->header.frame_id = "/table_1";
 				objects_pub.publish(output_cloud);
 
 
 				ROS_INFO("object %s found", objects[0].getName().c_str());
 				ROS_INFO("objects pose = %f %f %f", pose[0], pose[1], pose[2]);
-				tf::Transform transform;
-				pose_to_tf(pose, transform);
-
-				//addMarker(objects[i].getSize(), transform);
-
-				ROS_INFO("transform pose = %f %f %f", transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
+				tf::Transform to_object_from_table;
+				pose_to_tf(pose, to_object_from_table);
 
 
-				transforms.push_back(transform);
+				tf::StampedTransform to_table_from_map;
+				try {
+						pListener->waitForTransform("/table_1", "/map", ros::Time::now(), ros::Duration(60.0) );
+						pListener->lookupTransform("/table_1", "/map", ros::Time::now(), to_table_from_map);
+					}
+					catch(tf::TransformException e){
+						ROS_INFO("Transform object frame error Error: %s", e.what());
+					}
+				to_object_from_table.mult(to_table_from_map.inverse(), to_object_from_table);
+				transforms.push_back(to_object_from_table);
 				std::stringstream s;
 				s << count;
 				transform_names.push_back(objects[0].getName() + s.str());
@@ -239,17 +251,7 @@ void detectObjects(){
 
 bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){   
 
-	omnirob_robin_msgs::move_pan_tilt srv;
 
-	srv.request.pan_goal = 0.4;
-	srv.request.tilt_goal = 0.0;
-
-	move_pan_tilt_client.call(srv);
-
-	srv.request.pan_goal = 0.4;
-	srv.request.tilt_goal = 1.05;
-
-	move_pan_tilt_client.call(srv);
 
 	ros::Duration(5.0).sleep();
 
@@ -267,11 +269,6 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	newCloud = false;
 
 	detectObjects();
-
-	srv.request.pan_goal = 0.0;
-	srv.request.tilt_goal = 0.0;
-
-	move_pan_tilt_client.call(srv);
 
 	return true;
 }
@@ -326,14 +323,14 @@ int main( int argc, char** argv) {
 	//publisher
 	table_pub = n.advertise<sensor_msgs::PointCloud2> ("table_cloud", 1);
 	objects_pub = n.advertise<sensor_msgs::PointCloud2> ("objects_cloud", 1);
+	test_pub = n.advertise<sensor_msgs::PointCloud2> ("test_cloud", 1);
 
 	//Services Server
 	detectObjectsService = n.advertiseService("detect_objects_srv", detectObjectsCallback);
 	getObjectPoseService = n.advertiseService("get_object_pose_srv", getObjectPoseCallback);
 
 	//Service Clients
-	ros::service::waitForService("pan_tilt/move_pan_tilt");
-	move_pan_tilt_client = n.serviceClient<omnirob_robin_msgs::move_pan_tilt>("pan_tilt/move_pan_tilt");
+
 
 	ros::service::waitForService("add_marker");
 	add_marker_client = n.serviceClient<omnirob_robin_msgs::add_marker_srv>("add_marker");
@@ -342,20 +339,13 @@ int main( int argc, char** argv) {
 		ros::spinOnce();
 	}
 
-	robin_odlib_ros::loadObjects(objects);
+	robin_odlib::loadObjects(objects);
 
 	ros::Rate r(50);
 	while(ros::ok){
 		for(int i = 0; i < transforms.size(); i++){
 			int size = transforms.size();
-			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/base_link", transform_names[i]));
-		}
-		try {
-			pListener->waitForTransform("odom", "base_link", ros::Time(0), ros::Duration(20.0) );
-			pListener->lookupTransform("odom", "base_link", ros::Time(0), odom_base_link);
-		}
-		catch(tf::TransformException e){
-			ROS_INFO("No Transform found from base_link to odom");
+			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/map", transform_names[i]));
 		}
 		r.sleep();
 		ros::spinOnce();
