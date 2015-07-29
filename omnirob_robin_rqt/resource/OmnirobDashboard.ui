@@ -270,168 +270,269 @@
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QVBoxLayout" name="verticalLayout_21">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_7">
-               <item>
-                <widget class="QLabel" name="State">
-                 <property name="text">
-                  <string>State</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_1">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_2">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_3">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_4">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_5">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_6">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lwa_state_7">
-                 <property name="text">
-                  <string>TextLabel</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QLabel" name="module_label_1">
+               <property name="text">
+                <string>Module</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_2">
-               <item>
-                <widget class="QPushButton" name="lwa_move">
-                 <property name="text">
-                  <string>Move</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_1">
-                 <property name="minimum">
-                  <double>-1.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_2">
-                 <property name="minimum">
-                  <double>-2.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_3">
-                 <property name="minimum">
-                  <double>-2.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_4">
-                 <property name="minimum">
-                  <double>-2.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_5">
-                 <property name="minimum">
-                  <double>-2.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_6">
-                 <property name="minimum">
-                  <double>-2.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>2.000000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QDoubleSpinBox" name="lwa_goal_7">
-                 <property name="singleStep">
-                  <double>0.100000000000000</double>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <widget class="QLabel" name="module_label_3">
+               <property name="text">
+                <string>1 / ID11</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_2">
+               <property name="text">
+                <string>2/ ID12</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_8">
+               <property name="text">
+                <string>3 / ID13</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_7">
+               <property name="text">
+                <string>4 / ID14</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_6">
+               <property name="text">
+                <string>5 / ID15</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_5">
+               <property name="text">
+                <string>6 / ID16</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="module_label_4">
+               <property name="text">
+                <string>7 / ID17</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <item>
+              <widget class="QLabel" name="State">
+               <property name="text">
+                <string>State</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_1">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_2">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_3">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_4">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_5">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_6">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="lwa_state_7">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QPushButton" name="lwa_move">
+               <property name="text">
+                <string>Move</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_1">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-1.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_2">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-2.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_3">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-2.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_4">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-2.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_5">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-2.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_6">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-2.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>2.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="lwa_goal_7">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
           </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_6"/>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -655,6 +756,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="pan_tilt_test">
+             <property name="text">
+              <string>test pan tilt</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="pan_tilt_home">
              <property name="text">
               <string>home pan tilt</string>
@@ -692,56 +800,87 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_12">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QLabel" name="pan_tilt_state_label">
-               <property name="text">
-                <string>State</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pan_tilt_move">
-               <property name="text">
-                <string>Move</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QLabel" name="pan_tilt_state_1">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QLabel" name="pan_tilt_state_2">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
+              <layout class="QVBoxLayout" name="verticalLayout_22">
+               <item>
+                <widget class="QLabel" name="module_label_20">
+                 <property name="text">
+                  <string>Module</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="module_label_22">
+                 <property name="text">
+                  <string>Tilt / ID20</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="module_label_21">
+                 <property name="text">
+                  <string>Pan / ID19</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
+              <layout class="QVBoxLayout" name="verticalLayout_23">
+               <item>
+                <widget class="QLabel" name="pan_tilt_state_label">
+                 <property name="text">
+                  <string>State</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="pan_tilt_state_1">
+                 <property name="text">
+                  <string>TextLabel</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="pan_tilt_state_2">
+                 <property name="text">
+                  <string>TextLabel</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_24">
+               <item>
+                <widget class="QPushButton" name="pan_tilt_move">
+                 <property name="text">
+                  <string>Move</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
+                 <property name="decimals">
+                  <number>3</number>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.100000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
+                 <property name="decimals">
+                  <number>3</number>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.100000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>
@@ -906,38 +1045,66 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_14">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QLabel" name="gripper_state_Label">
-               <property name="text">
-                <string>State</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="gripper_move">
-               <property name="text">
-                <string>Move</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <layout class="QHBoxLayout" name="horizontalLayout_10"/>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QLabel" name="gripper_state">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
+              <layout class="QVBoxLayout" name="verticalLayout_27">
+               <item>
+                <widget class="QLabel" name="modules_label_30">
+                 <property name="text">
+                  <string>Module</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="module_label_31">
+                 <property name="text">
+                  <string>ID18</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="gripper_goal">
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
+              <layout class="QVBoxLayout" name="verticalLayout_25">
+               <item>
+                <widget class="QLabel" name="gripper_state_Label">
+                 <property name="text">
+                  <string>State</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="gripper_state">
+                 <property name="text">
+                  <string>TextLabel</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_26">
+               <item>
+                <widget class="QPushButton" name="gripper_move">
+                 <property name="text">
+                  <string>Move</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="gripper_goal">
+                 <property name="decimals">
+                  <number>0</number>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.100000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>

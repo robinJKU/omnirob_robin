@@ -77,52 +77,145 @@ class OmnirobDashboardWidget(QWidget):
                     self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
                     self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
                 
-        rospy.Subscriber('omnirob_robin/lwa/state/joint_state_array', Float64MultiArray, self.lwa_state_callback)
-        rospy.Subscriber('omnirob_robin/pan_tilt/state/joint_state_array', Float64MultiArray, self.pan_tilt_state_callback)
-        rospy.Subscriber('omnirob_robin/gripper/state/joint_state_array', Float64MultiArray, self.gripper_state_callback)
-           
         self.base_active.stateChanged.connect(self.on_base_active_stateChanged)
         self._twist = Twist() 
         self.base_activated = False
         self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1) 
-                
+        self._lwa_state_callback_count = 0
+        
+        self._lwa_goal_had_focus = [False for i in range(7)]
+        self._pan_tilt_goal_had_focus = [False for i in range(2)]
+        self._gripper_goal_had_focus = False
+        
         self._timer_refresh_state = QTimer(self)
-        self._timer_refresh_state.timeout.connect(self._publish_twist)
+        self._timer_refresh_state.timeout.connect(self._timer_update)
         self.start()
         
+        self._sub_lwa_state = rospy.Subscriber('omnirob_robin/lwa/state/joint_state_array', Float64MultiArray, self.lwa_state_callback)
+        self._gripper_lwa_state = rospy.Subscriber('omnirob_robin/pan_tilt/state/joint_state_array', Float64MultiArray, self.pan_tilt_state_callback)
+        self._sub_pan_tilt_state = rospy.Subscriber('omnirob_robin/gripper/state/joint_state_array', Float64MultiArray, self.gripper_state_callback)
+        
+        
     def start(self):
-        self._timer_refresh_state.start(100)                  
+        self._timer_refresh_state.start(10)                  
 
     #def save_settings(self, plugin_settings, instance_settings):
 
     def shutdown_plugin(self):
         self._timer_refresh_state.stop()
+        self._sub_lwa_state.unregister()
+        self._sub_gripper_state.unregister()
+        self._sub_pan_tilt_state.unregister()
 
     #def restore_settings(self, plugin_settings, instance_settings):
 
     #def trigger_configuration(self):
+    
+    def _timer_update(self):
+        self._publish_twist()
+        self._update_goals()
+        
+    def _update_goals(self):
+        #lwa
+        if self.lwa_goal_1.hasFocus():
+            self._lwa_goal_had_focus[0] = True
+            
+        if self.lwa_goal_2.hasFocus():
+            self._lwa_goal_had_focus[1] = True
+            
+        if self.lwa_goal_3.hasFocus():
+            self._lwa_goal_had_focus[2] = True
+            
+        if self.lwa_goal_4.hasFocus():
+            self._lwa_goal_had_focus[3] = True
+            
+        if self.lwa_goal_5.hasFocus():
+            self._lwa_goal_had_focus[4] = True
+            
+        if self.lwa_goal_6.hasFocus():
+            self._lwa_goal_had_focus[5] = True
+           
+        if self.lwa_goal_7.hasFocus():
+            self._lwa_goal_had_focus[6] = True            
+            
+            
+        if not self._lwa_goal_had_focus[0]:
+            self.lwa_goal_1.setValue(float(self.lwa_state_1.text()))
+
+        if not self._lwa_goal_had_focus[1]:
+            self.lwa_goal_2.setValue(float(self.lwa_state_2.text()))
+        
+        if not self._lwa_goal_had_focus[2]:
+            self.lwa_goal_3.setValue(float(self.lwa_state_3.text()))
+
+        if not self._lwa_goal_had_focus[3]:
+            self.lwa_goal_4.setValue(float(self.lwa_state_4.text()))
+
+        if not self._lwa_goal_had_focus[4]:
+            self.lwa_goal_5.setValue(float(self.lwa_state_5.text()))
+
+        if not self._lwa_goal_had_focus[5]:
+            self.lwa_goal_6.setValue(float(self.lwa_state_6.text()))
+
+        if not self._lwa_goal_had_focus[6]:
+            self.lwa_goal_7.setValue(float(self.lwa_state_7.text()))
+            
+        #pan_tilt
+        if self.pan_tilt_goal_1.hasFocus():
+            self._pan_tilt_goal_had_focus[0] = True
+            
+        if self.pan_tilt_goal_2.hasFocus():
+            self._pan_tilt_goal_had_focus[1] = True
+            
+        if not self._pan_tilt_goal_had_focus[0]:
+            self.pan_tilt_goal_1.setValue(float(self.pan_tilt_state_1.text()))
+
+        if not self._pan_tilt_goal_had_focus[1]:
+            self.pan_tilt_goal_2.setValue(float(self.pan_tilt_state_2.text()))
+            
+        #gripper
+        if self.gripper_goal.hasFocus():
+            self._gripper_goal_had_focus = True
+            
+        if not self._gripper_goal_had_focus:
+            self.gripper_goal.setValue(float(self.gripper_state.text()))    
+            
+    def _reset_focus_lwa(self):
+        for i in range(7):
+            self._lwa_goal_had_focus[i] = False       
+            
+    def _reset_focus_pan_tilt(self):
+        for i in range(2):
+            self._pan_tilt_goal_had_focus[i] = False  
+            
+    def _reset_focus_gripper(self):
+        self._gripper_goal_had_focus = False  
+    
 
     def _publish_twist(self):
+               
         if self.base_activated:
             self._pub.publish(self._twist)
-            
-    def lwa_state_callback(self, data):
+                   
+ 
+    def lwa_state_callback(self, data):        
         self.lwa_state_1.setText("{:.3f}".format(data.data[0]))
         self.lwa_state_2.setText("{:.3f}".format(data.data[1]))
         self.lwa_state_3.setText("{:.3f}".format(data.data[2]))
         self.lwa_state_4.setText("{:.3f}".format(data.data[3]))
         self.lwa_state_5.setText("{:.3f}".format(data.data[4]))
         self.lwa_state_6.setText("{:.3f}".format(data.data[5]))
-        self.lwa_state_7.setText("{:.3f}".format(data.data[6]))
-        
+        self.lwa_state_7.setText("{:.3f}".format(data.data[6]))   
+
     def pan_tilt_state_callback(self, data):
         self.pan_tilt_state_1.setText("{:.3f}".format(data.data[0]))
         self.pan_tilt_state_2.setText("{:.3f}".format(data.data[1]))
-        
+
+
     def gripper_state_callback(self, data):
-        self.gripper_state.setText("{:.3f}".format(data.data[0]))
+        self.gripper_state.setText("{:.0f}".format(data.data[0]))
        
-        
+
     @Slot()
     def refresh_state(self):
         self.test_label.setText('test')   
@@ -291,6 +384,7 @@ class OmnirobDashboardWidget(QWidget):
         pub.publish(msg)
         rospy.sleep(1.0)
         self._lwa_start_motion()
+        self._reset_focus_lwa()
         
     @Slot()
     def on_lwa_home_clicked(self):
@@ -301,6 +395,7 @@ class OmnirobDashboardWidget(QWidget):
         pub.publish(msg)
         rospy.sleep(1.0)
         self._lwa_start_motion()
+        self._reset_focus_lwa()
         
     @Slot()
     def on_lwa_move_clicked(self):
@@ -318,6 +413,7 @@ class OmnirobDashboardWidget(QWidget):
         pub.publish(msg)
         rospy.sleep(1.0)
         self._lwa_start_motion()
+        self._reset_focus_lwa()
         
     @Slot()
     def on_lwa_reference_1_clicked(self):
@@ -371,6 +467,16 @@ class OmnirobDashboardWidget(QWidget):
         pub = rospy.Publisher('omnirob_robin/pan_tilt/control/commanded_joint_state', Float64MultiArray, queue_size=1)
         msg = Float64MultiArray()
         msg.data = [0.0, 0.0]
+        rospy.sleep(1.0)
+        pub.publish(msg)
+        rospy.sleep(1.0)
+        self._pan_tilt_start_motion()
+        
+    @Slot()
+    def on_pan_tilt_test_clicked(self):
+        pub = rospy.Publisher('omnirob_robin/pan_tilt/control/commanded_joint_state', Float64MultiArray, queue_size=1)
+        msg = Float64MultiArray()
+        msg.data = [0.1, 0.1]
         rospy.sleep(1.0)
         pub.publish(msg)
         rospy.sleep(1.0)
