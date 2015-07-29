@@ -28,9 +28,9 @@
       </material>
     </visual>
 	  <collision>
-      <origin xyz="0.0 0.0 ${0.08/2.0}" rpy="0 0 0"/>
+      <origin xyz="0.0 0.0 ${0.1/2.0}" rpy="0 0 0"/>
 	    <geometry>
-	      <box size="0.08 0.260 0.08"/>
+	      <box size="0.12 0.35 0.12"/>
 	    </geometry>
 	  </collision>
     <inertial>
