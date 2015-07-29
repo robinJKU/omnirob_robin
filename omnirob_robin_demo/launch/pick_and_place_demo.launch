@@ -11,6 +11,7 @@
 	<include file="$(find omnirob_robin_moveit)/launch/move_group.launch"></include>
 	-->
 	
+	 <node pkg="tf" type="static_transform_publisher" name="table_1_publisher" args="1.81 1.57 0.0 -1.57 0.0 0.0 /map /table_1 100" />
 
 	<!-- start main demo node -->
 	<node pkg="omnirob_robin_demo" type="pick_and_place_demo" name="pick_and_place_demo" output="screen"></node>
