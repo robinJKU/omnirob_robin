@@ -53,10 +53,12 @@ int globalLocalization(){
   
   hector_reset_publisher.publish( hector_reset_msg);
   hector_initialize_publisher.publish( hector_initialize_msg);
-  
+  ros::spinOnce();
   std_srvs::Empty srv;
   clear_costmaps_client.call(srv);
+  ros::spinOnce();
   clear_costmaps_client.call(srv);
+  ros::spinOnce();
   is_localized = true;  
 }
 
