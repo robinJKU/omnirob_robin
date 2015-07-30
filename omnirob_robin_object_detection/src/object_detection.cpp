@@ -38,7 +38,7 @@ tf::TransformListener* pListener;
 
 bool detecting = false;
 bool newCloud = false;
-robin_object_detector object_detector;
+robin_object_detector *object_detector;
 
 pcl::PointCloud<PointType>::Ptr cloud;
 std::vector <tf::Transform> transforms;
@@ -116,7 +116,7 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 
 		if(cloud->size() > 0){
 			newCloud = true;
-			object_detector.set_cloud(cloud);
+			object_detector->set_cloud(cloud);
 		}
 
 	}
@@ -125,7 +125,7 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 void detect_objects(){
 
 
-	object_detector.detect_objects();
+	object_detector->detect_objects();
 	/*
 	tf::Transform table_transform;
 	pose_to_tf(table_pose, table_transform);
@@ -133,7 +133,7 @@ void detect_objects(){
 	addMarker(table_size, table_transform);
 	ROS_INFO("add marker finished");
 	*/
-	std::vector<Object> detected_objects = object_detector.get_detected_objects();
+	std::vector<Object> detected_objects = object_detector->get_detected_objects();
 	for(int i = 0; i < detected_objects.size(); i++){
 		tf::Transform to_object_from_table;
 		to_object_from_table = detected_objects[i].get_transform();
@@ -207,7 +207,8 @@ int main( int argc, char** argv) {
 	pListener = new(tf::TransformListener);
 	tf::TransformBroadcaster broadcaster;
 
-	object_detector = robin_object_detector();
+	object_detector = new robin_object_detector();
+	object_detector->set_frame("/table_1");
 
 	//Action Server
 	Server server(n, "hackObjRecActionServer", boost::bind(&execute, _1, &server), false);
