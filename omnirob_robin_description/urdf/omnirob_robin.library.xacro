@@ -16,8 +16,10 @@
   <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_base/base.urdf.xacro"/>
   <!-- Camera Mast -->
   <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_camera_mast/camera_mast.urdf.xacro"/>
-  <!-- Schunk Pan Tilt -->
+  <!-- Schunk Pan Tilt
   <xacro:include filename="$(find omnirob_robin_description)/urdf/schunk_pan_tilt/schunk_pan_tilt.urdf.xacro"/>  
+   -->
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/power_cube_pan_tilt/power_cube_pan_tilt.urdf.xacro"/>  
   <!-- lwa -->  
   <xacro:include filename="$(find omnirob_robin_description)/urdf/lwa/lwa.urdf.xacro"/>  
   <!-- gripper -->
