@@ -1,4 +1,10 @@
 analyzers:
+  base:
+    type: GenericAnalyzer
+    path: Base
+    startswith: base
+    num_items: 6
+    remove_prefix: base_
   lwa:
     type: GenericAnalyzer
     path: Lwa

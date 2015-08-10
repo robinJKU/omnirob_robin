@@ -117,7 +117,7 @@ private:
 		std::stringstream message;
 		message << "[";
 		for(int i = 0; i < msg.data.size(); i++) {
-			if(msg.data[i] > 0.5 && correct_value != 1){
+			if(msg.data[i] < 0.5 ^ correct_value != 1){
 				has_errors = true;
 			}
 			diagnostic_msgs::KeyValue key_val;
@@ -150,7 +150,7 @@ private:
 
 	diagnostic_message diag_msg_;
 	std::string topic;
-};
+}; //end of processor class
 
 // global variables
 
@@ -158,7 +158,7 @@ private:
 ros::Publisher diagnostics_pub;
 
 // Base callback functions
-void cb_base_canserver_state(std_msgs::Float64 msg) {
+void cb_base_canserver_server_state(std_msgs::Float64 msg) {
 	diagnostic_msgs::DiagnosticArray diag_arr;
 	diag_arr.header.stamp = ros::Time::now();
 	diagnostic_msgs::DiagnosticStatus diag_status;
@@ -174,6 +174,24 @@ void cb_base_canserver_state(std_msgs::Float64 msg) {
 	diag_status.values.push_back(key_val);
 	diag_arr.status.push_back(diag_status);
 	diagnostics_pub.publish(diag_arr);
+}
+
+void cb_base_canserver_server_is_ready(std_msgs::Bool msg){
+}
+
+void cb_base_state_info_motor_ready_to_switch_on(std_msgs::Float64MultiArray msg){
+}
+
+void cb_base_state_info_motor_switched_on(std_msgs::Float64MultiArray msg){
+}
+
+void cb_base_state_info_motor_operation_enabled(std_msgs::Float64MultiArray msg){
+}
+
+void cb_base_state_error_motor_has_errors(std_msgs::Float64MultiArray msg){
+}
+
+void cb_base_state_info_motor_has_warnings(std_msgs::Float64MultiArray msg){
 }
 
 void cb_base_drives_state_vel(geometry_msgs::Twist msg) {
@@ -232,10 +250,37 @@ void cb_base_drives_state_vel(geometry_msgs::Twist msg) {
 	diagnostics_pub.publish(diag_arr);
 }
 
-void cb_lwa_error_initialization_error(std_msgs::Float64MultiArray msg) {
-	//publish_error(msg, "lwa_initialization_error", "lwa", 0);
-	//ROS_INFO("test");
-}
+void base_state_callback( std_msgs::Float64MultiArray state_word ){
+
+	// check if all motors are enabled and ready
+	unsigned int switched_on, opeartion_mode_enabled, voltage_enabled;
+	bool motors_enabled_and_ready = true;
+	for( unsigned int motor=0; motor<4; motor++){
+		switched_on = ( ((unsigned int) state_word.data[motor]) & 0x2);
+		opeartion_mode_enabled = ( ((unsigned int) state_word.data[motor]) & 0x4);
+		voltage_enabled = ( ((unsigned int) state_word.data[motor]) & 0x16);
+
+		if( switched_on==0 || opeartion_mode_enabled==0 || voltage_enabled==0 ){
+			motors_enabled_and_ready = false;
+			break;
+		}
+	}
+
+	// check if the motor has errors
+	bool fault;
+	for( unsigned int motor=0; motor<4; motor++){
+		fault = fault || (( ((unsigned int) state_word.data[motor]) & 0x8)>0.0);
+	}
+
+	// publish results
+	std_msgs::Bool motors_enabled_and_ready_msgs, fault_msgs;
+	motors_enabled_and_ready_msgs.data = motors_enabled_and_ready;
+	fault_msgs.data = fault;
+
+	//base_state_ready_publisher.publish( motors_enabled_and_ready_msgs);
+	//base_state_fault_publisher.publish( fault_msgs);
+
+}// base state callback
 
 
 int main(int argc, char **argv) {
@@ -247,18 +292,40 @@ int main(int argc, char **argv) {
 	diagnostics_pub = n.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
 
 	// Base subscribers
-	ros::Subscriber sub_base_canserver_state = n.subscribe<std_msgs::Float64>("/omnirob_robin/base/canserver/state", 1000, cb_base_canserver_state);
+	ros::Subscriber sub_base_canserver_state = n.subscribe<std_msgs::Float64>("/omnirob_robin/base/canserver/server_state", 1000, cb_base_canserver_server_state);
+	ros::Subscriber sub_base_canserver_is_ready = n.subscribe<std_msgs::Bool>("/omnirob_robin/base/canserver/server_is_ready", 1000, cb_base_canserver_server_is_ready);
 	ros::Subscriber sub_base_drives_state_vel = n.subscribe<geometry_msgs::Twist>("/omnirob_robin/base/drives/state/vel", 1000, cb_base_drives_state_vel);
-	
 
 	std::vector<diagnostic_message> diag_messages;
+	std::vector<module_diagnostics_processor*> module_processors;
+
+	//base diagnostic messages
+	//diag_messages.push_back(diagnostic_message("motor_ready_to_switch_on", "base", "info", ERROR, FLOAT, 0, 1));
+	diag_messages.push_back(diagnostic_message("motor_switched_on", "base", "info", ERROR, FLOAT, 0, 1));
+	diag_messages.push_back(diagnostic_message("motor_operation_enabled", "base", "info", INFO, FLOAT, 0, 1));
+	diag_messages.push_back(diagnostic_message("motor_has_errors", "base", "error", ERROR, FLOAT, 0, 0));
+	diag_messages.push_back(diagnostic_message("motor_has_warnings", "base", "info", WARNING, FLOAT, 0, 1));
+
+
+	//different messages for gripper lwa and pan_tilt
+	diag_messages.push_back(diagnostic_message("move_blocked", "gripper", "error", INFO, FLOAT, 0, 0));
+	diag_messages.push_back(diagnostic_message("move_blocked", "lwa", "error", ERROR, FLOAT, 0, 0));
+	//diag_messages.push_back(diagnostic_message("move_blocked", "pan_tilt", "error", ERROR, FLOAT, 0, 0));
+
+	for(int i = 0; i < diag_messages.size(); i++){
+		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
+	}
+
+
+	diag_messages.clear();
+	//this diag messages are the same for gripper, lwa and pan_tilt
 
 	diag_messages.push_back(diagnostic_message("initialization_error", "gripper", "error", ERROR, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_has_errors", "gripper", "error", ERROR, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_has_low_voltage", "gripper", "error", ERROR, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_is_in_emergency_stop", "gripper", "error", ERROR, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_not_referenced", "gripper", "error", ERROR, FLOAT, 0, 0));
-	diag_messages.push_back(diagnostic_message("move_blocked", "gripper", "error", ERROR, FLOAT, 0, 0));
+
 	diag_messages.push_back(diagnostic_message("tow_error", "gripper", "error", ERROR, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("break_activated", "gripper", "info", INFO, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("continuos_position_tracking_mode_enabled", "gripper", "info", INFO, BOOL, 0, 0));
@@ -266,19 +333,19 @@ int main(int argc, char **argv) {
 	diag_messages.push_back(diagnostic_message("module_has_warnings", "gripper", "info", WARNING, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_in_motion", "gripper", "info", INFO, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("module_is_enabled", "gripper", "info", INFO, FLOAT, 0, 0));
-	diag_messages.push_back(diagnostic_message("module_is_ready", "gripper", "info", INFO, FLOAT, 1, 0));
+	diag_messages.push_back(diagnostic_message("module_is_ready", "gripper", "info", ERROR, FLOAT, 1, 1));
 	diag_messages.push_back(diagnostic_message("position_reached", "gripper", "info", INFO, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("joint_state_array", "gripper", "", INFO, FLOAT, 0, 2));
 	diag_messages.push_back(diagnostic_message("module_not_responding", "gripper", "error", ERROR, FLOAT, 0, 0));
 
 
-	std::vector<module_diagnostics_processor*> module_processors;
+
 	for(int i = 0; i < diag_messages.size(); i++){
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
 		diag_messages[i].ns_ = "lwa";
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
-		diag_messages[i].ns_ = "pan_tilt";
-	    module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
+		//diag_messages[i].ns_ = "pan_tilt";
+	    //module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
 	}
 
 	while( ros::ok())
