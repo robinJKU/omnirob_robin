@@ -141,37 +141,7 @@ void base_callback( const geometry_msgs::Twist base_vel ){
  	
 }
 
-void base_state_callback( std_msgs::Float64MultiArray state_word ){
-	
-	// check if all motors are enabled and ready
-	unsigned int switched_on, opeartion_mode_enabled, voltage_enabled;
-	bool motors_enabled_and_ready = true;
-	for( unsigned int motor=0; motor<4; motor++){
-		switched_on = ( ((unsigned int) state_word.data[motor]) & 0x2);
-		opeartion_mode_enabled = ( ((unsigned int) state_word.data[motor]) & 0x4);
-		voltage_enabled = ( ((unsigned int) state_word.data[motor]) & 0x16);
-		
-		if( switched_on==0 || opeartion_mode_enabled==0 || voltage_enabled==0 ){
-			motors_enabled_and_ready = false;
-			break;
-		}
-	}
-	
-	// check if the motor has errors
-	bool fault;
-	for( unsigned int motor=0; motor<4; motor++){
-		fault = fault || (( ((unsigned int) state_word.data[motor]) & 0x8)>0.0);
-	}
-	
-	// publish results
-	std_msgs::Bool motors_enabled_and_ready_msgs, fault_msgs;
-	motors_enabled_and_ready_msgs.data = motors_enabled_and_ready;
-	fault_msgs.data = fault;
-	
-	base_state_ready_publisher.publish(  motors_enabled_and_ready_msgs);
-	base_state_fault_publisher.publish( fault_msgs);
-		
-}// base state callback
+
 
 void imu_callback( sensor_msgs::Imu data ){
 	tf::Quaternion qt;
@@ -292,15 +262,13 @@ int main(int argc, char **argv)
   }
  	
   
-  ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/state_word", 1000, base_state_callback );
   ros::Subscriber base_state_subscriber = n.subscribe( "/omnirob_robin/base/drives/state/vel", 1000, base_callback );
   ros::Subscriber imu_subscriber = n.subscribe( "/imu/data", 1000, imu_callback );
 
   // init publisher and start loop
   joint_state_publisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
   odometry_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
-  base_state_ready_publisher = n.advertise<std_msgs::Bool>("/omnirob_robin/base/drives/state/info/motors_ready_end_enabled", 1000);
-  base_state_fault_publisher = n.advertise<std_msgs::Bool>("/omnirob_robin/base/drives/state/error/motors_have_error", 1000);
+
   
   current_time = ros::Time::now();
   

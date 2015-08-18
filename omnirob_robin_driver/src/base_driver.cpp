@@ -6,13 +6,13 @@
 //clients
 ros::ServiceClient base_canserver_start_client;
 ros::ServiceClient base_canserver_stop_client;
-ros::ServiceClient base_controler_start_client;
-ros::ServiceClient base_controler_stop_client;
+ros::ServiceClient base_controller_start_client;
+ros::ServiceClient base_controller_stop_client;
 
 int main(int argc, char** argv)
 {
   // Init the ROS node
-  ros::init(argc, argv, "pan_tilt_interface");
+  ros::init(argc, argv, "base_interface");
 
   ros::NodeHandle n;    
   
@@ -24,13 +24,13 @@ int main(int argc, char** argv)
 
   base_canserver_start_client = n.serviceClient<std_srvs::Empty>("base/canserver/start"); 
   base_canserver_stop_client = n.serviceClient<std_srvs::Empty>("base/canserver/stop"); 
-  base_controler_start_client = n.serviceClient<std_srvs::Empty>("base/drives/control/start"); 
-  base_controler_stop_client = n.serviceClient<std_srvs::Empty>("base/drives/control/stop"); 
+  base_controller_start_client = n.serviceClient<std_srvs::Empty>("base/drives/control/start");
+  base_controller_stop_client = n.serviceClient<std_srvs::Empty>("base/drives/control/stop");
 
  
   std_srvs::Empty srv;
   base_canserver_start_client.call(srv);
-  base_controler_start_client.call(srv);
+  base_controller_start_client.call(srv);
  
 
   while( ros::ok() ){
