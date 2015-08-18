@@ -59,9 +59,9 @@
          </inertial>
          <!-- z verschiebung = Abstand von Boden zu Motor achse + Rad Radius -->
          <visual>
-            <origin xyz="0 0 ${0.090+0.254/2}" rpy="1.57079 0 1.57079" />
+            <origin xyz="0 0 0" rpy="1.57079 0 1.57079" />
             <geometry>
-               <mesh filename="package://omnirob_robin_description/meshes/omnirob_base.stl" scale="0.001 0.001 0.001" />
+               <mesh filename="package://omnirob_robin_description/meshes/omnirob.stl" scale="0.001 0.001 0.001" />
             </geometry>
             <material name="Green">
                <color rgba="0.5 0.5 0.5 1.0" />
