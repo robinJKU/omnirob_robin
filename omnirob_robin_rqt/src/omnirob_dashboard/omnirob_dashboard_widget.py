@@ -284,7 +284,7 @@ class OmnirobDashboardWidget(QWidget):
         
     @Slot()
     def on_base_left_pressed(self):
-        self._base_move(0.0, 0.2, 0.0)
+        self._base_move(0.0, 0.3, 0.0)
  
     @Slot()
     def on_base_left_released(self):
@@ -292,7 +292,7 @@ class OmnirobDashboardWidget(QWidget):
         
     @Slot()
     def on_base_right_pressed(self):
-        self._base_move(0.0, -0.2, 0.0)
+        self._base_move(0.0, -0.3, 0.0)
  
     @Slot()
     def on_base_right_released(self):
@@ -300,7 +300,7 @@ class OmnirobDashboardWidget(QWidget):
 
     @Slot()
     def on_base_turn_left_pressed(self):
-        self._base_move(0.0, 0.0, 1.0)
+        self._base_move(0.0, 0.0, 0.5)
  
     @Slot()
     def on_base_turn_left_released(self):
@@ -308,7 +308,7 @@ class OmnirobDashboardWidget(QWidget):
         
     @Slot()
     def on_base_turn_right_pressed(self):
-        self._base_move(0.0, 0.0, -1.0)
+        self._base_move(0.0, 0.0, -0.5)
  
     @Slot()
     def on_base_turn_right_released(self):
@@ -436,6 +436,28 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_lwa_reference_7_clicked(self):
         self.call_service( '/omnirob_robin/lwa/control/reference_module_7' )
+        
+    @Slot()
+    def on_lwa_reboot_1_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_1' )        
+    @Slot()
+    def on_lwa_reboot_2_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_2' )        
+    @Slot()
+    def on_lwa_reboot_3_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_3' )        
+    @Slot()
+    def on_lwa_reboot_4_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_4' )
+    @Slot()
+    def on_lwa_reboot_5_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_5' )
+    @Slot()
+    def on_lwa_reboot_6_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_6' )
+    @Slot()
+    def on_lwa_reboot_7_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reboot_module_7' )
       
       
 ##### Pan Tilt

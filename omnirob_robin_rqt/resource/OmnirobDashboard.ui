@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1097</width>
+    <width>1334</width>
     <height>628</height>
    </rect>
   </property>
@@ -601,20 +601,26 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_8">
                <item>
-                <spacer name="verticalSpacer_3">
+                <spacer name="verticalSpacer_2">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>30</height>
+                   <height>40</height>
                   </size>
                  </property>
                 </spacer>
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_1">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 1</string>
                  </property>
@@ -622,6 +628,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 2</string>
                  </property>
@@ -629,6 +641,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_3">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 3</string>
                  </property>
@@ -636,6 +654,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_4">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 4</string>
                  </property>
@@ -643,6 +667,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_5">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 5</string>
                  </property>
@@ -650,6 +680,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_6">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 6</string>
                  </property>
@@ -657,6 +693,12 @@
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_7">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
                   <string>reference 7</string>
                  </property>
