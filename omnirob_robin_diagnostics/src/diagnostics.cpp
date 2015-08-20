@@ -6,6 +6,7 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float64MultiArray.h"
 #include "geometry_msgs/Twist.h"
+#include "sensor_msgs/Range.h"
 
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "diagnostic_msgs/DiagnosticStatus.h"
@@ -13,6 +14,8 @@
 
 enum DiagType {INFO, WARNING, ERROR};
 enum MsgType {FLOAT, BOOL};
+
+ros::Time last_ultrasonic_time;
 
 struct diagnostic_message{
 	diagnostic_message()
@@ -176,24 +179,6 @@ void cb_base_canserver_server_state(std_msgs::Float64 msg) {
 	diagnostics_pub.publish(diag_arr);
 }
 
-void cb_base_canserver_server_is_ready(std_msgs::Bool msg){
-}
-
-void cb_base_state_info_motor_ready_to_switch_on(std_msgs::Float64MultiArray msg){
-}
-
-void cb_base_state_info_motor_switched_on(std_msgs::Float64MultiArray msg){
-}
-
-void cb_base_state_info_motor_operation_enabled(std_msgs::Float64MultiArray msg){
-}
-
-void cb_base_state_error_motor_has_errors(std_msgs::Float64MultiArray msg){
-}
-
-void cb_base_state_info_motor_has_warnings(std_msgs::Float64MultiArray msg){
-}
-
 void cb_base_drives_state_vel(geometry_msgs::Twist msg) {
 	diagnostic_msgs::DiagnosticArray diag_arr;
 	diag_arr.header.stamp = ros::Time::now();
@@ -282,6 +267,28 @@ void base_state_callback( std_msgs::Float64MultiArray state_word ){
 
 }// base state callback
 
+void cb_ultrasonic(sensor_msgs::Range msg){
+	last_ultrasonic_time = ros::Time::now();
+}
+
+void publish_ultrasonic(){
+	diagnostic_msgs::DiagnosticArray diag_arr;
+	diag_arr.header.stamp = ros::Time::now();
+	diagnostic_msgs::DiagnosticStatus diag_status;
+	diag_status.name = "ultrasonic status";
+	diag_status.hardware_id = "ultrasonic";
+	if(ros::Time::now().toSec()-last_ultrasonic_time.toSec() < 5){
+		diag_status.level = diagnostic_msgs::DiagnosticStatus::OK;
+		diag_status.message = "OK";
+	} else {
+		diag_status.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+		diag_status.message = "No messages received";
+	}
+
+	diag_arr.status.push_back(diag_status);
+	diagnostics_pub.publish(diag_arr);
+}
+
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "omnirob_robin_diagnostics");
@@ -293,8 +300,10 @@ int main(int argc, char **argv) {
 
 	// Base subscribers
 	ros::Subscriber sub_base_canserver_state = n.subscribe<std_msgs::Float64>("/omnirob_robin/base/canserver/server_state", 1000, cb_base_canserver_server_state);
-	ros::Subscriber sub_base_canserver_is_ready = n.subscribe<std_msgs::Bool>("/omnirob_robin/base/canserver/server_is_ready", 1000, cb_base_canserver_server_is_ready);
+	//ros::Subscriber sub_base_canserver_is_ready = n.subscribe<std_msgs::Bool>("/omnirob_robin/base/canserver/server_is_ready", 1000, cb_base_canserver_server_is_ready);
 	ros::Subscriber sub_base_drives_state_vel = n.subscribe<geometry_msgs::Twist>("/omnirob_robin/base/drives/state/vel", 1000, cb_base_drives_state_vel);
+
+	ros::Subscriber sub_ultrasonic = n.subscribe<sensor_msgs::Range>("/Ultrasound/Sensor0", 1000, cb_ultrasonic);
 
 	std::vector<diagnostic_message> diag_messages;
 	std::vector<module_diagnostics_processor*> module_processors;
@@ -338,8 +347,6 @@ int main(int argc, char **argv) {
 	diag_messages.push_back(diagnostic_message("joint_state_array", "gripper", "", INFO, FLOAT, 0, 2));
 	diag_messages.push_back(diagnostic_message("module_not_responding", "gripper", "error", ERROR, FLOAT, 0, 0));
 
-
-
 	for(int i = 0; i < diag_messages.size(); i++){
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
 		diag_messages[i].ns_ = "lwa";
@@ -351,6 +358,7 @@ int main(int argc, char **argv) {
 	while( ros::ok())
 	{
 		loop_rate.sleep();
+		publish_ultrasonic();
 		ros::spinOnce();
 	}
 	// ros::spin();
