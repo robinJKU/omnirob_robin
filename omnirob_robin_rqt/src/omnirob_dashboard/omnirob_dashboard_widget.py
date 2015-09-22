@@ -76,7 +76,7 @@ class OmnirobDashboardWidget(QWidget):
                 if joint.name == 'gripper/finger_left_joint':
                     self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
                     self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
-                
+               
         self.base_active.stateChanged.connect(self.on_base_active_stateChanged)
         self._twist = Twist() 
         self.base_activated = False
@@ -116,6 +116,7 @@ class OmnirobDashboardWidget(QWidget):
         self._update_goals()
         
     def _update_goals(self):
+        
         #lwa
         if self.lwa_goal_1.hasFocus():
             self._lwa_goal_had_focus[0] = True
@@ -179,7 +180,7 @@ class OmnirobDashboardWidget(QWidget):
             
         if not self._gripper_goal_had_focus:
             self.gripper_goal.setValue(float(self.gripper_state.text()))    
-            
+           
     def _reset_focus_lwa(self):
         for i in range(7):
             self._lwa_goal_had_focus[i] = False       
@@ -233,6 +234,14 @@ class OmnirobDashboardWidget(QWidget):
         #else:
             #print(response)
             
+    @Slot()
+    def on_demo_move_clicked(self):
+        self.call_service('/omnirob_robin/base_demo_move_srv')
+        
+    @Slot()
+    def on_demo_localize_clicked(self):
+        self.call_service('/omnirob_robin/base_demo_localize_srv')
+            
 ##### Base
     def _base_move(self, x, y, yaw):
         twist = Twist()
@@ -248,7 +257,6 @@ class OmnirobDashboardWidget(QWidget):
         
     @Slot()
     def on_base_can_start_clicked(self):
-        print('test')
         self.call_service( '/omnirob_robin/base/canserver/start' )
         rospy.sleep(1.0)
         self.call_service( '/omnirob_robin/base/drives/control/start' )
