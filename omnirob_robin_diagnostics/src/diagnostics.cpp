@@ -319,7 +319,7 @@ int main(int argc, char **argv) {
 	//different messages for gripper lwa and pan_tilt
 	diag_messages.push_back(diagnostic_message("move_blocked", "gripper", "error", INFO, FLOAT, 0, 0));
 	diag_messages.push_back(diagnostic_message("move_blocked", "lwa", "error", ERROR, FLOAT, 0, 0));
-	//diag_messages.push_back(diagnostic_message("move_blocked", "pan_tilt", "error", ERROR, FLOAT, 0, 0));
+	diag_messages.push_back(diagnostic_message("move_blocked", "pan_tilt", "error", ERROR, FLOAT, 0, 0));
 
 	for(int i = 0; i < diag_messages.size(); i++){
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
@@ -351,8 +351,8 @@ int main(int argc, char **argv) {
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
 		diag_messages[i].ns_ = "lwa";
 		module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
-		//diag_messages[i].ns_ = "pan_tilt";
-	    //module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
+		diag_messages[i].ns_ = "pan_tilt";
+	    module_processors.push_back(new module_diagnostics_processor(diag_messages[i]));
 	}
 
 	while( ros::ok())

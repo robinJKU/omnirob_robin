@@ -56,7 +56,7 @@
             </geometry>
          </collision>
       </link>
-      <joint name="pan_tilt/tilt_joint" type="continous">
+      <joint name="pan_tilt/tilt_joint" type="continuous">
          <origin xyz="0 ${-0.071/2} ${0.071+0.04+0.071/2}" rpy="0 0 0" />
          <axis xyz="0 1 0" />
          <calibration rising="0.0" falling="0.0" />
