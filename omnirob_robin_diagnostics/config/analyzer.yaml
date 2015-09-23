@@ -1,11 +1,4 @@
-analyzers:
-  base:
-    type: GenericAnalyzer
-    path: Base
-    startswith: base
-    num_items: 6
-    remove_prefix: base_
-  lwa:
+lwa:
     type: GenericAnalyzer
     path: Lwa
     startswith: lwa
@@ -23,4 +16,3 @@ analyzers:
     startswith: pan_tilt
     num_items: 17
     remove_prefix: pan_tilt_
-
