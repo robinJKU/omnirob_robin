@@ -12,13 +12,7 @@
     <!-- set in properties xacro -->
     <insert_block name="camera_mast_origin" />
   </xacro:camera_mast>
-  
- 
-  <xacro:schunk_pan_tilt parent="camera_mast_origin_link">   
-    <!-- set in properties xacro -->
-    <insert_block name="pan_tilt_origin" />
-  </xacro:schunk_pan_tilt>
-  
+    
   
   <xacro:ultrasound_sensor parent="base_link" number="0">
     <insert_block name="ultrasound_sensor0" />
@@ -43,14 +37,17 @@
   </xacro:ultrasound_sensor>
   <xacro:ultrasound_sensor parent="base_link" number="7">
     <insert_block name="ultrasound_sensor7" />
-  </xacro:ultrasound_sensor>
+  </xacro:ultrasound_sensor>  
+
+  <xacro:sensor_kinect parent="pan_tilt/tcp_link" />   
+  
+  <xacro:sensor_sick3000 parent="base_link" /> 
   
   
-  <xacro:sensor_kinect parent="pan_tilt/tcp_link" />
-  
-  
-  <xacro:sensor_sick3000 parent="base_link" />  
-  
+  <xacro:schunk_pan_tilt parent="camera_mast_origin_link">
+    <insert_block name="pan_tilt_origin" />
+  </xacro:schunk_pan_tilt>
+
   
   <xacro:lwa parent="base_link" name="lwa">
 	  <insert_block name="lwa_origin"/>
@@ -59,5 +56,6 @@
   <xacro:schunk_pg70 parent="lwa/link_7" name="gripper">
     <insert_block name="gripper_origin"/>
   </xacro:schunk_pg70> 
+
   
 </robot>

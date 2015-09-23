@@ -1,105 +1,105 @@
-<?xml version="1.0"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-
-	
-	<xacro:include filename="$(find omnirob_robin_description)/urdf/schunk_pan_tilt/schunk_pan_tilt.transmission.xacro"/>	
-	
-	<xacro:macro name="schunk_pan_tilt" params="parent *origin">		
-		
-    
+   <xacro:include filename="$(find omnirob_robin_description)/urdf/schunk_pan_tilt/schunk_pan_tilt.transmission.xacro" />
+   <xacro:macro name="schunk_pan_tilt" params="parent *origin">
+      <joint name="pan_tilt/pan_socket_joint" type="fixed">
+         <insert_block name="origin" />
+         <parent link="${parent}" />
+         <child link="pan_tilt/pan_socket_link" />
+      </joint>
+      <link name="pan_tilt/pan_socket_link">
+         <inertial>
+            <mass value="0.5" />
+            <origin xyz="0 0 0.0" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.5" />
+         </inertial>
+         <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+               <mesh filename="package://omnirob_robin_description/meshes/power_cube_pan_socket.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="Schunk/DarkGolden" />
+         </visual>
+         <collision>
+            <origin xyz="0.0 0.0 0.05" rpy="0 0 0" />
+            <geometry>
+               <box size="0.1 0.1 0.1" />
+            </geometry>
+         </collision>
+      </link>
     <joint name="pan_tilt/pan_joint" type="continuous">
-			<insert_block name="origin"/> 
-			<axis xyz="0 0 1"/> 
-			<parent link="${parent}"/>
-      <calibration rising="0.0" falling="0.0"/>
-      <dynamics damping="0.2" friction="10.0" />
-      <limit effort="10" velocity="0.5" lower="-2.0" upper="2.0"/>
-			<child link="pan_tilt/pan_link" />
-		</joint>
-     
-
-		<link name="pan_tilt/pan_link">
-			<inertial>
-				<mass value="0.5" />
-				<origin xyz="0 0 0.0" />
-				<inertia ixx="0.01" ixy="0.0" ixz="0.0"
-					iyy="0.01" iyz="0.0" izz="0.5" />
-			</inertial>
-      
-      <visual>
-				<origin xyz="0 0 0.094" rpy="0 ${M_PI} ${M_PI/2}" />
-				<geometry>
-					<mesh filename="package://omnirob_robin_description/meshes/power_cube_pan.stl" scale="0.001 0.001 0.001"/>
-				</geometry>
-        <material name="Schunk/DarkGolden" />
-			</visual>
-      
-      <collision>
-				<origin xyz="0.0 0.0 0.08" rpy="0 0 0" />
-				<geometry>
-					<box size="0.1 0.12 0.16"/>
-				</geometry>
-			</collision>
-			
-		</link>
-    
-    <joint name="pan_tilt/tilt_joint" type="continuous">
-			<origin xyz="0 0 0.0951" rpy="0 0 0" />  
-			<axis xyz="0 1 0"/>   
-      <calibration rising="0.0" falling="0.0"/>
-      <dynamics damping="0.2" friction="10.0" />
-      <limit effort="10" velocity="0.5" lower="-1.57" upper="1.57"/>
-			<parent link="pan_tilt/pan_link"/>
-			<child link="pan_tilt/tilt_link" />
-		</joint>
-     
-
-		<link name="pan_tilt/tilt_link">
-			<inertial>
-				<mass value="0.5" />
-				<origin xyz="0 0 0.0" />
-				<inertia ixx="0.01" ixy="0.0" ixz="0.0"
-					iyy="0.01" iyz="0.0" izz="0.5" />
-			</inertial>
-      
-      <visual>
-				<origin xyz=" 0 0 0" rpy="0 ${M_PI} -${M_PI/2}" />
-				<geometry>
-					<mesh filename="package://omnirob_robin_description/meshes/schunk_tilt.stl" scale="0.001 0.001 0.001"/>
-				</geometry>
-        <material name="Schunk/DarkGolden" />
-			</visual>
-      
-      <collision>
-				<origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-				<geometry>
-					<box size="0.12 0.24 0.11"/>
-				</geometry>
-			</collision>
-			
-		</link>
-    
-     <joint name="pan_tilt/tcp_joint" type="fixed">
-			<origin xyz="0 0 0.07" rpy="0 0 0" />  
-			<parent link="pan_tilt/tilt_link"/>
-			<child link="pan_tilt/tcp_link" />
-		</joint>
-     
-
-		<link name="pan_tilt/tcp_link">
-			<inertial>
-				<mass value="0.5" />
-				<origin xyz="0 0 0.0" />
-				<inertia ixx="0.01" ixy="0.0" ixz="0.0"
-					iyy="0.01" iyz="0.0" izz="0.5" />
-			</inertial>			
-		</link>
-    
-    
-    <xacro:if value="${simulated}">
-      <xacro:pan_tilt_transmission/>
-    </xacro:if>
-
-	</xacro:macro>
+         <origin xyz="0 0 ${0.045+0.071}" rpy="0 0 0" />
+         <axis xyz="0 0 1" />
+         <parent link="pan_tilt/pan_socket_link" />
+         <calibration rising="0.0" falling="0.0" />
+         <dynamics damping="0.2" friction="10.0" />
+         <limit effort="10" velocity="0.5" lower="-2.0" upper="2.0" />
+         <child link="pan_tilt/pan_link" />
+      </joint>
+      <link name="pan_tilt/pan_link">
+         <inertial>
+            <mass value="0.5" />
+            <origin xyz="0 0 0.0" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.5" />
+         </inertial>
+         <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${M_PI/2.0}" />
+            <geometry>
+               <mesh filename="package://omnirob_robin_description/meshes/power_cube_pan.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="Schunk/DarkGolden" />
+         </visual>
+         <collision>
+            <origin xyz="0.0 0.0 0.08" rpy="0 0 0" />
+            <geometry>
+               <box size="0.1 0.12 0.16" />
+            </geometry>
+         </collision>
+      </link>
+      <joint name="pan_tilt/tilt_joint" type="continous">
+         <origin xyz="0 ${-0.071/2} ${0.071+0.04+0.071/2}" rpy="0 0 0" />
+         <axis xyz="0 1 0" />
+         <calibration rising="0.0" falling="0.0" />
+         <dynamics damping="0.2" friction="10.0" />
+         <limit effort="10" velocity="0.5" lower="-1.57" upper="1.57" />
+         <parent link="pan_tilt/pan_link" />
+         <child link="pan_tilt/tilt_link" />
+      </joint>
+      <link name="pan_tilt/tilt_link">
+         <inertial>
+            <mass value="0.5" />
+            <origin xyz="0 0 0.0" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.5" />
+         </inertial>
+         <visual>
+            <origin xyz=" 0 0 0" rpy="0 0 0" />
+            <geometry>
+               <mesh filename="package://omnirob_robin_description/meshes/power_cube_tilt.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="Schunk/DarkGolden" />
+         </visual>
+         <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <geometry>
+               <box size="0.12 0.24 0.11" />
+            </geometry>
+         </collision>
+      </link>
+      <joint name="pan_tilt/tcp_joint" type="fixed">
+         <origin xyz="0 0 0.07" rpy="0 0 0" />
+         <parent link="pan_tilt/tilt_link" />
+         <child link="pan_tilt/tcp_link" />
+      </joint>
+      <link name="pan_tilt/tcp_link">
+         <inertial>
+            <mass value="0.5" />
+            <origin xyz="0 0 0.0" />
+            <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.5" />
+         </inertial>
+      </link>
+      <xacro:if value="${simulated}">
+         <xacro:pan_tilt_transmission />
+      </xacro:if>
+   </xacro:macro>
 </robot>
+

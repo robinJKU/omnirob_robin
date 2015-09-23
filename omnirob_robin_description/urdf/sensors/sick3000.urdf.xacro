@@ -30,6 +30,9 @@
         <geometry>
           <box size="0.106 0.102 0.152"/>
         </geometry>
+        <material name="yellow">
+            <color rgba="1.0 1.0 0 1"/>
+        </material>
       </visual>
       
       <collision>

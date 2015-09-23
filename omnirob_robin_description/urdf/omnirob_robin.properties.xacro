@@ -10,7 +10,7 @@
   
   <xacro:property name="pan_tilt_origin">
     <!-- von camera mast origin zu pan_tilt_origin -->
-    <origin xyz="0 0 0.669" rpy="0 0 0"/>
+    <origin xyz="0 0 0.54" rpy="0 0 0"/>
   </xacro:property>  
   
   <property name="arm_1_ref" value="0"/>
@@ -49,7 +49,7 @@
     <origin xyz="${0.7/2.0+0.003+0.0597} 0 ${0.293+0.116}" rpy="${M_PI} 0 0"/> 
   </xacro:property>
   
-  <property name="ultrasound_z" value="0.66"/>
+  <property name="ultrasound_z" value="0.655"/>
   <property name="ultrasound_offset" value="0.34"/>
   <property name="sqrt2" value="1.414213562"/>
   
