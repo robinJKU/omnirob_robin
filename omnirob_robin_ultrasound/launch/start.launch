@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="rosserial_server" type="serial_node" name="rosserial_server">
+  <node pkg="rosserial_server" type="serial_node" name="rosserial_server" output="screen">
     <rosparam>
       port: /dev/arduino
       require:
-        publishers: [ status ]
-        subscribers: [ cmd, lights ]
+        publishers: [ arduino/Ultrasound_distances, arduino/Temperature ]
+        subscribers: []
     </rosparam>
   </node>
   <node pkg="rosserial_python" type="message_info_service.py"
         name="rosserial_message_info" />
-  <node pkg="omnirob_robin_ultrasound" type="arduino_node" name="arduino_node">
+  <node pkg="omnirob_robin_ultrasound" type="arduino_node" name="arduino_node" output="screen">
   	<param name="min_distance" type="double" value="0.2"/>
   	<param name="max_distance" type="double" value="1.5"/>
   </node>
