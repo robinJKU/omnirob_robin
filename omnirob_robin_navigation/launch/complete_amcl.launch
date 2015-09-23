@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- start localization nodes 
+        <include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include>
+        <include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
+     -->   
+        <!--start mapping nodes -->
+        <include file="$(find omnirob_robin_navigation)/launch/amcl.launch"></include>
+
+        <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena.yaml"/>
+        <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
+                <remap from="/map" to="/map"/>
+        </node>
+
+        <!-- start move base -->
+        <include file="$(find omnirob_robin_navigation)/launch/move_base.launch"></include>
+        <!--
+        <node pkg="omnirob_robin_navigation" type="global_localization" name="global_localization" output="screen" />
+        -->
+</launch>
+

@@ -42,3 +42,7 @@ add_dependencies(marker_localization_global omnirob_robin_msgs_gencpp)
 add_executable(global_localization src/global_localization.cpp)
 target_link_libraries(global_localization ${catkin_LIBRARIES})
 add_dependencies(global_localization omnirob_robin_msgs_gencpp)
+
+add_executable(marker_localization_base src/marker_localization_base.cpp)
+target_link_libraries(marker_localization_base ${catkin_LIBRARIES})
+add_dependencies(marker_localization_base omnirob_robin_msgs_gencpp)

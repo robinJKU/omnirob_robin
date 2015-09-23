@@ -1,7 +1,7 @@
 marker_ids: [0, 1]
 marker0:
   position:
-    x: 1.50
+    x: 1.55
     y: 0.09
     z: 1.65
   orientation:
@@ -16,8 +16,8 @@ marker0:
 marker1:
   position:
     x: 0.15
-    y: 1.94
-    z: 1.77692
+    y: 1.75
+    z: 1.65
   orientation:
     x: 0.503915
     y: 0.525556

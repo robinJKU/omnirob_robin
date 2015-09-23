@@ -4,7 +4,7 @@ base_local_planner: "dwa_local_planner/DWAPlannerROS"
 base_global_planner: "global_planner/GlobalPlanner" # "navfn/NavfnROS"
 
 shutdown_costmaps: false
-controller_frequency: 3.0 
+controller_frequency: 5.0 
 oscillation_timeout: 5.0
 oscillation_distance: 0.05
 
@@ -16,8 +16,8 @@ planner_patience: 5.0 # How long the planner will wait in seconds in an attempt 
 controller_patience: 15.0 # How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed. 
 
 # configure recovery behaviour
-aggressive_reset_dist: 0.5
-conservative_reset_dist: 3.0 # The distance away from the robot in meters at which obstacles will be cleared from the costmap when attempting to clear space in the map. Note, this parameter is only used when the default recovery behaviors are used for move_base. 
+aggressive/reset_dist: 0.5
+conservative/reset_dist: 3.0 # The distance away from the robot in meters at which obstacles will be cleared from the costmap when attempting to clear space in the map. Note, this parameter is only used when the default recovery behaviors are used for move_base. 
 recovery_behavior_enabled: true
 clearing_rotation_allowed: false
 

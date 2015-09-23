@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="omnirob_robin_navigation" type="marker_localization_base" name="marker_localization_base" >
+    <rosparam command="load" file="$(find omnirob_robin_navigation)/data/marker_calibration.yaml" />
+    <rosparam>
+      base_link: base_link
+    </rosparam>
+  </node>
+
+</launch>
