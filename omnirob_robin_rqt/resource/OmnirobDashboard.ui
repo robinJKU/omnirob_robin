@@ -887,16 +887,16 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="module_label_22">
+                <widget class="QLabel" name="module_label_21">
                  <property name="text">
-                  <string>Tilt / ID20</string>
+                  <string>Pan / ID19</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="module_label_21">
+                <widget class="QLabel" name="module_label_22">
                  <property name="text">
-                  <string>Pan / ID19</string>
+                  <string>Tilt / ID20</string>
                  </property>
                 </widget>
                </item>
@@ -937,7 +937,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
                  <property name="decimals">
                   <number>3</number>
                  </property>
@@ -947,7 +947,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
                  <property name="decimals">
                   <number>3</number>
                  </property>
