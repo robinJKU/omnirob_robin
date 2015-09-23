@@ -26,3 +26,7 @@ include_directories(
 add_executable(pick_and_place_demo src/pick_and_place_demo.cpp)
 target_link_libraries(pick_and_place_demo ${catkin_LIBRARIES})
 add_dependencies(pick_and_place_demo omnirob_robin_msgs_gencpp)
+
+add_executable(base_demo src/base_demo.cpp)
+target_link_libraries(base_demo ${catkin_LIBRARIES})
+add_dependencies(base_demo omnirob_robin_msgs_gencpp)

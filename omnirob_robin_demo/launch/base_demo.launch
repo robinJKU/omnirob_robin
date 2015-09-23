@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+    <include file="$(find omnirob_robin_bringup)/launch/omnirob.launch"></include>
+    -->
+	<!-- start localization nodes -->
+	<include file="$(find omnirob_robin_navigation)/launch/complete_karto.launch"></include>	
+
+	<!-- start main demo node -->
+	<node pkg="omnirob_robin_demo" type="base_demo" name="base_demo" output="screen"></node>   
+    
+    <!-- global localization launch -->
+    <include file="$(find omnirob_robin_navigation)/launch/global_marker_localization_base.launch"></include> 
+    
+    <!-- ar marker detection -->
+    <include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
+	
+</launch>
