@@ -62,7 +62,7 @@ public:
 		tf::Matrix3x3 rotated = tf::Matrix3x3(0.0, -sin_alpha, cos_alpha,    0.0, cos_alpha, sin_alpha,   -1.0,0.0,0.0);
 		to_object_rotated_from_gripper.setBasis( rotated );
 
-		float shifted = 0.0; // distance between gripper and tcp
+		float shifted = -0.04; // distance between gripper and tcp
 		tf::Vector3 shift_vec = tf::Vector3( 0.0, -0.05, -shifted );
 		to_object_rotated_from_gripper.setOrigin( to_object_rotated_from_gripper*shift_vec );
 
@@ -131,6 +131,8 @@ private:
 
 		// plan grasp
 		geometry_msgs::Pose palm_link_target_pose = calc_grasp( to_base_link_from_object);
+		geometry_msgs::Pose palm_link_above_target_pose = calc_grasp( to_base_link_from_object, 0.05);
+		palm_link_above_target_pose.position.z += 0.15;
 
 		// plan path above pick pose
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose, plan_home_pose;
@@ -138,14 +140,12 @@ private:
 
 		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_target_pose), ros::Time::now(), "base_link", "palm_link/target_pose"));
 
-		geometry_msgs::Pose palm_link_above_target_pose = geometry_msgs::Pose(palm_link_target_pose);
-		palm_link_above_target_pose.position.z += 0.15;
-
 		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_above_target_pose), ros::Time::now(), "base_link", "palm_link/above_target_pose")); // todo: remove
 
 		ROS_INFO("Plan path to intermediate point");
 		unsigned int ii=0;
 		while(ii<5){
+
 			moveit_msgs::Constraints constraints;
 			constraints.joint_constraints.resize(1);
 			constraints.joint_constraints[0].joint_name = "lwa/joint_3";
@@ -155,6 +155,7 @@ private:
 			constraints.joint_constraints[0].tolerance_below = 0.1;
 
 			lwa_.plan_continuous_path_.lwa_move_group_->setPathConstraints( constraints);
+
 
 			if( lwa_.plan_continuous_path_.plan_path_to_pose( plan_above_pick_pose, palm_link_above_target_pose, "/base_link") ){
 				ROS_INFO("Found valid path");
@@ -188,6 +189,7 @@ private:
 		ii=0;
 		std::vector<double> last_configuration = plan_above_pick_pose.trajectory_.joint_trajectory.points.back().positions;
 		while(ii<5){
+
 			moveit_msgs::Constraints constraints;
 			constraints.joint_constraints.resize(1);
 			constraints.joint_constraints[0].joint_name = "lwa/joint_3";
@@ -342,7 +344,7 @@ private:
 	 * @param to_base_link_from_object_pose: Object pose described in base_link frame
 	 * @return lwa/link_7 frame for the grasp pose describet in base_link frame
 	 */
-	geometry_msgs::Pose calc_grasp( const tf::Transform &to_base_link_from_object ){
+	geometry_msgs::Pose calc_grasp( const tf::Transform &to_base_link_from_object, double gripper_offset = 0 ){
 		// correct the object yaw angle:
 		//   for the following, only the projection onto the xy plane is considered
 		//   the x-axis of the object frame should always look into the direction given by the vector from base_link to object_link
@@ -354,7 +356,12 @@ private:
 		to_base_link_from_object_rotated.setRotation( rotate_tangential);
 
 		// calculate grasp
-		tf::Transform to_base_link_from_gripper_palm_link = to_base_link_from_object_rotated*to_object_from_palm_link_;
+		tf::Vector3 origin = to_object_from_palm_link_.getOrigin();
+		origin.setX(origin.getX()-gripper_offset);
+
+		tf::Transform to_object_from_palm_link_shifted = to_object_from_palm_link_;
+		to_object_from_palm_link_shifted.setOrigin(origin);
+		tf::Transform to_base_link_from_gripper_palm_link = to_base_link_from_object_rotated*to_object_from_palm_link_shifted;
 
 		geometry_msgs::Pose palm_link_target_pose;
 		tf::poseTFToMsg(to_base_link_from_gripper_palm_link, palm_link_target_pose);
@@ -416,12 +423,11 @@ int main(int argc, char **argv)
 	table_pose.orientation.w=1.0;
 	std::string table_pose_frame = "/base_link";
 
-
-
 	lwa_continuous_path_planner planner;
 	ROS_INFO("add collision object");
 	planner.add_static_object( table_id, table_primitive, table_pose, table_pose_frame);
     */
+
 	ros::spin();
 	return 0;
 
