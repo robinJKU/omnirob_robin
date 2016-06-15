@@ -548,7 +548,7 @@ class AR_Marker_Localization{
 				angle_overlooking_maximum_nr_of_markers = pan_tilt_target_position[0];
 			}
 			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_tilt_target_position[0]*180.0/M_PI);
-			if( max_nr_of_marks_detected== 1){
+			if( max_nr_of_marks_detected== 2){
 				break;
 			}
 			
