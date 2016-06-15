@@ -5,11 +5,13 @@
 
 //services und messages
 
+#include <actionlib_msgs/GoalStatusArray.h>
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/Twist.h"
 #include "tf/tf.h"
 #include "std_srvs/Empty.h"
 #include <omnirob_robin_msgs/localization.h>
+#include <omnirob_robin_msgs/move_pan_tilt.h>
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_listener.h"
 
@@ -17,13 +19,18 @@ double MAX_LIN_VEL = 0.25;
 double MAX_ANG_VEL = 0.4;
 double STEP_TIME = 0.01;
 
+bool goal_reached = false;
 
+ros::Publisher goal_publisher;
 ros::Publisher cmd_vel_publisher;
 
 ros::ServiceClient marker_localization_client;
+ros::ServiceClient move_pan_tilt_client;
+ros::ServiceClient detect_objects_client;
 
 ros::ServiceServer base_demo_server;
 ros::ServiceServer localize_server;
+ros::ServiceServer detect_server;
 
 tf::Transform static_map_to_map;
 
@@ -42,6 +49,32 @@ void move_base(double vx, double vy, double omega){
         msg.angular.z = omega;
         cmd_vel_publisher.publish(msg);    
     }    
+}
+
+void move_base_goal(double x, double y, double yaw){
+	tf::Quaternion quat;
+	quat.setRPY(0,0,yaw);
+	quat.normalize();
+
+	geometry_msgs::PoseStamped goal_msg;
+	goal_msg.header.frame_id = "/static_map";
+	goal_msg.header.stamp = ros::Time::now();
+	goal_msg.pose.position.x = x;
+	goal_msg.pose.position.y = y;
+	goal_msg.pose.position.z = 0;
+
+	goal_msg.pose.orientation.x = quat.getX();
+	goal_msg.pose.orientation.y = quat.getY();
+	goal_msg.pose.orientation.z = quat.getZ();
+	goal_msg.pose.orientation.w = quat.getW();
+
+	goal_publisher.publish(goal_msg);
+	ros::Duration(1.0).sleep();
+
+	while(!goal_reached){
+		ros::Rate(1).sleep();
+		ros::spinOnce();
+	}
 }
 
 //move base starting vom inital coordinate frame relative
@@ -116,7 +149,7 @@ bool localize_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Respo
         marker_localization_client.call( marker_localization_msg);
         if( !marker_localization_msg.response.error_message.empty() ){
             ROS_ERROR("Can't initialize robot pose -reason: %s", marker_localization_msg.response.error_message.c_str());
-            move_base_rel_pos(0, 0, 45, true);
+            //move_base_rel_pos(0, 0, 45, true);
             i++;
             continue;        
         }
@@ -130,7 +163,8 @@ bool localize_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Respo
         }
     catch (tf::TransformException &ex) {
         ROS_ERROR("%s",ex.what());
-    }    
+    }       
+    
     
     tf::poseMsgToTF(marker_localization_msg.response.base_link, static_map_to_base_link);
     static_map_to_map.mult(static_map_to_base_link, transform);
@@ -140,6 +174,41 @@ bool localize_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Respo
     //move_base_rel_pos(0, 0, -120, true);
     
     // "Finished scan, no marker detected"
+    
+	return true;
+}
+
+
+void statusCallback(const actionlib_msgs::GoalStatusArray::ConstPtr& msg){
+	if(msg->status_list.size() > 0){
+		int last = msg->status_list.size()-1;
+		if(msg->status_list[last].status == 3){
+			goal_reached = true;
+		} else {
+			goal_reached = false;
+		}
+	}
+}
+
+
+bool detect_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){
+	ROS_INFO("detect_srv called");
+    ROS_INFO("moving to table");
+
+	move_base_goal(1.81, 1.57, 0);
+    
+    ROS_INFO("move pan tilt");
+    
+    omnirob_robin_msgs::move_pan_tilt pan_tilt_srv;
+
+	pan_tilt_srv.request.pan_goal = -1.57;
+	pan_tilt_srv.request.tilt_goal = 1.0;
+
+	move_pan_tilt_client.call(pan_tilt_srv);   
+    
+    
+    //std_srvs::Empty srv;
+	//detect_objects_client.call(srv);
     
 	return true;
 }
@@ -159,11 +228,28 @@ int main( int argc, char** argv) {
 	cmd_vel_publisher = node_handle.advertise<geometry_msgs::Twist>("/omnirob_robin/base/drives/control/cmd_vel", 10);
 	//subscriber
 
+    ros::Subscriber status_subscriber = node_handle.subscribe("move_base/status", 10, statusCallback);
+
 	//Service server
 	base_demo_server = node_handle.advertiseService("/omnirob_robin/base_demo_move_srv", base_demo_callback);
     localize_server = node_handle.advertiseService("/omnirob_robin/base_demo_localize_srv", localize_callback);
+    detect_server = node_handle.advertiseService("/omnirob_robin/base_demo_detect_srv", detect_callback);
     
-    //service clients    
+    
+    goal_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("move_base_simple/goal", 10);
+    if( !omnirob_ros_tools::wait_until_publisher_is_connected( goal_publisher ) ){
+	  ROS_ERROR("Can't initialize goal publisher");
+	  return -1;
+	}
+    
+    
+    //service clients  
+    ros::service::waitForService("/omnirob_robin/pan_tilt/move_pan_tilt");
+	move_pan_tilt_client = node_handle.serviceClient<omnirob_robin_msgs::move_pan_tilt>("/omnirob_robin/pan_tilt/move_pan_tilt");
+      
+    //Service Clients
+	//ros::service::waitForService("/omnirob_robin/detect_objects_srv");
+	//detect_objects_client = node_handle.serviceClient<std_srvs::Empty>("/omnirob_robin/detect_objects_srv");  
     
     std::string marker_localization_topic = "/marker_localization";
     if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
@@ -171,6 +257,7 @@ int main( int argc, char** argv) {
     }
     marker_localization_client = node_handle.serviceClient<omnirob_robin_msgs::localization>( marker_localization_topic);
   
+    ROS_INFO("DEMO NODE READY");
     
     while(ros::ok){
         ros::Rate(100).sleep();
