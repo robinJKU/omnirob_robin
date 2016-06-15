@@ -22,12 +22,17 @@ class Pan_Tilt{
 		ros::NodeHandle node_handle;
 		ros::Publisher cmd_joint_state_publisher;
 		ros::Subscriber joint_state_subscriber;
+		ros::Subscriber module_is_ready_subscriber;
 		ros::ServiceClient start_motion_client;
+        ros::ServiceClient initialize_client;
 		
 		// state variables
 		std::vector<float> joint_state;
 		std::vector<float> last_commanded_joint_state;
 		ros::Time joint_state_time_stamp;
+        bool module_is_ready_published;
+        bool module_is_ready;
+        
 		
 		// static variables
 		const static float POSITION_REACHED_EPSILON = 0.02; /** The position reached epsilon value is considered element wise and in rad */
@@ -45,11 +50,47 @@ class Pan_Tilt{
 			}else{
 				start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
 			}
+            
+            std::string pan_tilt_initialize_srv = "/omnirob_robin/pan_tilt/control/initialize_modules";
+			if( !omnirob_ros_tools::wait_for_service( pan_tilt_initialize_srv) ){
+				throw "initialize service does not exist";
+			}else{
+				initialize_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_initialize_srv);
+			}
 			
 			// initialize msg	
 			cmd_joint_state_publisher = node_handle.advertise<std_msgs::Float64MultiArray>("/omnirob_robin/pan_tilt/control/commanded_joint_state", 5);
 			joint_state_subscriber = node_handle.subscribe("/omnirob_robin/pan_tilt/state/joint_state_array", 10, &Pan_Tilt::joint_state_callback, this);
+			module_is_ready_subscriber = node_handle.subscribe("/omnirob_robin/pan_tilt/state/info/module_is_ready", 10, &Pan_Tilt::module_is_ready_callback, this);
+
+
+			// now check if the pan_tilt driver is running
+			module_is_ready = false;
+            module_is_ready_published = false;
+            int n = 0;            
+			while(n < 10 && module_is_ready == false){
+                ros::Duration(0.5).sleep();
+                ros::spinOnce();
+			}
+            // if not ready initialize modules
+            if (module_is_ready == false){
+                std_srvs::Empty empty_srvs;
+                initialize_client.call( empty_srvs);   
+                n = 0;
+                while(n < 10 && module_is_ready == false){
+                    ros::Duration(0.5).sleep();
+                    ros::spinOnce();
+                }
+                if (module_is_ready == false){
+                    throw "initialization did not ready the module";
+                }            
+            }
+            // no topic received
+            if (module_is_ready_published == false){
+                throw "pan_til_driver not publishing";
+            }
 			
+						
 		}
 		/**
 		 * destructor
@@ -69,6 +110,21 @@ class Pan_Tilt{
 				
 			}else{
 				ROS_WARN("joint state callback - Msg data not proper sized: got %i, expected 2",  (int) joint_state_msg.data.size() );
+			}
+		}// joint state callback
+        
+     public:
+		/**
+		 * Callback for the module_is_ready publisher
+		 */        
+        void module_is_ready_callback( std_msgs::Float64MultiArray module_is_ready_msg ){
+            module_is_ready_published = true;
+			if( module_is_ready_msg.data.size()==2 ){
+				if(module_is_ready_msg.data[0] > 0.0 && module_is_ready_msg.data[1] > 0.0){
+                    module_is_ready = true;
+                }								
+			}else{
+				ROS_WARN("module_is_ready callback - Msg data not proper sized: got %i, expected 2",  (int) module_is_ready_msg.data.size() );
 			}
 		}// joint state callback
 		
