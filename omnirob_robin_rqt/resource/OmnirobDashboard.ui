@@ -146,16 +146,23 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="demo_move">
+        <widget class="QPushButton" name="demo_localize">
          <property name="text">
-          <string>PushButton</string>
+          <string>Localize</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="demo_localize">
+        <widget class="QPushButton" name="demo_move">
          <property name="text">
-          <string>PushButton</string>
+          <string>Move</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="demo_detect">
+         <property name="text">
+          <string>Detect</string>
          </property>
         </widget>
        </item>
@@ -937,9 +944,15 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
                  <property name="decimals">
                   <number>3</number>
+                 </property>
+                 <property name="minimum">
+                  <double>-3.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>3.000000000000000</double>
                  </property>
                  <property name="singleStep">
                   <double>0.100000000000000</double>
@@ -947,9 +960,15 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="pan_tilt_goal_1">
+                <widget class="QDoubleSpinBox" name="pan_tilt_goal_2">
                  <property name="decimals">
                   <number>3</number>
+                 </property>
+                 <property name="minimum">
+                  <double>0.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>3.000000000000000</double>
                  </property>
                  <property name="singleStep">
                   <double>0.100000000000000</double>
