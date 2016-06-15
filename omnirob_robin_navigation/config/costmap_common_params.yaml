@@ -1,5 +1,5 @@
 max_obstacle_height: 0.60 # assume something like an arm is mounted on top of the robot
-robot_radius: 0.4 # distance a circular robot should be clear of the obstacle
+robot_radius: 0.55 # distance a circular robot should be clear of the obstacle
 
 # map_type: voxel # not specified, uses a 2D obstacle map
 obstacle_layer:
@@ -7,7 +7,7 @@ obstacle_layer:
   max_obstacle_height: 0.6
   obstacle_range: 30.0 # trusted distance in filling in obstacles phase
   raytrace_range: 30.0 # trusted distance in clearing phase
-  track_unknown_space: true #true needed for disabling global path planning through unknown space
+  track_unknown_space: false #true needed for disabling global path planning through unknown space
   observation_sources: scan
   scan:
     data_type: LaserScan
@@ -18,7 +18,7 @@ obstacle_layer:
 inflation_layer:
   enabled: true
   cost_scaling_factor: 15.0 # exponential rate at which the obstacle cost drops off (default: 10), see http://wiki.ros.org/costmap_2d/flat
-  inflation_radius: 0.6 # max. distance from an obstacle at which costs are incurred for planning paths.
+  inflation_radius: 0.25 # max. distance from an obstacle at which costs are incurred for planning paths.
 
 static_layer:
   enabled: true
