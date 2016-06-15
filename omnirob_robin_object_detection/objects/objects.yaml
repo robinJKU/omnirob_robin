@@ -1,6 +1,6 @@
-# all objects: cylinder_orange
+# all objects: cylinder_white
 # add objects only to detactable objects if they are part of the scene
-detectable_objects: [cylinder_orange]
+detectable_objects: [cylinder_white]
 objects:
   cylinder_orange_old:
       color: orange
@@ -9,7 +9,7 @@ objects:
       primitive0_size: [0.04, 0.04, 0.15]
       primitive0_position: [0.0, 0.0, 0.0]
       primitive0_orientation: [0.0, 0.0, 0.0]
-  cylinder_orange:
+  cylinder_white:
       color: white
       RGBcolor:  [255, 140, 0]
       primitive0_type: cylinder

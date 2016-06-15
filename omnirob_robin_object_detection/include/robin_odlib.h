@@ -99,6 +99,7 @@ public: //functions
 			for(int k = 0; k < objects.size(); k++){
 			if(search_object(objects_clouds[i], objects[k], table_height))
 				{
+                    ROS_INFO("Object detected");
 					detected_objects.push_back(objects[k]);
 					detected_objects.back().set_number(cnt[i]);
 					cnt[i] += 1;
@@ -277,7 +278,7 @@ private: //functions
 
 	    cropBoxFilter.setNegative(false);
 	    cropBoxFilter.filter(*cloudCroped);
-	    publish_marker(cropBoxFilter, 1);
+	    //publish_marker(cropBoxFilter, 1);
 	    if(cloudCroped->size() > 0){
 	      if(step == 0.01){
 	        collision = true;
@@ -299,7 +300,7 @@ private: //functions
 
 	    cropBoxFilter.setNegative(false);
 	    cropBoxFilter.filter(*cloudCroped);
-	    publish_marker(cropBoxFilter, 2);
+	    //publish_marker(cropBoxFilter, 2);
 	    if(cloudCroped->size() > 0){
 	      if(step == 0.01){
 	        collision = true;
@@ -519,7 +520,7 @@ private: //functions
 	    }
 	}
 
-	bool search_object(pcl::PointCloud<PointType>::Ptr  cloud, Object object, double table_height){
+	bool search_object(pcl::PointCloud<PointType>::Ptr  cloud, Object &object, double table_height){
 	  //extract the indices in a new pointcloud
 
 	  ROS_INFO("Fitting Bounding box to object pointcloud");

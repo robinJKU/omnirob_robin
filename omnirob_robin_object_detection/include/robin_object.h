@@ -24,7 +24,7 @@ public:
 
 	geometry_msgs::Pose get_pose(){
 		geometry_msgs::Pose pose;
-
+        ROS_INFO("boundnig box position = %f %f %f", position[0], position[1] ,position[2]);
 		pose.position.x = position[0];
 		pose.position.y = position[1];
 		pose.position.z = position[2];

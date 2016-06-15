@@ -103,14 +103,30 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 	//Transform cloud to target frame
 
 	if(input_cloud->data.size() > 0){
-
+        
+        ros::Time time = ros::Time::now();  // or better msg->header.stamp, if available; never ros::Time(0)
+        bool success = false;
+        while (!success) {
+          try {
+            pListener->waitForTransform("/table_1", (*input_cloud).header.frame_id, ros::Time(0), ros::Duration(60.0) );
+			pcl_ros::transformPointCloud ("/table_1", *input_cloud, *cloud_transformed, *pListener);
+            success = true;
+          } catch (tf::TransformException e) {
+              ROS_INFO("Transform_PointCloud Error: %s", e.what());
+          }
+          sleep(0.1);
+        }
+        
+        
+        /*
 		try {
-			pListener->waitForTransform("/table_1", (*input_cloud).header.frame_id, ros::Time::now(), ros::Duration(60.0) );
+			pListener->waitForTransform("/table_1", (*input_cloud).header.frame_id, ros::Time(0), ros::Duration(60.0) );
 			pcl_ros::transformPointCloud ("/table_1", *input_cloud, *cloud_transformed, *pListener);
 		}
 		catch(tf::TransformException e){
 			ROS_INFO("Transform_PointCloud Error: %s", e.what());
 		}
+        * */
 
 		pcl::fromROSMsg (*cloud_transformed, *cloud);
 
@@ -140,8 +156,8 @@ void detect_objects(){
 
 		tf::StampedTransform to_table_from_map;
 		try {
-				pListener->waitForTransform("/table_1", "/map", ros::Time::now(), ros::Duration(60.0) );
-				pListener->lookupTransform("/table_1", "/map", ros::Time::now(), to_table_from_map);
+				pListener->waitForTransform("/table_1", "/static_map", ros::Time::now(), ros::Duration(60.0) );
+				pListener->lookupTransform("/table_1", "/static_map", ros::Time::now(), to_table_from_map);
 			}
 			catch(tf::TransformException e){
 				ROS_INFO("Transform object frame error Error: %s", e.what());
@@ -173,6 +189,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	newCloud = false;
 
 	detect_objects();
+    ROS_INFO("detect objects finished");
 
 	return true;
 }
@@ -239,7 +256,7 @@ int main( int argc, char** argv) {
 	while(ros::ok){
 		for(int i = 0; i < transforms.size(); i++){
 			int size = transforms.size();
-			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/map", transform_names[i]));
+			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/static_map", transform_names[i]));
 		}
 		r.sleep();
 		ros::spinOnce();
