@@ -45,7 +45,7 @@
   <!--<build_depend>rosserial/rosserial_arduino</build_depend>-->
   <!--<build_depend>rosserial/rosserial_client</build_depend>-->
   <!--<build_depend>rosserial/rosserial_msgs</build_depend>-->
-  <build_depend>rosserial/rosserial_python</build_depend>
+  <build_depend>rosserial_python</build_depend>
   <build_depend>rosserial_server</build_depend>
   <!--<build_depend>rosserial/rosserial_server</build_depend>-->
   <run_depend>roscpp</run_depend>
@@ -53,7 +53,7 @@
   <!--<run_depend>rosserial/rosserial_arduino</run_depend>-->
   <!--<run_depend>rosserial/rosserial_client</run_depend>-->
   <!--<run_depend>rosserial/rosserial_msgs</run_depend>-->
-  <run_depend>rosserial/rosserial_python</run_depend>
+  <run_depend>rosserial_python</run_depend>
   <run_depend>rosserial_server</run_depend>
   <!--<run_depend>rosserial/rosserial_server</run_depend>-->
 

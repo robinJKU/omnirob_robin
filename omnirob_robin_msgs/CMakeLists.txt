@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   genmsg
   actionlib
   actionlib_msgs
-  message_generation
   std_msgs
   geometry_msgs
 )
@@ -77,7 +76,7 @@ add_action_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES omnirob_robin_msgs
-  CATKIN_DEPENDS std_msgs message_runtime actionlib actionlib_msgs std_msgs geometry_msgs
+   CATKIN_DEPENDS std_msgs message_runtime actionlib actionlib_msgs std_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 

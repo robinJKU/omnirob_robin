@@ -40,7 +40,10 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>omnirob_robin_msgs</buildtool_depend>
+  <build_depend>ar_track_alvar</build_depend>
+  <build_depend>ar_track_alvar_msgs</build_depend>
+  <run_depend>ar_track_alvar</run_depend>
+  <run_depend>ar_track_alvar_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -5,18 +5,12 @@ project(omnirob_robin_driver)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
   roscpp
-  std_msgs
-  genmsg
-  sensor_msgs
-  diagnostic_msgs
   tf
   controller_manager
   hardware_interface
   nav_msgs
   trajectory_msgs
-  omnirob_robin_msgs
   omnirob_robin_tools_ros
   sensor_msgs
   urdf
@@ -28,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES omnirob_robin_driver
-#  CATKIN_DEPENDS geometry_msgs/Twist roscpp std_msgs
+#  CATKIN_DEPENDS
 #  DEPENDS system_lib
    INCLUDE_DIRS include
 )

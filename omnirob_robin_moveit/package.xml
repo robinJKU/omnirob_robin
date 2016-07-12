@@ -18,7 +18,6 @@
   <url type="repository">https://github.com/ros-planning/moveit_setup_assistant</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>omnirob_robin_description</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_ros_planning_interface</build_depend>
@@ -41,7 +40,6 @@
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>xacro</run_depend>
-  <run_depend>omnirob_robin_description</run_depend>
   <run_depend>moveit_core</run_depend>
   <run_depend>moveit_ros_move_group</run_depend>
   <run_depend>moveit_ros_planning_interface</run_depend>

@@ -4,7 +4,7 @@ project(omnirob_robin_control)
 
 find_package(catkin REQUIRED roscpp COMPONENTS sensor_msgs geometry_msgs actionlib actionlib_msgs control_msgs message_generation trajectory_msgs omnirob_robin_tools_ros)
 
-generate_messages( DEPENDENCIES actionlib_msgs control_msgs trajectory_msgs)
+#generate_messages( DEPENDENCIES actionlib_msgs control_msgs trajectory_msgs)
 
 add_executable(follow_joint_trajectory_controller src/follow_joint_trajectory_controller.cpp)
 target_link_libraries(follow_joint_trajectory_controller ${catkin_LIBRARIES})
