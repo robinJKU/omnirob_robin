@@ -8,18 +8,14 @@
 			<insert_block name="origin" />
 			<parent link="${parent}" />
 			<child link="US${number}_link" />			
-		</joint>
-		
+		</joint>		
 
 		<link name="US${number}_link">
 			<inertial>
 				<mass value="0.1" />
 				<origin xyz="0 0.0 0.0" />
-			an_tilt_origin	<inertia ixx="0.0" ixy="0.0" ixz="0.0"
-					iyy="0.0" iyz="0.0" izz="0.0" />
+				<inertia ixx="0.0" ixy="0.0" ixz="0.0"	iyy="0.0" iyz="0.0" izz="0.0" />
 			</inertial>     
-      
-      <!-- sensor-origin is the center of the vertical post -->
 
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />

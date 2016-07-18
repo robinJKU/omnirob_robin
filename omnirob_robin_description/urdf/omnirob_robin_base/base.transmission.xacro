@@ -2,15 +2,15 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="omnirob_transmission">
-     
+    
     <transmission name="tran_x">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="base_x_joint">
           <hardwareInterface>PositionJointInterface</hardwareInterface>
         </joint>
         <actuator name="motor_x">
-          <hardwareInterface>PositionJointInterface</hardwareInterface>
-          <mechanicalReduction>1</mechanicalReduction>
+		  <mechanicalReduction>1</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>          
         </actuator>
     </transmission>
     
@@ -35,8 +35,7 @@
           <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission> 
-    
-
+	
 
 </xacro:macro>
 

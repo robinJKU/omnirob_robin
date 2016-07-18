@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro"> 
+<robot xmlns:xacro="http://ros.org/wiki/xacro">    		 
+   <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_base/base.transmission.xacro" />
    <xacro:macro name="base" params="">
       <link name="world" />
       <joint name="odom_joint" type="fixed">
@@ -17,6 +18,7 @@
          <origin xyz="0 0 0" rpy="0 0 0" />
          <axis xyz="1 0 0" />
          <dynamics damping="0.0" friction="0.0" />
+         <calibration rising="0.0" falling="0.0" />
          <limit effort="10" velocity="1.0" lower="-100" upper="100" />
          <parent link="odom" />
          <child link="base_x_link" />
@@ -86,8 +88,7 @@
             <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="0.5" />
          </inertial>
       </link>
-      <xacro:if value="${simulated}">		 
-		 <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_base/base.transmission.xacro" />
+      <xacro:if value="${simulated}">
          <xacro:omnirob_transmission />         
       </xacro:if>
    </xacro:macro>
