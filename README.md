@@ -1,12 +1,8 @@
 # omnirob_robin v1.0
 Omnirob @Institute of Robotics, JKU Linz
 
+omnirob_robin needs ros-gazebo5/6/7 to run the simulation.
+Gazebo7 has been tested, ros-indigo-ros-control was compiled from source.
 
 To install dependencies run:
-rosdep install omnirob_robin_ultrasound
-rosdep install omnirob_robin_driver
-rosdep install omnirob_robin_navigation
-rosdep install slam_karto
-rosdep install omnirob_robin_driver
-rosdep install xsens_bringup
-
+rosdep install --from-paths WORKSPACE/src --ignore-src --rosdistro=indigo -y
