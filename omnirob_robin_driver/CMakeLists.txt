@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   trajectory_msgs
   omnirob_robin_tools_ros
+  omnirob_robin_msgs
   sensor_msgs
   urdf
 )

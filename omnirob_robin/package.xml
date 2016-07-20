@@ -11,11 +11,44 @@
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <run_depend>omnirob_robin_description</run_depend>
+  <run_depend>cob_sick_s300</run_depend>
+  <run_depend>iai_kinect2</run_depend>
   <run_depend>omnirob_robin_bringup</run_depend>
-  <run_depend>omnirob_robin_gazebo</run_depend>
-  <run_depend>omnirob_robin_driver</run_depend>
   <run_depend>omnirob_robin_control</run_depend>
+  <run_depend>omnirob_robin_demo</run_depend>
+  <run_depend>omnirob_robin_description</run_depend>
+  <run_depend>omnirob_robin_diagnostics</run_depend>
+  <run_depend>omnirob_robin_driver</run_depend>  
+  <run_depend>omnirob_robin_gazebo</run_depend>
+  <run_depend>omnirob_robin_moveit</run_depend>
+  <run_depend>omnirob_robin_msgs</run_depend>
+  <run_depend>omnirob_robin_navigation</run_depend>
+  <run_depend>omnirob_robin_object_detection</run_depend>
+  <run_depend>omnirob_robin_rqt</run_depend>
+  <run_depend>omnirob_robin_tools_ros</run_depend>
+  <run_depend>omnirob_robin_ultrasound</run_depend>
+  <run_depend>slam_karto</run_depend>
+  
+  <!-- package dependencies from other packages -->
+  <run_depend>controller_manager</run_depend>
+  <run_depend>position_controllers</run_depend>
+  <run_depend>joint_state_controller</run_depend>
+  <run_depend>ros_control</run_depend>
+  <run_depend>ros_controllers</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>trajectory_msgs</run_depend>  
+  <run_depend>moveit_core</run_depend>
+  <run_depend>moveit_ros_move_group</run_depend>
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>moveit_ros_move_group</run_depend>
+  <run_depend>moveit_planners_ompl</run_depend>
+  <run_depend>moveit_ros_visualization</run_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>ar_track_alvar</run_depend>
+  <run_depend>ar_track_alvar_msgs</run_depend>
+  
 
   
   <export>
