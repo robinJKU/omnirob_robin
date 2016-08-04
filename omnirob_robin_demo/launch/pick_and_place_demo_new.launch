@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+    <include file="$(find omnirob_robin_bringup)/launch/omnirob.launch"></include>
+    -->
+	<!-- start localization nodes -->
+	<include file="$(find omnirob_robin_navigation)/launch/complete_karto.launch"></include>	
+    
+    <!-- start object detection nodes -->
+ 	<include file="$(find omnirob_robin_object_detection)/launch/object_detection.launch"></include>
+    
+    <node pkg="tf" type="static_transform_publisher" name="table_1_publisher" args="1.81 1.57 0.0 -1.57 0.0 0.0 /static_map /table_1 300" />
+
+    <!-- start main demo node -->
+    <node pkg="omnirob_robin_demo" type="pick_and_place_demo" name="pick_and_place_demo" output="screen"></node>   
+    
+    <!-- global localization launch -->
+    <include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include> 
+    
+    <!-- ar marker detection -->
+    <include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
+    
+    <!-- start lwa nodes -->
+	<include file="$(find omnirob_robin_moveit)/launch/move_group.launch"></include>
+	
+</launch>
