@@ -478,6 +478,59 @@ class AR_Marker_Localization{
 			mark[marker_index].observed_pose_reference_frame.push_back( marker_pose);
 		}
 	}// insert pose
+    
+    /**
+     * Compute the optimal pan angle that is that angle whitch sees either the maximum number of possible markers (2)
+     * or if not possible the marker which is nearer to the optimal work distance of the kinect
+     * @param estimation: Pose estimation of the base link frame
+     * @return optimal_pan_angle: the optimal pan angle in rad
+     * @todo compute the angles relative to the camera frame and not to the base link, determine max field of view of kinect
+     */
+    double compute_optimal_pan_angle( const geometry_msgs::Pose base_link_in_interial_frame)
+    {
+        // compute the maximum required field of view
+        tf::Transform base_link_in_interial_frame_tf;
+        tf::poseMsgToTF( base_link_in_interial_frame, base_link_in_interial_frame_tf);
+        
+        tf::Vector3 from_base_link_to_marker_inertial_frame, from_base_link_to_inertial_origin_inertial_frame;
+        from_base_link_to_inertial_origin_inertial_frame = -base_link_in_interial_frame_tf.getOrigin();
+        from_base_link_to_inertial_origin_inertial_frame[2] = 0.0;
+        ROS_INFO("base link to inertial origin inertial frame x = %f m, y = %f m\n", from_base_link_to_inertial_origin_inertial_frame[0], from_base_link_to_inertial_origin_inertial_frame[1]);
+        
+        double required_field_of_view = 0.0, temp_field_of_view;
+        for( unsigned int marker_ii=0; marker_ii<mark.size(); marker_ii++ ){
+            
+            from_base_link_to_marker_inertial_frame = from_base_link_to_inertial_origin_inertial_frame+mark[ marker_ii].pose_inertial_frame.getOrigin();
+            from_base_link_to_marker_inertial_frame[2] = 0.0;
+            
+            temp_field_of_view = from_base_link_to_marker_inertial_frame.angle( from_base_link_to_inertial_origin_inertial_frame);
+            ROS_INFO("Required angle for marker %i: %f degree\n", marker_ii, temp_field_of_view*180.0/M_PI);
+            if( temp_field_of_view>required_field_of_view)
+                required_field_of_view=temp_field_of_view;
+                
+        }
+      
+        // check if the field of view is possible
+        const double beta_max_abs=(71.0-10.0)*M_PI/180.0/2.0;
+        double optimal_pan_angle = 0.0;
+        if( required_field_of_view<beta_max_abs )
+        {
+            // field of view possible, move the kinect to the marker center (inertial frame)
+            tf::Vector3 from_base_link_to_inertial_origin_base_link_frame = base_link_in_interial_frame_tf.inverse()*from_base_link_to_inertial_origin_inertial_frame;
+            optimal_pan_angle = atan2( from_base_link_to_inertial_origin_base_link_frame[1], from_base_link_to_inertial_origin_base_link_frame[0]);
+            ROS_INFO("Field of view POSSIBLE. Move pan tilt %f degree", optimal_pan_angle*180.0/M_PI);
+            
+        }else{
+            // field of view not possible 
+            tf::Vector3 from_base_link_to_marker_base_link_frame = base_link_in_interial_frame_tf.inverse()*from_base_link_to_marker_inertial_frame;
+            optimal_pan_angle = atan2( from_base_link_to_marker_base_link_frame[1], from_base_link_to_marker_base_link_frame[0]);
+            ROS_INFO("Field of view NOT possible. Move pan tilt %f degree", optimal_pan_angle*180.0/M_PI);
+        }
+        
+        // todo
+        
+        return optimal_pan_angle;
+    }// compute optimal pan angle
 	
 	public:
 	/**
@@ -508,6 +561,17 @@ class AR_Marker_Localization{
 		    ROS_ERROR("%s", res.error_message.c_str());
 		    return true;
 	    }
+        
+        // configure averaging
+        unsigned int nr_of_avg;
+		int tmp_nr_of_avg;
+		private_ns_node_handle.param( "nr_of_avg", tmp_nr_of_avg, 20);
+		if( tmp_nr_of_avg<=0 ){	  
+            ROS_WARN("Unexpected nr of averaging samples %i, use default value (%i) insted", nr_of_avg, 20);
+            nr_of_avg = 20;
+		}else{
+            nr_of_avg = tmp_nr_of_avg;
+		}
 	    
 	    // enable ar track alvar node
 		ros::ServiceClient ar_set_parameters_client = node_handle.serviceClient<dynamic_reconfigure::Reconfigure>( ar_track_set_param_srv);
@@ -520,8 +584,8 @@ class AR_Marker_Localization{
 		// subscribe to marker poses
 		ros::Subscriber ar_pose_marker_subscriber = node_handle.subscribe("/ar_pose_marker", 50, &AR_Marker_Localization::ar_pose_marker_callback, this);
 
-		// look around, search for pan angle overlooking the maximum number of markers
-		detection_mode = true;
+		// search for at least one marker
+		detection_mode = true; // only count number of detected markers
 
 		double min_angle=-1.8, max_angle=1.8, increment_angle=20.0/180.0*M_PI;
 		std::vector<float> pan_tilt_target_position(2);
@@ -531,7 +595,7 @@ class AR_Marker_Localization{
 		double angle_overlooking_maximum_nr_of_markers;
 		
 		while( ros::ok() && pan_tilt_target_position[0]<=max_angle ){
-			// go to next pan angle
+			// move to next pan angle
 			if( !pan_tilt->move_to_state_blocking( pan_tilt_target_position, 10.0) ){
 				res.error_message = "Pan Tilt target position isn't reached in time";
 				ROS_ERROR("%s", res.error_message.c_str());
@@ -543,49 +607,39 @@ class AR_Marker_Localization{
 			nr_of_markers_received=0;
 			ros::Rate(1.0).sleep();
 			ros::spinOnce();
-			if( max_nr_of_marks_detected<nr_of_markers_received ){
+            if( nr_of_markers_received>0 )
+                break;
+            // todo remove
+			/*if( max_nr_of_marks_detected<nr_of_markers_received ){
 				max_nr_of_marks_detected = nr_of_markers_received;
 				angle_overlooking_maximum_nr_of_markers = pan_tilt_target_position[0];
 			}
 			ROS_INFO("detected %i markers at %f degree", nr_of_markers_received, pan_tilt_target_position[0]*180.0/M_PI);
 			if( max_nr_of_marks_detected== 2){
 				break;
-			}
-			
-			// adapt pan angle
+			}*/ 
+            
+			// move on
 			pan_tilt_target_position[0] += increment_angle;
+            ROS_INFO("Target_position = %f degree\n", pan_tilt_target_position[0]*180.0/M_PI);
 			
-		}// while no marker found
+		}// while no marker is found
 		if( !ros::ok() ){
 		  return true;
 		}
-		if( max_nr_of_marks_detected==0 ){
-			res.error_message = "Finished scan, no marker detected";
+        
+        // continue if at least one marker is found
+		if( nr_of_markers_received==0 ){
+			res.error_message = "Finished scan without detecting any marker";
+            ROS_ERROR("%s", res.error_message.c_str());
 			return true;
 		}
-		
-		// move to optimal pan angle
-		ROS_INFO("move to %f degree", angle_overlooking_maximum_nr_of_markers*180.0/M_PI);
-		pan_tilt_target_position[0] = angle_overlooking_maximum_nr_of_markers;
-		if( !pan_tilt->move_to_state_blocking( pan_tilt_target_position, 10.0) ){
-			res.error_message = "Pan Tilt target position isn't reached in time";
-			ROS_ERROR("%s", res.error_message.c_str());
-			return true;
-		}
-	    detection_mode = false;
-
-		// wait for detected markers
-		unsigned int nr_of_avg;
-		int tmp_nr_of_avg;
-		private_ns_node_handle.param( "nr_of_avg", tmp_nr_of_avg, 20);
-		if( tmp_nr_of_avg<=0 ){	  
-		ROS_WARN("Unexpected nr of averaging samples %i, use default value (%i) insted", nr_of_avg, 20);
-		nr_of_avg = 20;
-		}else{
-		  nr_of_avg = tmp_nr_of_avg;
-		}
-
-		clear();
+        
+        // save results and not only count them
+        detection_mode = false;
+        
+        // read recent marker results
+        clear();
 		block_until_latest_marker_is_later_than( ros::Time::now(), 5.0 );
 		nr_of_samples_received = 0;
 		while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
@@ -596,27 +650,62 @@ class AR_Marker_Localization{
 		if( !ros::ok() ){
 		  return true;
 		}
-
-		// disable ar track alvar node
-		ar_parameters.request.config.bools[0].value=false;
-		ar_set_parameters_client.call( ar_parameters);
-
-		// evaluate values
-		ROS_INFO("Evaluate values");
+        
+        // estimate robot pose
+        ROS_INFO("Evaluate values");
 		geometry_msgs::Pose estimation;
 		if( !localize_base_frame(estimation) ){
 		  res.error_message = "localization failed";
 		  ROS_ERROR("%s", res.error_message.c_str());
 		  return true;
 		}
-		
+        
+        // compute optimal pan angle
+        angle_overlooking_maximum_nr_of_markers = compute_optimal_pan_angle( estimation);
+        ROS_INFO("move to %f degree", angle_overlooking_maximum_nr_of_markers*180.0/M_PI);
+        
+		// move to optimal pan angle
+		pan_tilt_target_position[0] = angle_overlooking_maximum_nr_of_markers;
+		if( !pan_tilt->move_to_state_blocking( pan_tilt_target_position, 10.0) ){
+			res.error_message = "Pan Tilt target position isn't reached in time";
+			ROS_ERROR("%s", res.error_message.c_str());
+			return true;
+		}
+
+        // read recent marker results
+        clear();
+		block_until_latest_marker_is_later_than( ros::Time::now(), 5.0 );
+		nr_of_samples_received = 0;
+		while( nr_of_samples_received<=nr_of_avg && ros::ok() ){
+		  ROS_INFO("Buffer marker poses %i/%i received", nr_of_samples_received, nr_of_avg);
+		  ros::Rate(1.0).sleep();
+		  ros::spinOnce();
+		}
+		if( !ros::ok() ){
+		  return true;
+		}
+        
+        // estimate robot pose
+        ROS_INFO("Evaluate values");
+		if( !localize_base_frame(estimation) ){
+		  res.error_message = "localization failed";
+		  ROS_ERROR("%s", res.error_message.c_str());
+		  return true;
+		}
+
+		// disable ar track alvar node
+		ar_parameters.request.config.bools[0].value=false;
+		ar_set_parameters_client.call( ar_parameters);
+
+    
+        // print and return results
 		ROS_INFO("finished localization-----------------------------------");
 		ROS_INFO("position = [%f, %f, %f]", estimation.position.x, estimation.position.y, estimation.position.z);
 		double roll, pitch, yaw;
 		tf::Matrix3x3( tf::Quaternion(estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w)).getRPY(roll, pitch, yaw);
 		ROS_INFO("orientation = [%f, %f, %f, %f] (quaternion)", estimation.orientation.x, estimation.orientation.y, estimation.orientation.z, estimation.orientation.w);
 		ROS_INFO("orientation = [%f, %f, %f] (RPY in degree)", roll*180.0/M_PI, pitch*180.0/M_PI, yaw*180.0/M_PI);
-  
+        
 	    res.base_link = estimation;
 	    return true;
 	    

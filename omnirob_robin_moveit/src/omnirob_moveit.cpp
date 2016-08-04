@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
 	pick_and_place_executer lwa_pick_and_place;
 
-	std::string object_id = "cylinder_orange0";
+	std::string object_id = "cylinder_white";
 	shape_msgs::SolidPrimitive object_primitive;
 	object_primitive.type = object_primitive.CYLINDER;
 	object_primitive.dimensions.push_back(2e-1); // height
