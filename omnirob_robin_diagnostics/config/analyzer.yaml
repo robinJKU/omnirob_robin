@@ -9,17 +9,17 @@ analyzers:
     type: GenericAnalyzer
     path: Lwa
     startswith: lwa
-    num_items: 17
+    num_items: 16
     remove_prefix: lwa_
   gripper:
     type: GenericAnalyzer
     path: Gripper
     startswith: gripper
-    num_items: 17
+    num_items: 16
     remove_prefix: gripper_
   pan_tilt:
     type: GenericAnalyzer
     path: Pan_tilt
     startswith: pan_tilt
-    num_items: 17
+    num_items: 16
     remove_prefix: pan_tilt_
