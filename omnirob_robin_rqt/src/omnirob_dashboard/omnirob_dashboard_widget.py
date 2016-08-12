@@ -515,7 +515,7 @@ class OmnirobDashboardWidget(QWidget):
     def on_pan_tilt_test_clicked(self):
         pub = rospy.Publisher('omnirob_robin/pan_tilt/control/commanded_joint_state', Float64MultiArray, queue_size=1)
         msg = Float64MultiArray()
-        msg.data = [-0.2, -0.2]
+        msg.data = [-0.2, 0.2]
         rospy.sleep(1.0)
         pub.publish(msg)
         rospy.sleep(1.0)
