@@ -48,18 +48,20 @@ void base_callback( const sensor_msgs::JointState joint_state ){
  	odom.pose.pose.position.z = 0.0;
  	odom.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw (0.0, 0.0, joint_state.position[index_yaw]);
  	
- 	odom.child_frame_id = "odom";
- 	odom.twist.twist.linear.x = joint_state.velocity[index_x];
- 	odom.twist.twist.linear.y = joint_state.velocity[index_y];
+ 	return;
+ 	
+}
+
+void vel_callback( const geometry_msgs::Twist twist ){
+	odom.child_frame_id = "base_link";
+ 	odom.twist.twist.linear.x = twist.linear.x;
+ 	odom.twist.twist.linear.y = twist.linear.y;
  	odom.twist.twist.linear.z = 0.0;
  	odom.twist.twist.angular.x = 0.0;
  	odom.twist.twist.angular.y = 0.0;
- 	odom.twist.twist.angular.z = joint_state.velocity[index_yaw];
+ 	odom.twist.twist.angular.z = twist.angular.z;
  	
  	odometry_publisher.publish( odom );
- 	
- 	return;
- 	
 }
 
 int main(int argc, char **argv)
@@ -102,6 +104,7 @@ int main(int argc, char **argv)
  	
   
   ros::Subscriber base_subscriber = n.subscribe( "/omnirob_robin/joint_states", 1000, base_callback );
+  ros::Subscriber vel_subscriber = n.subscribe( "/omnirob_robin/base/cmd_vel", 1000, vel_callback );
 
   // init publisher and start loop
   odometry_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
