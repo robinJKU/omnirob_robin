@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
 <launch>
+	
+  <arg name="offsetx" value="2.3" />
+  <arg name="offsety" value="1.9" />
+  <arg name="offsetz" value="0.01" />
     
-  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/omnirob_robin_simulated.urdf.xacro'" />
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/omnirob_robin_simulated.urdf.xacro' ofx:=$(arg offsetx) ofy:=$(arg offsety) ofz:=$(arg offsetz)" />
   <!--<param name="robot_description" command="$(arg urdf_file)" />-->
   <param name="robot_description" command="$(arg urdf_file)" />
   <!--<param name="robot_description" value="15" />-->
   <!-- Gazebo model spawner -->
   <node name="spawn_omnirob_model" pkg="gazebo_ros" type="spawn_model"
-        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description 
-        -x 2.3
-        -y 1.9
-        -z 0.01   
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description  
         -model omnirob"/>   
 </launch>

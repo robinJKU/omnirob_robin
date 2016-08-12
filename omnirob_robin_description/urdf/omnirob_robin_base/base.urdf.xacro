@@ -4,6 +4,7 @@
    <xacro:macro name="base" params="">
       <link name="world" />
       <joint name="odom_joint" type="fixed">
+		 <origin xyz="$(arg ofx) $(arg ofy) $(arg ofz)" rpy="0 0 0" /> 
          <parent link="world" />
          <child link="odom" />
       </joint>
