@@ -3,6 +3,10 @@
 <robot name="omnirob_robin" xmlns:xacro="http://ros.org/wiki/xacro">
   
   <xacro:property name="simulated" value="0" />
+  
+  <xacro:property name="ofx" value="0" />
+  <xacro:property name="ofx" value="0" />
+  <xacro:property name="ofx" value="0" />
 
   <xacro:include filename="$(find omnirob_robin_description)/robots/omnirob.urdf.xacro" /> 
   

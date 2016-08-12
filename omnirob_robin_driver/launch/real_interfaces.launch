@@ -12,6 +12,18 @@
   
   <node name="base_driver" pkg="omnirob_robin_driver" type="base_driver" respawn="false" 
 	output="screen" ns="omnirob_robin"/>  
+
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/omnirob_robin_real.urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+    
+  <!-- load the joint state publisher -->      
+  <rosparam command="load" file="$(find omnirob_robin_driver)/launch/odometry.yaml" />
+  <node name="joint_state_publisher" pkg="omnirob_robin_driver" type="omnirob_joint_state_publisher" respawn="false"
+        output="screen" ns="/omnirob_robin/driver"/>
+
+  <!-- load state publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        output="screen"/>
        
 
 </launch>

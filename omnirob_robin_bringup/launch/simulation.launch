@@ -5,12 +5,6 @@
   	 
 	<include file="$(find omnirob_robin_control)/launch/all_controllers.launch"></include>
 	<include file="$(find omnirob_robin_driver)/launch/simulated_interfaces.launch"></include> 
-	<include file="$(find omnirob_robin_driver)/launch/odometry.launch"></include>
-	 
- 
-	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">
-		<param name="publish_frequency" type="double" value="30.0"/>
-	</node>
-      
+	<include file="$(find omnirob_robin_driver)/launch/odometry.launch"></include>     
 
 </launch>

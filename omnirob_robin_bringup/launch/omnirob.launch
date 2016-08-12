@@ -3,8 +3,7 @@
 
 	<!-- load hardware interface and controler here -->
 	<include file="$(find omnirob_robin_control)/launch/lwa_control_real.launch"></include>	
-	<include file="$(find omnirob_robin_driver)/launch/real_interfaces.launch"></include>	
-	<include file="$(find omnirob_robin_driver)/launch/state_publisher.launch"></include>
+	<include file="$(find omnirob_robin_driver)/launch/real_interfaces.launch"></include>
 
 	<!-- laser scanner -->
 	<include file="$(find cob_sick_s300)/launch/s300.xml.launch"></include>
