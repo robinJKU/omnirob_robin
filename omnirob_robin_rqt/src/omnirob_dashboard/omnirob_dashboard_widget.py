@@ -77,7 +77,6 @@ class OmnirobDashboardWidget(QWidget):
                     self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
                     self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
                
-        self.base_active.stateChanged.connect(self.on_base_active_stateChanged)
         self._twist = Twist() 
         self.base_activated = False
         self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1) 
@@ -257,7 +256,10 @@ class OmnirobDashboardWidget(QWidget):
         self._twist =  twist
 
     def _base_stop_motion(self):
+	self.base_activated = False
         self._base_move(0.0, 0.0, 0.0)
+	self._pub.publish(self._twist)
+	
         
     @Slot()
     def on_base_can_start_clicked(self):
@@ -269,18 +271,12 @@ class OmnirobDashboardWidget(QWidget):
     def on_base_can_stop_clicked(self):
         self.call_service( '/omnirob_robin/base/drives/control/stop' )
         rospy.sleep(1.0)
-        self.call_service( '/omnirob_robin/base/canserver/stop' )
-        
-    @Slot()
-    def on_base_active_stateChanged(self):
-        if self.base_active.isChecked():
-           self.base_activated = True
-        else:
-           self.base_activated = False
-        
+        self.call_service( '/omnirob_robin/base/canserver/stop' )        
+            
     @Slot()
     def on_base_forward_pressed(self):
         self._base_move(0.3, 0.0, 0.0)
+	self.base_activated = True
  
     @Slot()
     def on_base_forward_released(self):
@@ -289,6 +285,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_back_pressed(self):
         self._base_move(-0.3, 0.0, 0.0)
+	self.base_activated = True
  
     @Slot()
     def on_base_back_released(self):
@@ -297,6 +294,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_left_pressed(self):
         self._base_move(0.0, 0.3, 0.0)
+	self.base_activated = True
  
     @Slot()
     def on_base_left_released(self):
@@ -305,6 +303,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_right_pressed(self):
         self._base_move(0.0, -0.3, 0.0)
+	self.base_activated = True
  
     @Slot()
     def on_base_right_released(self):
@@ -313,6 +312,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_turn_left_pressed(self):
         self._base_move(0.0, 0.0, 0.5)
+	self.base_activated = True
  
     @Slot()
     def on_base_turn_left_released(self):
@@ -321,6 +321,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_turn_right_pressed(self):
         self._base_move(0.0, 0.0, -0.5)
+	self.base_activated = True
  
     @Slot()
     def on_base_turn_right_released(self):
@@ -330,6 +331,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_forward_left_pressed(self):
         self._base_move(0.2, 0.2, 0.0)
+	self.base_activated = True
      
     @Slot()
     def on_base_forward_left_released(self):
@@ -338,6 +340,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_forward_right_pressed(self):
         self._base_move(0.2, -0.2, 0.0)
+	self.base_activated = True
      
     @Slot()
     def on_base_forward_right_released(self):
@@ -347,6 +350,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()   
     def on_base_back_left_pressed(self):
         self._base_move(-0.2, 0.2, 0.0)
+	self.base_activated = True
      
     @Slot()
     def on_base_back_left_released(self):
@@ -355,6 +359,7 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_base_back_right_pressed(self):
         self._base_move(-0.2, -0.2, 0.0)
+	self.base_activated = True
      
     @Slot()
     def on_base_back_right_released(self):
