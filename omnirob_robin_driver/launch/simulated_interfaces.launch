@@ -17,9 +17,6 @@
   <node name="virtuell_robot_driver_interface" pkg="omnirob_robin_driver" type="virtuell_robot_driver_interface" respawn="false"
     output="screen" ns="omnirob_robin"/>
     
-  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/omnirob_robin_simulated.urdf.xacro'" />
-  <param name="robot_description" command="$(arg urdf_file)" />  
-    
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">
 		<param name="publish_frequency" type="double" value="30.0"/>
   </node>

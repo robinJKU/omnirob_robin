@@ -26,7 +26,7 @@
         </ray>
         <plugin name="gazebo_ros_laser_scanner_controller" filename="libgazebo_ros_laser.so">
           <alwaysOn>true</alwaysOn>
-          <topicName>omnirob_robin/laser_scanner</topicName>
+          <topicName>laser_front/scan</topicName>
           <frameName>laser_scanner_link</frameName>
         </plugin>
       </sensor>
