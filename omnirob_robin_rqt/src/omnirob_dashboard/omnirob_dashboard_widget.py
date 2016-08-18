@@ -431,7 +431,16 @@ class OmnirobDashboardWidget(QWidget):
         rospy.sleep(1.0)
         self._lwa_start_motion()
         self._reset_focus_lwa()
-        
+
+    @Slot()
+    def on_lwa_reference_all_clicked(self):
+        self.call_service( '/omnirob_robin/lwa/control/reference_module_1' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_2' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_3' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_4' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_5' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_6' )
+	self.call_service( '/omnirob_robin/lwa/control/reference_module_7' )        
     @Slot()
     def on_lwa_reference_1_clicked(self):
         self.call_service( '/omnirob_robin/lwa/control/reference_module_1' )        

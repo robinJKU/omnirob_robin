@@ -635,17 +635,17 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_8">
                <item>
-                <spacer name="verticalSpacer_2">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                <widget class="QPushButton" name="lwa_reference_all">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
+                 <property name="text">
+                  <string>reference all</string>
                  </property>
-                </spacer>
+                </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="lwa_reference_1">
