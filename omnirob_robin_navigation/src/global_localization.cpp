@@ -4,7 +4,7 @@
 
 //services und messages
 #include <std_srvs/Empty.h>
-#include <omnirob_robin_msgs/localization.h>
+#include <ros_common_robin_msgs/localization.h>
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "std_msgs/String.h"
 #include "std_msgs/Bool.h"
@@ -23,7 +23,7 @@ int globalLocalization(){
 
   // perform a global localization
   ROS_INFO("Perform global localization");
-  omnirob_robin_msgs::localization marker_localization_msg;
+  ros_common_robin_msgs::localization marker_localization_msg;
   
   marker_localization_client.call( marker_localization_msg);
   if( !marker_localization_msg.response.error_message.empty() ){
@@ -87,7 +87,7 @@ int main( int argc, char** argv) {
   if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
 	  return -1;
   }    
-  marker_localization_client = n.serviceClient<omnirob_robin_msgs::localization>( marker_localization_topic);
+  marker_localization_client = n.serviceClient<ros_common_robin_msgs::localization>( marker_localization_topic);
   
   if( !omnirob_ros_tools::wait_for_service( "/move_base/clear_costmaps", 10) ) {
 	  return -1;

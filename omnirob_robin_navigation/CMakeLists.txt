@@ -15,13 +15,13 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   ar_track_alvar_msgs
   dynamic_reconfigure
-  omnirob_robin_msgs
+  ros_common_robin_msgs
   omnirob_robin_tools_ros
   omnirob_robin_driver
 )
 
 # Generate used messages and services
-# generate_messages(DEPENDENCIES std_msgs diagnostic_msgs omnirob_robin_msgs omnirob_robin_msgs)
+# generate_messages(DEPENDENCIES std_msgs diagnostic_msgs ros_common_robin_msgs ros_common_robin_msgs)
 
 catkin_package(
 #  INCLUDE_DIRS include
@@ -37,12 +37,12 @@ include_directories(
 
 add_executable(marker_localization_global src/marker_localization_global.cpp)
 target_link_libraries(marker_localization_global ${catkin_LIBRARIES})
-add_dependencies(marker_localization_global omnirob_robin_msgs_gencpp)
+add_dependencies(marker_localization_global ros_common_robin_msgs_gencpp)
 
 add_executable(global_localization src/global_localization.cpp)
 target_link_libraries(global_localization ${catkin_LIBRARIES})
-add_dependencies(global_localization omnirob_robin_msgs_gencpp)
+add_dependencies(global_localization ros_common_robin_msgs_gencpp)
 
 add_executable(marker_localization_base src/marker_localization_base.cpp)
 target_link_libraries(marker_localization_base ${catkin_LIBRARIES})
-add_dependencies(marker_localization_base omnirob_robin_msgs_gencpp)
+add_dependencies(marker_localization_base ros_common_robin_msgs_gencpp)

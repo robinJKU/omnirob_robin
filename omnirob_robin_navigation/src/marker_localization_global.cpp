@@ -21,7 +21,7 @@
 #include <dynamic_reconfigure/Reconfigure.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Float64MultiArray.h>
-#include <omnirob_robin_msgs/localization.h>
+#include <ros_common_robin_msgs/localization.h>
 
 // prototypes
 std::string unsigned_int_to_string( unsigned int value );
@@ -546,7 +546,7 @@ class AR_Marker_Localization{
 	/**
 	 * Callback of the localization service
 	 */
-	bool localization_service_callback( omnirob_robin_msgs::localization::Request &req, omnirob_robin_msgs::localization::Response &res ){
+	bool localization_service_callback( ros_common_robin_msgs::localization::Request &req, ros_common_robin_msgs::localization::Response &res ){
 		ROS_INFO("Start marker localization -------------------");
 		// wait for services
 	    std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";

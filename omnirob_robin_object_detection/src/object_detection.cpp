@@ -16,9 +16,9 @@
 
 //services und messages
 #include <std_srvs/Empty.h>
-#include <omnirob_robin_msgs/get_object_pose.h>
+#include <ros_common_robin_msgs/get_object_pose.h>
 #include <omnirob_robin_msgs/HackObjRecAction.h>
-#include <omnirob_robin_msgs/add_marker_srv.h>
+#include <ros_common_robin_msgs/add_marker_srv.h>
 
 //robin object detection library
 #include <robin_odlib.h>
@@ -47,13 +47,13 @@ std::vector <std::string> transform_names;
 //function definitions
 void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud);
 bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
-bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response);
+bool getObjectPoseCallback(ros_common_robin_msgs::get_object_pose::Request& request, ros_common_robin_msgs::get_object_pose::Response& response);
 void detect_objects();
 void addMarker(std::vector <double> size, tf::Transform transform);
 
 void addMarker(std::vector <double> size, tf::Transform transform){
 	ROS_INFO("add marker service called");
-	omnirob_robin_msgs::add_marker_srv srv;
+	ros_common_robin_msgs::add_marker_srv srv;
 	srv.request.name = "table";
 	srv.request.size.x = size[0];
 	srv.request.size.y = size[1];
@@ -194,7 +194,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	return true;
 }
 
-bool getObjectPoseCallback(omnirob_robin_msgs::get_object_pose::Request& request, omnirob_robin_msgs::get_object_pose::Response& response){
+bool getObjectPoseCallback(ros_common_robin_msgs::get_object_pose::Request& request, ros_common_robin_msgs::get_object_pose::Response& response){
 	int index = -1;
 	for(int i = 0; i < transform_names.size(); i++){
 		if(transform_names[i].compare(request.name) == 0){
@@ -246,7 +246,7 @@ int main( int argc, char** argv) {
 
 
 	//ros::service::waitForService("add_marker");
-	//add_marker_client = n.serviceClient<omnirob_robin_msgs::add_marker_srv>("add_marker");
+	//add_marker_client = n.serviceClient<ros_common_robin_msgs::add_marker_srv>("add_marker");
 
 	while(!ros::param::has("/detectable_objects")){
 		ros::spinOnce();

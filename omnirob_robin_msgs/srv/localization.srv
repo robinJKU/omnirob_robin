@@ -1,4 +1,0 @@
----
-# base_link pose described in map frame
-geometry_msgs/Pose base_link
-string error_message

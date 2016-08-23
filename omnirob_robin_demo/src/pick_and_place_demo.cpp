@@ -10,7 +10,7 @@
 #include "geometry_msgs/Twist.h"
 #include "tf/tf.h"
 #include "std_srvs/Empty.h"
-#include <omnirob_robin_msgs/localization.h>
+#include <ros_common_robin_msgs/localization.h>
 #include <omnirob_robin_msgs/move_pan_tilt.h>
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_listener.h"
@@ -140,7 +140,7 @@ bool base_demo_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Resp
 bool localize_callback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){ 
 	// perform a global localization
     ROS_INFO("Perform global localization");
-    omnirob_robin_msgs::localization marker_localization_msg;
+    ros_common_robin_msgs::localization marker_localization_msg;
     tf::StampedTransform transform;
     tf::Transform static_map_to_base_link;
     
@@ -257,7 +257,7 @@ int main( int argc, char** argv) {
     if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
         return -1;
     }
-    marker_localization_client = node_handle.serviceClient<omnirob_robin_msgs::localization>( marker_localization_topic);
+    marker_localization_client = node_handle.serviceClient<ros_common_robin_msgs::localization>( marker_localization_topic);
   
     ROS_INFO("DEMO NODE READY");
     

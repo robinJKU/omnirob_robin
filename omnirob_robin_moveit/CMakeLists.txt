@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   shape_msgs
   omnirob_robin_tools_ros
   omnirob_robin_msgs
+  ros_common_robin_msgs
   srdfdom
   urdf
 )
@@ -55,6 +56,7 @@ find_package(Boost REQUIRED system filesystem date_time thread)
    actionlib_msgs
    moveit_msgs
    omnirob_robin_msgs
+   ros_common_robin_msgs
  )
 
 

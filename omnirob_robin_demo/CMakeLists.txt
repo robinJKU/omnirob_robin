@@ -6,12 +6,13 @@ project(omnirob_robin_demo)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
 	omnirob_robin_msgs
+	ros_common_robin_msgs
 	omnirob_robin_tools_ros
 	geometry_msgs
 	omnirob_robin_moveit)
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(DEPENDENCIES omnirob_robin_msgs geometry_msgs)
+#generate_messages(DEPENDENCIES ros_common_robin_msgs omnirob_robin_msgs geometry_msgs)
 
 catkin_package(
 #  INCLUDE_DIRS include
@@ -25,8 +26,8 @@ include_directories(
 
 add_executable(pick_and_place_demo src/pick_and_place_demo.cpp)
 target_link_libraries(pick_and_place_demo ${catkin_LIBRARIES})
-add_dependencies(pick_and_place_demo omnirob_robin_msgs_gencpp)
+add_dependencies(pick_and_place_demo ros_common_robin_msgs_gencpp omnirob_robin_msgs_gencpp)
 
 add_executable(base_demo src/base_demo.cpp)
 target_link_libraries(base_demo ${catkin_LIBRARIES})
-add_dependencies(base_demo omnirob_robin_msgs_gencpp)
+add_dependencies(base_demo ros_common_robin_msgs_gencpp omnirob_robin_msgs_gencpp)

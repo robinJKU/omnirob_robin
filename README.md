@@ -1,5 +1,5 @@
 # omnirob_robin v1.0
-Omnirob @Institute of Robotics, JKU Linz
+Omnirob @ Institute of Robotics, JKU Linz
 
 omnirob_robin needs ros-gazebo5/6/7 to run the simulation.
 Gazebo7 has been tested, ros-indigo-ros-control was compiled from source.
@@ -15,7 +15,7 @@ sudo apt-get install ros-indigo-gazebo7-ros-pkgs
 Copy the gazebo_ros_control package from github to your workspace:
 https://github.com/ros-simulation/gazebo_ros_pkgs/tree/indigo-devel
 
-
+Git clone the ros_common_robin stack: https://github.com/robinJKU/ros_common_robin
 
 To install dependencies run:
 rosdep install --from-paths WORKSPACE/src --ignore-src --rosdistro=indigo -y

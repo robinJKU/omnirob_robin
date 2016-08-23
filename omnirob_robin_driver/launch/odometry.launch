@@ -2,7 +2,7 @@
 <launch>
 	    
   <!-- load the joint state publisher -->      
-  <rosparam command="load" file="$(find omnirob_robin_driver)/launch/odometry.yaml" />
+  <rosparam command="load" file="$(find omnirob_robin_driver)/config/odometry.yaml" />
   <node name="omnirob_odometry_publisher_simulation_only" pkg="omnirob_robin_driver" type="omnirob_odometry_publisher_simulation_only" respawn="false"
         output="screen" ns="/omnirob_robin/driver"/>
 

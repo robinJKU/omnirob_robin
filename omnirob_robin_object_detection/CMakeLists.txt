@@ -13,12 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   diagnostic_msgs
   pcl_ros
-  omnirob_robin_msgs
+  ros_common_robin_msgs
   ar_track_alvar_msgs
 )
 
 # Generate used messages and services
-# generate_messages(DEPENDENCIES std_msgs diagnostic_msgs omnirob_robin_msgs)
+# generate_messages(DEPENDENCIES std_msgs diagnostic_msgs ros_common_robin_msgs)
 
 catkin_package(
 #  INCLUDE_DIRS include
@@ -33,9 +33,9 @@ include_directories(
 )
 
 add_executable(omnirob_robin_object_detection src/object_detection.cpp)
-add_dependencies(omnirob_robin_object_detection omnirob_robin_msgs_gencpp)
+add_dependencies(omnirob_robin_object_detection ros_common_robin_msgs_gencpp)
 target_link_libraries(omnirob_robin_object_detection ${catkin_LIBRARIES})
 
 add_executable(marker_calibration src/marker_calibration.cpp)
 target_link_libraries(marker_calibration ${catkin_LIBRARIES})
-add_dependencies(marker_calibration omnirob_robin_msgs_gencpp)
+add_dependencies(marker_calibration ros_common_robin_msgs_gencpp)

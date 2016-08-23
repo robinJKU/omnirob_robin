@@ -21,6 +21,7 @@
   <run_depend>omnirob_robin_driver</run_depend>  
   <run_depend>omnirob_robin_gazebo</run_depend>
   <run_depend>omnirob_robin_moveit</run_depend>
+  <run_depend>ros_common_robin_msgs</run_depend>
   <run_depend>omnirob_robin_msgs</run_depend>
   <run_depend>omnirob_robin_navigation</run_depend>
   <run_depend>omnirob_robin_object_detection</run_depend>

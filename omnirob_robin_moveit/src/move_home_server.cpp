@@ -13,7 +13,7 @@
 
 // services
 #include <std_srvs/Empty.h>
-#include <omnirob_robin_msgs/execute.h>
+#include <ros_common_robin_msgs/execute.h>
 
 // messsages
 #include <omnirob_robin_msgs/move_gripper.h>
@@ -71,7 +71,7 @@ public:
 	{}
 
 private:
-	bool move_home_callback( omnirob_robin_msgs::executeRequest &request, omnirob_robin_msgs::executeResponse &result )
+	bool move_home_callback( ros_common_robin_msgs::executeRequest &request, ros_common_robin_msgs::executeResponse &result )
 	{
 		ROS_INFO("got move home service request");
 

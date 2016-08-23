@@ -1,6 +1,0 @@
-string name
-uint32 type
-geometry_msgs/Vector3 size
-geometry_msgs/Pose pose
----
-
