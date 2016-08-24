@@ -5,7 +5,14 @@
         <include file="$(find omnirob_robin_object_detection)/launch/detect_ar_marker.launch"></include>
      -->   
         <!--start mapping nodes -->
-        <include file="$(find slam_karto)/launch/karto_slam.launch"></include>
+        <launch>
+		  <node pkg="slam_karto" type="slam_karto" name="slam_karto" output="screen">
+			<remap from="scan" to="/laser_front/scan"/>
+			<param name="odom_frame" value="world"/>
+			<param name="map_update_interval" value="25"/>
+			<param name="resolution" value="0.025"/>
+		  </node>
+		</launch>
 
         <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena.yaml"/>
         <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
