@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   nav_msgs
   trajectory_msgs
-  omnirob_robin_tools_ros
+  ros_common_robin_tools
   ros_common_robin_msgs
   omnirob_robin_msgs
   sensor_msgs

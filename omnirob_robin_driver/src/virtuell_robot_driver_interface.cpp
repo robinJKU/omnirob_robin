@@ -8,7 +8,7 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <omnirob_robin_driver/cubic_trajectory_generator.h>
 #include <control_msgs/JointTrajectoryControllerState.h>
-#include <omnirob_robin_tools_ros/common_cpp_tools.h>
+#include <ros_common_robin_tools/common_cpp_tools.h>
 
 class Modules{
 	protected:

@@ -14,8 +14,8 @@
 #include <moveit_msgs/CollisionObject.h>
 #include <moveit_msgs/DisplayRobotState.h>
 
-#include <omnirob_robin_tools_ros/ros_tools.h>
-#include <omnirob_robin_tools_ros/geometry_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
+#include <ros_common_robin_tools/common_geometry_tools.h>
 #include <omnirob_robin_moveit/moveit_tools.h>
 
 
@@ -74,7 +74,7 @@ class lwa_continuous_path_planner{
 				ros::NodeHandle node_handle;
 				ros::Publisher temp_publisher = node_handle.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
 				ROS_INFO("wait for at least one subscriber on topic /planning_scene"); // ros needs some time for establishing the connection
-				omnirob_ros_tools::wait_until_publisher_is_connected( temp_publisher);// this is not the used publisher (@see member variables PlanningSceneInterface), but it is used as measurement who long it takes to establish the connection
+				common_tools::wait_until_publisher_is_connected( temp_publisher);// this is not the used publisher (@see member variables PlanningSceneInterface), but it is used as measurement who long it takes to establish the connection
 			}
 
 			// the state monitor is usually started by the getCurrentState function, however
@@ -171,7 +171,7 @@ class lwa_continuous_path_planner{
 			if( t_frame.empty() )
 				t_frame = planning_frame;
 
-			if( !omnirob_geometry_tools::pose_is_valid( goal_pose) ){
+			if( !common_geometry_tools::pose_is_valid( goal_pose) ){
 				ROS_ERROR("Specified goal pose is invalid, cancel motion plan request");
 				return false;
 			}
@@ -182,7 +182,7 @@ class lwa_continuous_path_planner{
 				goal_pose_planning_frame = goal_pose;
 			}else{
 				goal_pose_planning_frame = pose_transformer_.transform_pose( goal_pose, t_frame, planning_frame);
-				if( !omnirob_geometry_tools::pose_is_valid( goal_pose_planning_frame) )
+				if( !common_geometry_tools::pose_is_valid( goal_pose_planning_frame) )
 					return false;
 			}
 
@@ -273,7 +273,7 @@ class lwa_continuous_path_planner{
 				t_frame = planning_frame;
 			for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
 			{
-				if( !omnirob_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
+				if( !common_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
 					ROS_ERROR("Specified goal pose nr %u is invalid, cancel motion plan request", goal_ii);
 					return false;
 				}
@@ -290,7 +290,7 @@ class lwa_continuous_path_planner{
 				for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
 				{
 					goal_poses_planning_frame.push_back( pose_transformer_.transform_pose( goal_poses[goal_ii], t_frame, planning_frame));
-					if( !omnirob_geometry_tools::pose_is_valid( goal_poses_planning_frame.back()) )
+					if( !common_geometry_tools::pose_is_valid( goal_poses_planning_frame.back()) )
 						return false;
 				}
 			}
@@ -336,7 +336,7 @@ class lwa_continuous_path_planner{
  			std::string planning_frame = lwa_move_group_->getPlanningFrame();
  			if( t_frame.empty() )
  				t_frame = planning_frame;
- 			if( !omnirob_geometry_tools::pose_is_valid( goal_pose) ){
+ 			if( !common_geometry_tools::pose_is_valid( goal_pose) ){
  				ROS_ERROR("Specified goal pose is invalid, cancel motion plan request");
  				return false;
  			}
@@ -361,7 +361,7 @@ class lwa_continuous_path_planner{
 				std::string planning_frame = lwa_move_group_->getPlanningFrame();
 				if( t_frame.empty() )
 					t_frame = planning_frame;
-				if( !omnirob_geometry_tools::pose_is_valid( goal_pose) ){
+				if( !common_geometry_tools::pose_is_valid( goal_pose) ){
 					ROS_ERROR("Specified goal pose is invalid, cancel motion plan request");
 					return false;
 				}
@@ -402,7 +402,7 @@ class lwa_continuous_path_planner{
 				t_frame = planning_frame;
 			for( unsigned int goal_ii=0; goal_ii<goal_poses.size(); goal_ii++)
 			{
-				if( !omnirob_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
+				if( !common_geometry_tools::pose_is_valid( goal_poses[goal_ii]) ){
 					ROS_ERROR("Specified goal pose nr %u is invalid, cancel motion plan request", goal_ii);
 					return false;
 				}
@@ -615,7 +615,7 @@ class lwa_continuous_path_planner{
 		ros::Publisher visualize_robot_state_publisher_;
 
 		// geometry
-		omnirob_geometry_tools::pose_transformer pose_transformer_;
+		common_geometry_tools::pose_transformer pose_transformer_;
 
 		// state monitoring
 		bool visualize_plan_after_planning_;

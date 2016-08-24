@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 #include "tf/transform_listener.h"
 
 
@@ -239,7 +239,7 @@ int main( int argc, char** argv) {
     
     
     goal_publisher = node_handle.advertise<geometry_msgs::PoseStamped>("move_base_simple/goal", 10);
-    if( !omnirob_ros_tools::wait_until_publisher_is_connected( goal_publisher ) ){
+    if( !common_tools::wait_until_publisher_is_connected( goal_publisher ) ){
 	  ROS_ERROR("Can't initialize goal publisher");
 	  return -1;
 	}
@@ -254,7 +254,7 @@ int main( int argc, char** argv) {
 	//detect_objects_client = node_handle.serviceClient<std_srvs::Empty>("/omnirob_robin/detect_objects_srv");  
     
     std::string marker_localization_topic = "/marker_localization";
-    if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
+    if( !common_tools::wait_for_service( marker_localization_topic, 10) ){
         return -1;
     }
     marker_localization_client = node_handle.serviceClient<ros_common_robin_msgs::localization>( marker_localization_topic);

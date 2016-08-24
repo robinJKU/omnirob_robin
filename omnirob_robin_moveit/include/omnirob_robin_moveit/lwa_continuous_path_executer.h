@@ -13,7 +13,7 @@
 #include <std_msgs/Float64MultiArray.h>
 
 // user specific
-#include <omnirob_robin_tools_ros/geometry_tools.h>
+#include <ros_common_robin_tools/common_geometry_tools.h>
 
 /**
  * This class is a client for moveits move_group node and configures the driver. The class aim is to provide methods for executing continuous trajectories.
@@ -135,7 +135,7 @@ class lwa_continuous_path_executer{
 			std::vector<double> lwa_joint_values(7);
 
 			// determine euclidean distance from goal state
-			if( omnirob_geometry_tools::max_angle_distance( last_state_value_, goal_value_ )<0.05 ){
+			if( common_geometry_tools::max_angle_distance( last_state_value_, goal_value_ )<0.05 ){
 				return true;
 			}
 			return false;

@@ -7,7 +7,7 @@ project(omnirob_robin_demo)
 find_package(catkin REQUIRED COMPONENTS
 	omnirob_robin_msgs
 	ros_common_robin_msgs
-	omnirob_robin_tools_ros
+	ros_common_robin_tools
 	geometry_msgs
 	omnirob_robin_moveit)
 

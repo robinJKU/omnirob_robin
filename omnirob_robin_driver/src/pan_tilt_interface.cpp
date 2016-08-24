@@ -8,7 +8,7 @@
 #include <omnirob_robin_msgs/move_pan_tilt.h>
 
 // tools
-#include <omnirob_robin_tools_ros/geometry_tools.h>
+#include <ros_common_robin_tools/common_geometry_tools.h>
 
 // urdf
 #include <urdf/model.h>
@@ -55,7 +55,7 @@ bool movePanTiltCallback(omnirob_robin_msgs::move_pan_tilt::Request& req, omniro
 	  pan_tilt_start_motion_srv.call(srv);
 
 	  ros::Rate rate10Hz(10.0);
-	  while( ros::ok() && omnirob_geometry_tools::max_angle_distance(msg.data, pan_tilt_state)>3e-2)
+	  while( ros::ok() && common_geometry_tools::max_angle_distance(msg.data, pan_tilt_state)>3e-2)
 	  {
 		  rate10Hz.sleep();
 		  ros::spinOnce();
@@ -64,7 +64,7 @@ bool movePanTiltCallback(omnirob_robin_msgs::move_pan_tilt::Request& req, omniro
   }
   
   res.success = false;
-  if( omnirob_geometry_tools::max_angle_distance(msg.data, pan_tilt_state)<=3e-2)
+  if( common_geometry_tools::max_angle_distance(msg.data, pan_tilt_state)<=3e-2)
   		  res.success = true;
 
   return true;  

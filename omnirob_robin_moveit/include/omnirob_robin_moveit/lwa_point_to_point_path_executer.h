@@ -14,8 +14,8 @@
 #include <std_msgs/Float64MultiArray.h>
 
 // user specific
-#include <omnirob_robin_tools_ros/common_cpp_tools.h>
-#include <omnirob_robin_tools_ros/geometry_tools.h>
+#include <ros_common_robin_tools/common_cpp_tools.h>
+#include <ros_common_robin_tools/common_geometry_tools.h>
 
 /**
  * This class act as an client and interface to the corresponding action controller.

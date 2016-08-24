@@ -44,8 +44,8 @@
   <build_depend>ros_common_robin_msgs</build_depend>
   <build_depend>omnirob_robin_moveit</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>omnirob_robin_tools_ros</build_depend>
-  <run_depend>omnirob_robin_tools_ros</run_depend>
+  <build_depend>ros_common_robin_tools</build_depend>
+  <run_depend>ros_common_robin_tools</run_depend>
   
 
 

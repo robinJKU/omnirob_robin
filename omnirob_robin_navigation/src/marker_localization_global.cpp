@@ -3,7 +3,7 @@
 #include <fstream>
 
 // custom libraries
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 #include <omnirob_robin_driver/driver_tools.h>
 
 // extern libraries
@@ -550,13 +550,13 @@ class AR_Marker_Localization{
 		ROS_INFO("Start marker localization -------------------");
 		// wait for services
 	    std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
-	    if( !omnirob_ros_tools::wait_for_service( pan_tilt_start_motion_srv) ){
+	    if( !common_tools::wait_for_service( pan_tilt_start_motion_srv) ){
 		    res.error_message = "Service "+ pan_tilt_start_motion_srv +" is not available";
 		    ROS_ERROR("%s", res.error_message.c_str());
 		    return true;
 	    }
 	    std::string ar_track_set_param_srv = "/ar_track_alvar/set_parameters";
-	    if( !omnirob_ros_tools::wait_for_service( ar_track_set_param_srv) ){
+	    if( !common_tools::wait_for_service( ar_track_set_param_srv) ){
 		    res.error_message = "Service "+ ar_track_set_param_srv +" is not available";
 		    ROS_ERROR("%s", res.error_message.c_str());
 		    return true;

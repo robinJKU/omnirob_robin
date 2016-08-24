@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 #include "tf/transform_listener.h"
 
 //services und messages
@@ -39,14 +39,14 @@ int globalLocalization(){
   hector_initialize_msg.pose.pose = marker_localization_msg.response.base_link;
   
   
-  if( !omnirob_ros_tools::wait_until_publisher_is_connected( hector_initialize_publisher) ){
+  if( !common_tools::wait_until_publisher_is_connected( hector_initialize_publisher) ){
 	  ROS_ERROR("Can't initialize hector initialization publisher");
 	  return -1;
   }
   
   std_msgs::String hector_reset_msg;
   hector_reset_msg.data = "reset";  
-  if( !omnirob_ros_tools::wait_until_publisher_is_connected( hector_reset_publisher) ){
+  if( !common_tools::wait_until_publisher_is_connected( hector_reset_publisher) ){
 	  ROS_ERROR("Can't initialize hector reset publisher");
 	  return -1;
   }
@@ -79,17 +79,17 @@ int main( int argc, char** argv) {
   
   // check if all required services and topics exists
   std::string hector_get_map_topic = "/hector_slam/get_map";
-  if( !omnirob_ros_tools::wait_for_service( hector_get_map_topic, 10) ){
+  if( !common_tools::wait_for_service( hector_get_map_topic, 10) ){
 	  return -1;
   }
   
   std::string marker_localization_topic = "/marker_localization";
-  if( !omnirob_ros_tools::wait_for_service( marker_localization_topic, 10) ){
+  if( !common_tools::wait_for_service( marker_localization_topic, 10) ){
 	  return -1;
   }    
   marker_localization_client = n.serviceClient<ros_common_robin_msgs::localization>( marker_localization_topic);
   
-  if( !omnirob_ros_tools::wait_for_service( "/move_base/clear_costmaps", 10) ) {
+  if( !common_tools::wait_for_service( "/move_base/clear_costmaps", 10) ) {
 	  return -1;
   }
   

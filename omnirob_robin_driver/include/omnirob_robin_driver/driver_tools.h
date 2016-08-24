@@ -2,7 +2,7 @@
 #define __OMNIROB_DRIVER_TOOLS_H
 
 #include <ros/ros.h>
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <std_srvs/Empty.h>
 
@@ -45,14 +45,14 @@ class Pan_Tilt{
 		{
 			// initialize services
 			std::string pan_tilt_start_motion_srv = "/omnirob_robin/pan_tilt/control/start_motion";
-			if( !omnirob_ros_tools::wait_for_service( pan_tilt_start_motion_srv) ){
+			if( !common_tools::wait_for_service( pan_tilt_start_motion_srv) ){
 				throw "start motion service does not exist";
 			}else{
 				start_motion_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_start_motion_srv);
 			}
             
             std::string pan_tilt_initialize_srv = "/omnirob_robin/pan_tilt/control/initialize_modules";
-			if( !omnirob_ros_tools::wait_for_service( pan_tilt_initialize_srv) ){
+			if( !common_tools::wait_for_service( pan_tilt_initialize_srv) ){
 				throw "initialize service does not exist";
 			}else{
 				initialize_client = node_handle.serviceClient<std_srvs::Empty>( pan_tilt_initialize_srv);
@@ -133,7 +133,7 @@ class Pan_Tilt{
 		 * Blocks until timeout is reached or at least one node subscribes to the commanded joint state topic.
 		 */
 		bool wait_until_joint_state_publisher_is_connected( float timeout_in_seconds=10.0){
-			if( !omnirob_ros_tools::wait_until_publisher_is_connected( cmd_joint_state_publisher, timeout_in_seconds)){
+			if( !common_tools::wait_until_publisher_is_connected( cmd_joint_state_publisher, timeout_in_seconds)){
 				ROS_ERROR("Can't initialize pan commanded joint state publisher");
 				return false;
 			}

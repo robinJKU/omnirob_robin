@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   ar_track_alvar_msgs
   dynamic_reconfigure
   ros_common_robin_msgs
-  omnirob_robin_tools_ros
+  ros_common_robin_tools
   omnirob_robin_driver
 )
 

@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   sensor_msgs
   shape_msgs
-  omnirob_robin_tools_ros
+  ros_common_robin_tools
   omnirob_robin_msgs
   ros_common_robin_msgs
   srdfdom

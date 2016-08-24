@@ -18,7 +18,7 @@
 #include <omnirob_robin_msgs/move_gripper.h>
 
 // tools
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 
 class pick_and_place_action_server
 {
@@ -138,9 +138,9 @@ private:
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose, plan_pick_pose, plan_home_pose;
 		moveit::planning_interface::MoveGroup::Plan plan_above_pick_pose_reversed, plan_pick_pose_reversed;
 
-		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_target_pose), ros::Time::now(), "base_link", "palm_link/target_pose"));
+		tf_broadcaster_->sendTransform( tf::StampedTransform( common_geometry_tools::calc_tf( palm_link_target_pose), ros::Time::now(), "base_link", "palm_link/target_pose"));
 
-		tf_broadcaster_->sendTransform( tf::StampedTransform( omnirob_geometry_tools::calc_tf( palm_link_above_target_pose), ros::Time::now(), "base_link", "palm_link/above_target_pose")); // todo: remove
+		tf_broadcaster_->sendTransform( tf::StampedTransform( common_geometry_tools::calc_tf( palm_link_above_target_pose), ros::Time::now(), "base_link", "palm_link/above_target_pose")); // todo: remove
 
 		ROS_INFO("Plan path to intermediate point");
 		unsigned int ii=0;
@@ -391,7 +391,7 @@ private:
 	ros::ServiceClient open_gripper_client, close_gripper_client;
 
 	// todo: remove
-	omnirob_ros_tools::blocker blocker_;
+	common_tools::blocker blocker_;
 };
 
 int main(int argc, char **argv)

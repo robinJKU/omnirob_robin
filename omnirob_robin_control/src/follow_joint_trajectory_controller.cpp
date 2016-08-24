@@ -12,8 +12,8 @@
 #include <std_srvs/Empty.h>
 
 // user specific
-#include <omnirob_robin_tools_ros/common_cpp_tools.h>
-#include <omnirob_robin_tools_ros/geometry_tools.h>
+#include <ros_common_robin_tools/common_cpp_tools.h>
+#include <ros_common_robin_tools/common_geometry_tools.h>
 
 /**
  * lwa controller acts as interface to the lwa driver. The class advertise two actions for moving the lwa along a (1) continuous path and a (2) point to point (p2p) path.
@@ -293,7 +293,7 @@ class lwa_controller{
 			while( ros::ok() && p2p_control_action_server_.isActive() && lwa_state_.modules_are_ready && !target_is_reached){
 				rate_10Hz.sleep();
 				ros::spinOnce();
-				target_is_reached = omnirob_geometry_tools::max_angle_distance( lwa_state_.current_lwa_joint_state , trajectory.points[0].positions)<0.01;
+				target_is_reached = common_geometry_tools::max_angle_distance( lwa_state_.current_lwa_joint_state , trajectory.points[0].positions)<0.01;
 			}
 
 			if( !ros::ok() ){

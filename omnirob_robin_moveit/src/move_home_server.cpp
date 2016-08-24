@@ -19,7 +19,7 @@
 #include <omnirob_robin_msgs/move_gripper.h>
 
 // tools
-#include <omnirob_robin_tools_ros/ros_tools.h>
+#include <ros_common_robin_tools/common_tools.h>
 #include <moveit/rdf_loader/rdf_loader.h>
 
 class move_home_server
