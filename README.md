@@ -17,5 +17,7 @@ https://github.com/ros-simulation/gazebo_ros_pkgs/tree/indigo-devel
 
 Git clone the ros_common_robin stack: https://github.com/robinJKU/ros_common_robin
 
+To use slam_kart clone it from here: https://github.com/ros-perception/slam_karto
+
 To install dependencies run:
 rosdep install --from-paths WORKSPACE/src --ignore-src --rosdistro=indigo -y
