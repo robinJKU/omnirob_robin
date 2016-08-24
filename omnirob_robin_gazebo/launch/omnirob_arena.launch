@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="world_file"  default="$(find ros_common_robin_robin_gazebo)/worlds/arena.world"/>
+  <arg name="world_file"  default="$(find ros_common_robin_gazebo)/worlds/arena.world"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
