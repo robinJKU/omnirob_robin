@@ -10,7 +10,7 @@
   
   <xacro:property name="pan_tilt_origin">
     <!-- von camera mast origin zu pan_tilt_origin -->
-    <origin xyz="0 0 0.54" rpy="0 0 0"/>
+    <origin xyz="0 0 0.484" rpy="0 0 0"/>
   </xacro:property>  
   
   <property name="arm_1_ref" value="0"/>
