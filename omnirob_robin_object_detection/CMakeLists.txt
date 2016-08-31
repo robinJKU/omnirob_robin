@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   diagnostic_msgs
   pcl_ros
+  PCL REQUIRED
   omnirob_robin_msgs
   ar_track_alvar_msgs
 )
@@ -29,12 +30,17 @@ catkin_package(
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
   include
 )
 
+link_directories(${PCL_LIBRARY_DIRS})
+
+add_definitions(${PCL_DEFINITIONS})
+
 add_executable(omnirob_robin_object_detection src/object_detection.cpp src/robin_odlib.cpp src/robin_odlib_ros.cpp src/robin_object.cpp)
 add_dependencies(omnirob_robin_object_detection omnirob_robin_msgs_gencpp)
-target_link_libraries(omnirob_robin_object_detection ${catkin_LIBRARIES})
+target_link_libraries(omnirob_robin_object_detection ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(marker_calibration src/marker_calibration.cpp)
 target_link_libraries(marker_calibration ${catkin_LIBRARIES})
