@@ -192,7 +192,7 @@ class lwa_continuous_path_planner{
 				constraints.name = "gripper constrain";
 				moveit_msgs::OrientationConstraint gripper_constrain;
 
-				gripper_constrain.header.frame_id = "/world";
+				gripper_constrain.header.frame_id = "odom";
 				gripper_constrain.link_name = "gripper/palm_link";
 				gripper_constrain.orientation.x = goal_pose_planning_frame.orientation.x;
 				gripper_constrain.orientation.y = goal_pose_planning_frame.orientation.y;

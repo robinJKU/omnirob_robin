@@ -11,6 +11,10 @@
   <!--<param name="robot_description" value="15" />-->
   <!-- Gazebo model spawner -->
   <node name="spawn_omnirob_model" pkg="gazebo_ros" type="spawn_model"
-        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description  
-        -model omnirob"/>   
+        args="$(optenv ROBOT_INITIAL_POSE) -urdf -param robot_description
+        -x $(arg offsetx)
+        -y $(arg offsety)
+        -z $(arg offsetz)  
+        -model omnirob"
+        />   
 </launch>

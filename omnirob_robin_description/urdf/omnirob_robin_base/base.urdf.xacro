@@ -2,14 +2,6 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro"> 
    <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin_base/base.transmission.xacro" />     
    <xacro:macro name="base" params="">
-      <link name="world" />
-      <joint name="odom_joint" type="fixed">
-         <xacro:if value="${simulated}">          
-            <origin xyz="$(arg ofx) $(arg ofy) $(arg ofz)" rpy="0 0 0" /> 
-         </xacro:if>   
-         <parent link="world" />
-         <child link="odom" />
-      </joint>
       <link name="odom">
          <inertial>
             <mass value="1" />

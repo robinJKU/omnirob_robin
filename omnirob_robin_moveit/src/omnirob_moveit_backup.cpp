@@ -474,8 +474,8 @@ int main(int argc, char **argv)
 
     // send the message to the RobotState display //
     robot_state_publisher.publish( msg );
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", "cylinder_orange0")); // luke !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    br.sendTransform(tf::StampedTransform(transform_box, ros::Time::now(), "world", "box0")); 
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom", "cylinder_orange0")); // luke !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    br.sendTransform(tf::StampedTransform(transform_box, ros::Time::now(), "odom", "box0")); 
     br.sendTransform(tf::StampedTransform(to_base_link_from_tcp, ros::Time::now(), "base_link", "tcp"));
 
     //let ROS send the message, then wait a while //

@@ -172,7 +172,7 @@ int main( int argc, char** argv) {
       
       
       try{
-         listener.lookupTransform("world", "gripper/palm_link", ros::Time(0), gripper_transform);
+         listener.lookupTransform("odom", "gripper/palm_link", ros::Time(0), gripper_transform);
       }  catch (tf::TransformException ex){
           
       }      

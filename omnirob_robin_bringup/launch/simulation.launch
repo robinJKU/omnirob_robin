@@ -12,7 +12,7 @@
 		<arg name="driver_ns" value="omnirob_robin" />
 	</include> 
 	
-	<include file="$(find omnirob_robin_navigation)/launch/complete_karto.launch"></include> 
+	<include file="$(find omnirob_robin_navigation)/launch/complete_amcl.launch"></include> 
 	
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" ns="omnirob_robin">
 		<param name="publish_frequency" type="double" value="30.0"/>

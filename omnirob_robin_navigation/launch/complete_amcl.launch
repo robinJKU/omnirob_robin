@@ -9,7 +9,6 @@
 
         <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena.yaml"/>
         <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
-                <remap from="/map" to="/map"/>
         </node>
 
         <!-- start move base -->
