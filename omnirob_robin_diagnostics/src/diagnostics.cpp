@@ -1,3 +1,18 @@
+/*
+ * 
+ * This nodes checks for certain published topics and messages and publishes corrosponding
+ * diagnostics messages.
+ * 
+ * To do this create a diagnostics message struct which defines the format of the message.
+ * After that the struct has to be loaded in a processor which subscribes to the topic and publishes the message
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+ 
 #include <iostream>
 
 #include "ros/ros.h"
@@ -52,7 +67,7 @@ public:
 
 		topic = "/omnirob_robin/" + diag_msg_.ns_ + "/state/" + diag_msg_.msg_ns_ + "/" + diag_msg_.topic_;
 
-		//ROS_INFO(topic.c_str());
+		ROS_INFO(topic.c_str());
 		if(diag_msg_.msg_type_ == FLOAT){
 			subscriber_ = node_handle_.subscribe<std_msgs::Float64MultiArray>(topic, 1, &module_diagnostics_processor::cb_float, this);
 		} else {

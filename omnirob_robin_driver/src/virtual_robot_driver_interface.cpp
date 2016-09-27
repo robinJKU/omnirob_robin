@@ -1023,7 +1023,7 @@ std::vector<double> read_acceleartion_joint_limits(){
 int main( int argc, char** argv) {
 
 	// init ros node
-	ros::init(argc, argv, "virtuell_robot_driver_interface");
+	ros::init(argc, argv, "virtual_robot_driver_interface");
 	ros::NodeHandle handle;
 	
 	std::vector<double> v_max, a_max, j_max;
