@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+	<include file="$(find omnirob_robin_detection_reels)/launch/detection.launch"></include>	
+
+	<node pkg="omnirob_robin_detection_reels" type="omnirob_robin_detection_demo" name="omnirob_robin_detection_demo" output="screen"></node>   
+
+	
+</launch>

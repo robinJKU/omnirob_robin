@@ -1,0 +1,19 @@
+# all objects: cylinder_white
+# add objects only to detactable objects if they are part of the scene
+detectable_objects: [empty_reel,pin]
+objects:
+  empty_reel:
+      color: orange
+      RGBcolor:  [255, 140, 0]
+      primitive0_type: cylinder
+      primitive0_size: [0.17, 0.17, 0.03]
+      primitive0_position: [0.0, 0.0, 0.0]
+      primitive0_orientation: [0.0, 0.0, 0.0]
+
+  pin:
+      color: blue
+      RGBcolor:  [255, 140, 0]
+      primitive0_type: cylinder
+      primitive0_size: [0.0758, 0.0758, 0.07]
+      primitive0_position: [0.0, 0.0, 0.0]
+      primitive0_orientation: [0.0, 0.0, 0.0]
