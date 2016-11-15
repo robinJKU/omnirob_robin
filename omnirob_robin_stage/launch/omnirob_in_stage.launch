@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<launch>
+  <!--<arg name="base"       default="$(optenv TURTLEBOT_BASE kobuki)"/> -->
+  <!--<arg name="stacks"     default="$(optenv TURTLEBOT_STACKS hexagons)"/>-->
+  <!--<arg name="3d_sensor"  default="$(optenv TURTLEBOT_3D_SENSOR kinect)"/>-->
+
+  <!-- Name of the map to use (without path nor extension) and initial position -->
+  <!--<arg name="map_file"       default="$(find omnirob_robin_stage)/maps/arena.yaml"/>-->
+  <arg name="world_file"     default="$(find omnirob_robin_stage)/world/arena_stage.world"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <!--  ******************** Stage ********************  -->
+  <!-- 
+        Publishes transforms:
+          /base_link -> /base_laser
+          /base_footprint -> /base_link (identity)
+          /odom -> base_footprint
+        Publishes topics:
+          /odom : odometry data from the simulated odometry
+          /base_scan : laser data from the simulated laser
+          /base_pose_ground_truth : the ground truth pose
+        Parameters:
+          base_watchdog_timeout : time (s) after receiving the last command on cmd_vel before stopping the robot
+        Args:
+          -g : run in headless mode.
+  --> 
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(arg world_file)">
+    <param name="base_watchdog_timeout" value="0.5"/>
+    <remap from="odom" to="odom"/>
+    <remap from="base_pose_ground_truth" to="base_pose_ground_truth"/>
+    <remap from="cmd_vel" to="omnirob_robin/base/drives/control/cmd_vel"/>
+    <remap from="base_scan" to="laser_front/scan"/>
+  </node>
+
+
+  <!--  ***************** Robot Model *****************  -->
+
+
+  <arg name="offsetx" value="2.3" />
+  <arg name="offsety" value="1.9" />
+  <arg name="offsetz" value="0.0" />
+    
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find omnirob_robin_description)/robots/base_only.urdf.xacro'" />
+
+  <param name="robot_description" command="$(arg urdf_file)" />
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="5.0" />
+  </node>
+	
+  <include file="$(find omnirob_robin_driver)/launch/simulated_base_only.launch"></include>
+	
+  <include file="$(find ros_common_robin_driver)/launch/odometry.launch">
+	<arg name="driver_ns" value="omnirob_robin" />
+  </include> 
+	
+  <include file="$(find omnirob_robin_navigation)/launch/complete_amcl.launch"></include>
+
+</launch>

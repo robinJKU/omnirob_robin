@@ -1,0 +1,21 @@
+<package>
+  <name>omnirob_robin_stage</name>
+  <version>0.3.2</version>
+  <description>
+     A package to launch the omnirob_robin in the ros stage simulator.
+  </description>
+  <maintainer email="alessandrocarapia@alice.it">Alessandro Carapia</maintainer>
+
+  <author>Alessandro Carapia</author>
+
+  <license>BSD</license>
+  <license>LGPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>stageros</run_depend>
+
+  <export>
+  </export>
+
+</package>
