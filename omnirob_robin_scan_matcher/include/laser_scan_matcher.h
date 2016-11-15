@@ -91,6 +91,8 @@ class LaserScanMatcher
     ros::Subscriber odom_subscriber_;
     ros::Subscriber imu_subscriber_;
     ros::Subscriber vel_subscriber_;
+    ros::Subscriber amcl_subscriber_;
+    ros::Subscriber basetrue_subscriber_;
 
     tf::TransformListener    tf_listener_;
     tf::TransformBroadcaster tf_broadcaster_;
@@ -99,9 +101,11 @@ class LaserScanMatcher
     tf::Transform laser_to_base_; // static, cached, calculated from base_to_laser_
     tf::Transform odom_to_base_;
     tf::Transform map_to_odom_;
-    tf::Transform base_to_goal_;
+    tf::Transform goal_to_base_;
     tf::Transform map_to_goal_;
     tf::Transform map_to_base_;
+
+    tf::Transform map_to_amcl_;
 
     ros::Publisher  pose_publisher_;
     ros::Publisher  pose_stamped_publisher_;
@@ -149,6 +153,9 @@ class LaserScanMatcher
     bool received_imu_;
     bool received_odom_;
     bool received_vel_;
+    bool received_amcl_;
+    bool received_basetrue_;
+
 
     tf::Transform f2b_;    // fixed-to-base tf (pose of base frame in fixed frame)
     tf::Transform f2b_kf_; // pose of the last keyframe scan in fixed frame
@@ -159,6 +166,8 @@ class LaserScanMatcher
     sensor_msgs::Imu last_used_imu_msg_;
     nav_msgs::Odometry latest_odom_msg_;
     nav_msgs::Odometry last_used_odom_msg_;
+    geometry_msgs::PoseWithCovarianceStamped last_used_amcl_msg_;
+    nav_msgs::Odometry last_used_basetrue_msg_;
 
     geometry_msgs::Twist latest_vel_msg_;
 
@@ -181,6 +190,8 @@ class LaserScanMatcher
 
     void scanCallback (const sensor_msgs::LaserScan::ConstPtr& scan_msg);
     void cloudCallback (const PointCloudT::ConstPtr& cloud);
+    void amclCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg);
+    void basetrueCallback(const nav_msgs::Odometry::ConstPtr& basetrue_msg);
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg);
     void imuCallback (const sensor_msgs::Imu::ConstPtr& imu_msg);

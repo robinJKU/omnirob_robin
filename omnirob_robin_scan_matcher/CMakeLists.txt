@@ -52,6 +52,9 @@ target_link_libraries( write_scan omnirob_robin_scan_matcher )
 add_executable(broadcaster src/broadcaster.cpp)
 target_link_libraries( broadcaster omnirob_robin_scan_matcher )
 
+add_executable(save_scan src/save_scan.cpp)
+target_link_libraries( save_scan omnirob_robin_scan_matcher )
+
 #Install library
 #install(TARGETS omnirob_robin_scan_matcher laser_scan_matcher_nodelet
 #    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

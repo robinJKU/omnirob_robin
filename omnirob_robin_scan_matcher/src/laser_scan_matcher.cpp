@@ -39,6 +39,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <boost/assign.hpp>
 
+bool test=false;
+
 namespace scan_tools
 {
 
@@ -48,7 +50,9 @@ LaserScanMatcher::LaserScanMatcher(ros::NodeHandle nh, ros::NodeHandle nh_privat
   initialized_(false),
   received_imu_(false),//No use of imu
   received_odom_(false),//No use of odom
-  received_vel_(false)//No use of velocity
+  received_vel_(false),//No use of velocity
+  received_amcl_(false),
+  received_basetrue_(false)
 {
   ROS_INFO("Starting LaserScanMatcher");
 
@@ -125,6 +129,12 @@ void LaserScanMatcher::set_reference_scan(const sensor_msgs::LaserScan::ConstPtr
 void LaserScanMatcher::scan_matching_sub(){
 
   // *** subscribers
+   basetrue_subscriber_ = nh_.subscribe("base_pose_ground_truth", 1, &LaserScanMatcher::basetrueCallback, this);
+
+   sleep(1);
+
+   amcl_subscriber_ = nh_.subscribe("amcl_pose", 1, &LaserScanMatcher::amclCallback, this);
+
 
   if (LaserScanMatcher::use_cloud_input_)
   {
@@ -161,6 +171,7 @@ void LaserScanMatcher::scan_matching_sub(){
 
 void LaserScanMatcher::initParams()
 {
+
   if (!nh_private_.getParam ("base_frame", base_frame_))
     base_frame_ = "base_link";
   if (!nh_private_.getParam ("fixed_frame", fixed_frame_))
@@ -376,6 +387,61 @@ void LaserScanMatcher::imuCallback(const sensor_msgs::Imu::ConstPtr& imu_msg)
   }
 }
 
+void LaserScanMatcher::basetrueCallback(const nav_msgs::Odometry::ConstPtr& basetrue_msg)
+{
+  boost::mutex::scoped_lock(mutex_);
+  if (!received_basetrue_)
+  {
+    last_used_basetrue_msg_ = *basetrue_msg;
+    received_basetrue_ = true;
+
+  tf::Quaternion q(last_used_basetrue_msg_.pose.pose.orientation.x,last_used_basetrue_msg_.pose.pose.orientation.y,last_used_basetrue_msg_.pose.pose.orientation.z,last_used_basetrue_msg_.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  double roll, pitch, yaw;
+  m.getRPY(roll, pitch, yaw);
+
+  ROS_INFO("\n\nPosition true:");
+  ROS_INFO("x=%f",last_used_basetrue_msg_.pose.pose.position.x);
+  ROS_INFO("y=%f",last_used_basetrue_msg_.pose.pose.position.y);
+  ROS_INFO("z=%f",last_used_basetrue_msg_.pose.pose.position.z);
+
+  ROS_INFO("\nOrientation true:");
+  ROS_INFO("r=%f",roll);
+  ROS_INFO("p=%f",pitch);
+  ROS_INFO("y=%f",yaw);
+  }
+
+}
+
+void LaserScanMatcher::amclCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& amcl_msg)
+{
+  boost::mutex::scoped_lock(mutex_);
+  if (!received_amcl_)
+  {
+    last_used_amcl_msg_ = *amcl_msg;
+    received_amcl_ = true;
+  }
+
+  tf::Quaternion q(last_used_amcl_msg_.pose.pose.orientation.x,last_used_amcl_msg_.pose.pose.orientation.y,last_used_amcl_msg_.pose.pose.orientation.z,last_used_amcl_msg_.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  double roll, pitch, yaw;
+  m.getRPY(roll, pitch, yaw);
+
+  ROS_INFO("\n\nPosition evaluated by amcl:");
+  ROS_INFO("x=%f",last_used_amcl_msg_.pose.pose.position.x);
+  ROS_INFO("y=%f",last_used_amcl_msg_.pose.pose.position.y);
+  ROS_INFO("z=%f",last_used_amcl_msg_.pose.pose.position.z);
+
+  ROS_INFO("\nOrientation evaluated by amcl:");
+  ROS_INFO("r=%f",roll);
+  ROS_INFO("p=%f",pitch);
+  ROS_INFO("y=%f",yaw);
+
+  map_to_amcl_.setOrigin(tf::Vector3(last_used_amcl_msg_.pose.pose.position.x, last_used_amcl_msg_.pose.pose.position.y, 0.0));
+  map_to_amcl_.setRotation(q);
+
+}
+
 void LaserScanMatcher::odomCallback(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
   boost::mutex::scoped_lock(mutex_);
@@ -499,13 +565,21 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
 
   // the predicted change of the laser's position, in the laser frame
 
+  tf::Transform map_to_laser0_=map_to_goal_*base_to_laser_;
+  tf::Transform map_to_laser1_=map_to_amcl_*base_to_laser_;
+
   tf::Transform pr_ch_l;
   pr_ch_l.setIdentity(); //I suppose that the scanner is in the same position of the reference one
+  //pr_ch_l=map_to_laser0_.inverse()*map_to_laser1_;
 
   input_.first_guess[0] = pr_ch_l.getOrigin().getX();
   input_.first_guess[1] = pr_ch_l.getOrigin().getY();
   input_.first_guess[2] = tf::getYaw(pr_ch_l.getRotation());
 
+  ROS_INFO("\n\nFirst guess evaluated by the amcl:");
+  ROS_INFO("x=%f",input_.first_guess[0]);
+  ROS_INFO("y=%f",input_.first_guess[1]);
+  ROS_INFO("yaw=%f",input_.first_guess[2]);
 
   // If they are non-Null, free covariance gsl matrices to avoid leaking memory
   if (output_.cov_x_m)
@@ -528,23 +602,28 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
 
   sm_icp(&input_, &output_);
 
+  if (fabs(output_.x[0])<0.3 && fabs(output_.x[1])<0.3){
+    test=true;
+  }
+
   tf::Transform corr_ch;
 
-  if (output_.valid)
+  if (output_.valid && test)
   {
 
     // the correction of the laser's position, in the laser frame
     tf::Transform corr_ch_l;
     createTfFromXYTheta(output_.x[0], output_.x[1], output_.x[2], corr_ch_l);
 
+    ROS_INFO("\nResults evaluated by the scan-matcher:");
+    ROS_INFO("x=%f",output_.x[0]);
+    ROS_INFO("y=%f",output_.x[1]);
+    ROS_INFO("yaw=%f",output_.x[2]);
+
     // the correction of the base's position, in the base frame
-    corr_ch = base_to_laser_ * corr_ch_l * laser_to_base_;
+    goal_to_base_ = base_to_laser_ * corr_ch_l * laser_to_base_;
 
-    // update the pose in the world frame
-    f2b_ = corr_ch;
-
-    base_to_goal_=f2b_.inverse();
-    map_to_odom_=map_to_goal_*base_to_goal_.inverse()*odom_to_base_.inverse();
+    map_to_odom_=map_to_goal_*goal_to_base_*odom_to_base_.inverse();
     map_to_base_=map_to_odom_*odom_to_base_;
 
 //-----------------------
@@ -570,7 +649,7 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
       pose_stamped_msg->header.stamp    = time;
       pose_stamped_msg->header.frame_id = "map";
 
-      tf::poseTFToMsg(f2b_, pose_stamped_msg->pose);
+      tf::poseTFToMsg(map_to_base_, pose_stamped_msg->pose);
 
       pose_stamped_publisher_.publish(pose_stamped_msg);
     }
@@ -654,15 +733,19 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
           (0)  (0)  (0)  (0)  (0)  (0);
       }
 	
-      ROS_INFO("Position evaluated by the scan matching:");
+      ROS_INFO("\n\nPosition evaluated by the scan matching:");
       ROS_INFO("x=%f",pose_with_covariance_stamped_msg->pose.pose.position.x);
       ROS_INFO("y=%f",pose_with_covariance_stamped_msg->pose.pose.position.y);
       ROS_INFO("z=%f",pose_with_covariance_stamped_msg->pose.pose.position.z);
-      ROS_INFO("Orientation evaluated by the scan matching:");
+      /*ROS_INFO("Orientation evaluated by the scan matching:");
       ROS_INFO("x=%f",pose_with_covariance_stamped_msg->pose.pose.orientation.x);
       ROS_INFO("y=%f",pose_with_covariance_stamped_msg->pose.pose.orientation.y);
       ROS_INFO("z=%f",pose_with_covariance_stamped_msg->pose.pose.orientation.z);
-      ROS_INFO("w=%f",pose_with_covariance_stamped_msg->pose.pose.orientation.w);
+      ROS_INFO("w=%f",pose_with_covariance_stamped_msg->pose.pose.orientation.w);*/
+      ROS_INFO("\nOrientation evaluated by the scan matching RPY:");
+      ROS_INFO("r=%f",roll);
+      ROS_INFO("p=%f",pitch);
+      ROS_INFO("y=%f",yaw);
       ros::Rate poll_rate(100);
 
       while(pose_with_covariance_stamped_publisher_.getNumSubscribers() == 0 || pose_with_covariance_stamped_publisher_.isLatched()==0){
@@ -851,6 +934,7 @@ bool LaserScanMatcher::getBaseToLaserTf (const std::string& frame_id)
     return false;
   }
   base_to_laser_ = base_to_laser_tf;
+  //base_to_laser_.setRotation(tf::Quaternion(0.000,0.000,0.000,1));
   laser_to_base_ = base_to_laser_.inverse();
 
   return true;
