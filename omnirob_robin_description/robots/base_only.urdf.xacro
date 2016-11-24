@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+   
+<robot name="omnirob_robin" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="simulated" value="1" />
+   
+  <xacro:include filename="$(find omnirob_robin_description)/urdf/omnirob_robin.library.xacro" />
+
+  <!-- load the base of the robot   -->
+  <xacro:base /> 
+  
+</robot>

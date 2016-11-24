@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+ 
+  <!-- load the gripper interface node -->   
+  <group ns="omnirob_robin/">
+	<rosparam command="load" file="$(find omnirob_robin_driver)/config/joint_limits.yaml"/>
+  </group>   
+    
+  <arg name="driver_ns" value="omnirob_robin" />   
+  <node name="$(arg driver_ns)_base_interface" pkg="ros_common_robin_driver" type="robin_base_interface" respawn="false"
+    output="screen" ns="$(arg driver_ns)">
+    <param name="driver_ns" value="omnirob_robin"/>
+  </node>  
+      
+  <node name="virtual_robot_driver_interface" pkg="omnirob_robin_driver" type="virtual_robot_driver_interface" respawn="false"
+    output="screen" ns="omnirob_robin"/>  
+
+</launch>
+
+
