@@ -3,13 +3,17 @@
   
     <rosparam command="load" file="$(find omnirob_robin_detection_reels)/objects/objects_reels.yaml" />
 
+    <node pkg="tf" type="static_transform_publisher" name="calibration_frame_publisher" args="0.3372403 0.1330963 1.0101598 0.0036 -0.0078 -0.0248 /base_link /calibration_frame 10" />
+
     <!-- <node name="omnirob_robin_detection_reels" pkg="omnirob_robin_detection_reels" type="omnirob_robin_detection_reels" ns="omnirob_robin" respawn="false" output="screen" launch-prefix="xterm -e gdb -args">
       <remap from="/input_cloud" to="/kinect2/qhd/points" />
     </node>-->
 
+<param name="debugging" type="bool" value="false" />
 <node name="omnirob_robin_detection_reels" pkg="omnirob_robin_detection_reels" type="omnirob_robin_detection_reels" ns="omnirob_robin" respawn="false" output="screen">
       <remap from="/input_cloud" to="/kinect2/qhd/points" />
     </node>
+
     <include file="$(find omnirob_robin_detection_reels)/launch/detect_ar_marker.launch"></include>
     
 </launch>

@@ -39,6 +39,12 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
+/**
+*This code analyses the point cloud and the RGB image coming from the kinect sensor.
+*The code is based on the detection of different AR-Markers. In particular the markers
+*with ID number 2-3-4 are used to detect the vertical base while the marker 5 is used to
+*control the position of the cylindrical objects.
+ */
 
 using namespace std;
 
@@ -55,6 +61,7 @@ ros::ServiceServer detectObjectsService;
 ros::ServiceServer getObjectPoseService;
 tf::TransformListener* pListener;
 tf::Transform base_to_target_pose;
+tf::StampedTransform calibrated_to_base;
 
 bool detecting = false;
 bool newCloud = false;
@@ -70,6 +77,7 @@ ImageProcessor *image_detector;
 pcl::PointCloud<PointType>::Ptr cloud;
 std::vector <tf::Transform> transforms;
 std::vector <std::string> transform_names;
+sensor_msgs::Image image_ellipse;
 
 
 //function definitions
@@ -87,8 +95,6 @@ void detect_objects();
 
 void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
 
-	cout<<endl;
-	cout<<"ANALYSIS OF THE POINTCLOUD"<<endl;
 	ROS_INFO("Object detection called, image received");
 	detecting = false;
 	sensor_msgs::PointCloud2::Ptr cloud_transformed (new sensor_msgs::PointCloud2);
@@ -102,11 +108,10 @@ void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input_cloud) {
             		pListener->waitForTransform("/base_link", (*input_cloud).header.frame_id, ros::Time::now(), ros::Duration(1.0) );
 			pcl_ros::transformPointCloud ("/base_link", *input_cloud, *cloud_transformed, *pListener);
             		success = true;
-            		//ROS_INFO("The point cloud is now transformed in the base_link frame");
+            		//The point cloud is now transformed in the base_link frame
           	}catch (tf::TransformException e) {
               		ROS_INFO("Transform_PointCloud Error: %s", e.what());
           	}
-          	//sleep(0.01);
         }
         
 	ROS_INFO("Trasformation of the point cloud in the target frame that is orinted as the plane of the 3 markers");
@@ -166,7 +171,7 @@ void MarkersCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg){
 	  		to_marker_from_camera.setOrigin( tf::Vector3(x, y, z) );
 			to_marker_from_camera.setRotation(q);
 			tf::StampedTransform to_camera_from_base;
-			//ROS_INFO("Trasformation of the markers in the base_link frame");
+			ROS_INFO("Trasformation of the markers in the base_link frame");
 
 			try {
 				pListener->waitForTransform("/base_link", "/kinect2_rgb_optical_frame", ros::Time(0), ros::Duration(3.0) );
@@ -175,7 +180,6 @@ void MarkersCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg){
 				catch(tf::TransformException e){
 				ROS_INFO("Transform object frame error Error: %s", e.what());
 				}
-			//sleep(0.1);
 
 			to_marker_from_base.mult(to_camera_from_base, to_marker_from_camera);
 
@@ -215,25 +219,25 @@ void detect_objects(){
 
 	for(int i = 0; i < detected_cylinder.size(); i++){
 
-		tf::Transform to_object_from_base, to_object_from_target;
+		tf::Transform to_object_from_base, to_object_from_target,to_object_from_calibrated;
 		tf::poseMsgToTF(detected_cylinder[i].get_pose(), to_object_from_target);
 		to_object_from_base.mult(base_to_target_pose,to_object_from_target);	
-		transforms.push_back(to_object_from_base);
+                to_object_from_calibrated.mult(calibrated_to_base,to_object_from_base);
+		transforms.push_back(to_object_from_calibrated);
 		transform_names.push_back(detected_cylinder[i].getName());
 
 		double roll, pitch, yaw;
 		tf::Vector3 Position;
 		tf::Quaternion q2;
-		Position=to_object_from_base.getOrigin();
-		q2=to_object_from_base.getRotation();
+		Position=to_object_from_calibrated.getOrigin();
+		q2=to_object_from_calibrated.getRotation();
 		tf::Matrix3x3 rotation(q2);
 		rotation.getRPY(roll, pitch, yaw);
-
-cout<<"\n---------------------------OBJECT DETECTED"<<endl;
+		ROS_INFO("\nOBJECT DETECTED");
 
 		ROS_INFO("Pose of object detected %s",detected_cylinder[i].getName().c_str());
-		ROS_INFO("Position object detected x= %f y= %f z= %f", Position[0], Position[1], Position[2]);
-            	ROS_INFO("Orientation object detected r= %f p= %f y= %f", roll,pitch,yaw);
+		ROS_INFO("Position object detected with respect to the calibration frame x= %f y= %f z= %f", Position[0], Position[1], Position[2]);
+            	ROS_INFO("Orientation object detected with respect to the calibration frame r= %f p= %f y= %f", roll,pitch,yaw);
 	}
 
 }
@@ -241,7 +245,6 @@ cout<<"\n---------------------------OBJECT DETECTED"<<endl;
 
 bool detectMarkersCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){   
 
-	//ros::Duration(0.01).sleep();
 	clock_t time_e = clock();
 
 	ros::NodeHandle n;
@@ -261,7 +264,7 @@ bool detectMarkersCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	markers_sub = n.subscribe("/ar_pose_marker", 1, &MarkersCallback);
 
 	while(!detection_markers){
-		ros::Rate(1).sleep();
+		ros::Rate(10).sleep();
 		ros::spinOnce();
         }
 	markers_sub.shutdown();
@@ -273,8 +276,8 @@ bool detectMarkersCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 
 	// elaborate the rgb image
 	image_detector->elaboration();
+        image_detector->get_image_msg(image_ellipse);
 	image_detector->get_reel_presence(reel_presence);
-	//std::cout<<"Reels presence "<<reel_presence<<endl;
 	object_detector->set_reel_presence(reel_presence);
 	
 	ROS_INFO("Analysis of the RGB image finished");
@@ -340,6 +343,7 @@ bool ReceiveImage(){
 
 bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response){  
 
+	ROS_INFO("\n\nANALYSIS OF THE POINTCLOUD");
 	clock_t time_c = clock(); 
 
 	//ros::Duration(0.01).sleep(); //duration in the time domain
@@ -367,7 +371,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	tf::Matrix3x3 rotation(qi);
 	target=true;
 
-	//ROS_INFO("Change the reference frame of the markers");
+	ROS_INFO("Change the reference frame of the markers");
 	std::vector<AR_Marker> markers_2;
 	object_detector->get_markers(markers_2);
 
@@ -393,7 +397,7 @@ bool detectObjectsCallback(std_srvs::Empty::Request& request, std_srvs::Empty::R
 	n.shutdown();
 	newCloud = false;
 	detect_objects();//call to the function detect_objects()
-        ROS_INFO("Detect objects finished");
+    ROS_INFO("Detect objects finished");
 	clock_t time_d = clock();
 	double timeTOT_detection=(double)(time_d-time_c) / CLOCKS_PER_SEC; 
 	ROS_INFO("Time necessary for the WHOLE point cloud analysis = %f",timeTOT_detection);
@@ -431,6 +435,15 @@ int main( int argc, char** argv) {
 	//Transform Listener / Broadcaster
 	pListener = new(tf::TransformListener);
 	tf::TransformBroadcaster broadcaster;
+        ros::Publisher image_pub=n.advertise<sensor_msgs::Image> ("/image_ellipse", 10, true);
+
+	try {
+		pListener->waitForTransform("/calibration_frame", "/base_link", ros::Time(0), ros::Duration(3.0) );
+		pListener->lookupTransform("/calibration_frame", "/base_link", ros::Time(0), calibrated_to_base);
+		}
+	catch(tf::TransformException e){
+		ROS_INFO("Transform object frame error Error: %s", e.what());
+		}
 
 	//Receive the camera information and the 2D RGB image
 	ReceiveInfoCamera();
@@ -454,9 +467,10 @@ int main( int argc, char** argv) {
 
 	ros::Rate r(50);
 	while(ros::ok){
+		image_pub.publish(image_ellipse);
 		for(int i = 0; i < transforms.size(); i++){
 			int size = transforms.size();
-			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/base_link", transform_names[i]));
+			broadcaster.sendTransform(tf::StampedTransform(transforms[i], ros::Time::now(), "/calibration_frame", transform_names[i]));
 		}
 		if(target){
 		broadcaster.sendTransform(tf::StampedTransform(base_to_target_pose, ros::Time::now(), "base_link", "target"));	

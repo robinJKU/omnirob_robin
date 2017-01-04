@@ -22,6 +22,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/point_types.h>
 
+//Library for RANSAC algorith (pcl)
 #include <pcl/sample_consensus/ransac.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/sample_consensus/sac_model_plane.h>
@@ -38,6 +39,13 @@
 #include "Eigen/Geometry"
 #include "tf_conversions/tf_eigen.h"
 #include <pcl/sample_consensus/sac_model_circle.h>
+
+/**
+*The code implements the analysis of the point cloud for the estimation of the position
+*and the dimensions of the cylindrical objects.
+*It uses also the results coming from the RGB image to verify the effective presence of 
+*the object with the specific color.
+ */
 
 using namespace std;
 
@@ -117,8 +125,11 @@ public: //functions
 		pcl::PointCloud<PointType>::Ptr base_cloud = pcl::PointCloud<PointType>::Ptr(new pcl::PointCloud<PointType>());
 		pcl::PointCloud<PointType>::Ptr objects_cloud = pcl::PointCloud<PointType>::Ptr(new pcl::PointCloud<PointType>());
 		Eigen::VectorXf coefficients_base(4);
+		ros::param::get("/debugging", debugging);
 
-		//ROS_INFO("Number of markers found= %d",(int)markers.size());
+		if (debugging==1){
+			ROS_INFO("Number of markers found= %d",(int)markers.size());
+		}
  
 		seperateBase(base_cloud,objects_cloud,coefficients_base);
 
@@ -126,7 +137,10 @@ public: //functions
 
 	       	publish_objects(objects_cloud);
 	  	publish_base(base_cloud);
-	  	//ros::Duration(50).sleep();
+
+		if (debugging==1){
+	  		ros::Duration(5).sleep();
+		}
 
 	        ROS_INFO("Segmentation of objects and detection of the cylinders");
 
@@ -139,7 +153,7 @@ public: //functions
 		double distance_from_base=0.0;//Fixed distance between the vertical plane of the machine and the reel
 		int n_max=2;//Maximum number of reels in the warehouse
 
-cout<<"\n---------------------------CORRECTION OF THE POSITION USING THE REFERENCE OBJECTS AND MARKERS"<<endl;
+		ROS_INFO("\nCORRECTION OF THE POSITION USING THE REFERENCE OBJECTS AND MARKERS");
 		for (int i=0;i<cylinder_found.size();i++){
 			for (int j=0;j<objects.size();j++){
 	
@@ -148,16 +162,19 @@ cout<<"\n---------------------------CORRECTION OF THE POSITION USING THE REFEREN
 			}
 		}
 
-		Object reel_object;
+		Object reel_object, pin_object;
 		for (int j=0;j<objects.size();j++){
 			if (objects[j].getName().compare("empty_reel")==0){
 				reel_object=objects[j];
 			}
+			if (objects[j].getName().compare("pin")==0){
+				pin_object=objects[j];
+			}
+			
 		}
 
-cout<<"\n---------------------------COMPARISON WITH THE RESULT OF THE RGB IMAGE ANALYSIS"<<endl;
-		comparison_imageRGB(detected_cylinder,coefficients_base,reel_object,distance_from_base);
-cout<<endl;
+		ROS_INFO("\nCOMPARISON WITH THE RESULT OF THE RGB IMAGE ANALYSIS");
+		comparison_imageRGB(detected_cylinder,coefficients_base,reel_object,pin_object,distance_from_base);
 
 		for (int i=0;i<detected_cylinder.size();i++){
 
@@ -187,7 +204,6 @@ cout<<endl;
 		width=position3-position2;
 		half_height=position4-position2;
 		normal=((position3-position2).cross(position4-position2))/((position3-position2).cross(position4-position2)).length();
-		//ROS_INFO("Normal of the plane x= %f y= %f z= %f",normal[0],normal[1],normal[2]);
 		distance=-normal.dot(position2);
 		ROS_INFO("Distance of the plane from the origin of the frame = %f",distance);
 		center=position4+width/2;
@@ -205,16 +221,9 @@ private: //functions
 	    		//create the variables for the constructor + param namespace
 	    		std::string name = object_names[i];
 	    		std::string name_space = "/objects/" + name;
-	    		std::string color;
-	    		std::vector <int> RGBcolor;
-
-	    		//print name + get the color and RGBcolor value
-	    		ros::param::get(name_space + "/color", color);
-	    		ros::param::get(name_space + "/RGBcolor", RGBcolor);
-	    		int size = RGBcolor.size();
 
 	    		//construct a new object and push it in our vector
-	    		objects.push_back(Object(name, color, RGBcolor));
+	    		objects.push_back(Object(name));
 
 	    		//now load all the primitives
 	    		int k = 0;
@@ -301,7 +310,9 @@ private: //functions
 		pose.position.z = filter.getTranslation()[2]+filter.getMin()[2]+scale[2]/2.0;
 
 		publish_marker(pose, scale, id);
-		//ros::Duration(50).sleep();
+		if (debugging==1){
+			ros::Duration(5).sleep();
+		}
 	}
 
 	void publish_marker(geometry_msgs::Pose pose, std::vector<double> scale, int id = 0){
@@ -319,7 +330,12 @@ private: //functions
 		msg.color.g = 0;
 		msg.color.b = 0;
 		msg.color.a = 1;
+		if (debugging==1){
+		msg.lifetime = ros::Duration(10);
+		}
+		else{
 		msg.lifetime = ros::Duration(0.01);
+		}
 		marker_pub.publish(msg);
 	} 
 
@@ -356,7 +372,7 @@ private: //functions
 		h=half_height.length()*2;
 
 		double profondplus=0.05;
-		double profondminus=0.30;
+		double profondminus=0.20;
 
 
 	  	//initialize cropBox to focus only on the scene
@@ -373,25 +389,40 @@ private: //functions
 	  	cropBoxFilter.setNegative(false);
 	  	cropBoxFilter.filter(*temp);
 		publish_marker(cropBoxFilter, 10);
+
+		if (debugging==1){
+			ros::Duration(10).sleep();
+		}
+
 	  	*cloud = *temp;
-  		//ROS_INFO("Number of points of the cloud after the CropBox application = %d",(int)cloud->size());
+		
+		if (debugging==1){
+  			ROS_INFO("Number of points of the cloud after the CropBox application = %d",(int)cloud->size());
+		}
+
 		publish_objects(cloud);
-		//ros::Duration(100).sleep();
+		
+		if (debugging==1){
+			ros::Duration(5).sleep();
+		}
+
 	  	ros::spinOnce();
 
-	  	/*ROS_INFO("Detection of the vertical base with the RANSAC algorithm");
 
-	  	pcl::ExtractIndices<PointType> extract_objects;
-	  	pcl::ExtractIndices<PointType> extract_base;
-	  	boost::shared_ptr<vector<int> > inliers (new vector<int>);
-	  	pcl::SampleConsensusModelPlane<PointType>::Ptr model_p (new pcl::SampleConsensusModelPlane<PointType> (cloud));
-	  	pcl::RandomSampleConsensus<PointType> ransac (model_p);
-    	  	ransac.setDistanceThreshold (0.01);
-    	  	ransac.computeModel();
-          	ransac.getInliers (*inliers);
-		ransac.getModelCoefficients (coefficients_base); //Hessian coefficients of the plane
-	  	ROS_INFO("Found a plane with %d inliers",(int)inliers->size());
-		ROS_INFO("Distance of the plane from the origin with ransac= %f",coefficients_base[3]);*/
+		if (debugging==1){
+	  		ROS_INFO("Detection of the vertical base with the RANSAC algorithm");
+	  		pcl::ExtractIndices<PointType> extract_objects;
+	  		pcl::ExtractIndices<PointType> extract_base;
+	  		boost::shared_ptr<vector<int> > inliers (new vector<int>);
+	  		pcl::SampleConsensusModelPlane<PointType>::Ptr model_p (new pcl::SampleConsensusModelPlane<PointType> (cloud));
+	  		pcl::RandomSampleConsensus<PointType> ransac (model_p);
+    	  		ransac.setDistanceThreshold (0.01);
+    	  		ransac.computeModel();
+          		ransac.getInliers (*inliers);
+			ransac.getModelCoefficients (coefficients_base); //Hessian coefficients of the plane
+	  		ROS_INFO("Found a plane with %d inliers",(int)inliers->size());
+			ROS_INFO("Distance of the plane from the origin with ransac= %f",coefficients_base[3]);
+		}
 
 	  	ROS_INFO("Elimination of the plane with a cropbox filter");
 
@@ -403,7 +434,10 @@ private: //functions
 	  	cropBoxFilterBase.setNegative(true);
 	  	cropBoxFilterBase.filter(*objects_cloud);
 		publish_marker(cropBoxFilterBase, 10);
-		//ros::Duration(100).sleep();
+	
+		if (debugging==1){
+			ros::Duration(10).sleep();
+		}
 
 	  	cropBoxFilterBase.setNegative(false);
 	  	cropBoxFilterBase.filter(*base_cloud);
@@ -430,7 +464,11 @@ private: //functions
 
           		*objects_cloud=*objects_clouds[j];
 	  		publish_objects(objects_cloud);
-	  		//ros::Duration(50).sleep();
+
+			if (debugging==1){
+	  			ros::Duration(5).sleep();
+			}
+
 			std::vector<pcl::PointCloud<PointType>::Ptr> plane_clouds_tot;//Vector containing the total planes
 			std::vector<pcl::PointCloud<PointType>::Ptr> plane_clouds;//Vector containing only the interesting plane
 	  		pcl::PointCloud<PointType>::Ptr plane (new pcl::PointCloud<PointType>);
@@ -481,7 +519,10 @@ private: //functions
 				n_plane=plane_clouds_tot.size();
 
 				publish_objects(plane);
-				//ros::Duration(50).sleep();
+				
+				if (debugging==1){
+					ros::Duration(2).sleep();
+				}
 
           			Eigen::VectorXf coefficiente;
 	  			ransac.getModelCoefficients (coefficiente); 
@@ -518,23 +559,34 @@ private: //functions
           			proj.filter (*cloud_proj);
 	  
 	  			std::vector<pcl::PointCloud<PointType>::Ptr> cluster_plane_clouds;
-	  			//ROS_INFO("Segmentation of the plane to eliminate stray points");
+		
+				if (debugging==1){
+	  				ROS_INFO("Segmentation of the plane to eliminate stray points");
+				}
 	  			segmentation1(cloud_proj, cluster_plane_clouds);
 
 				if (cluster_plane_clouds.size()>0){
 					*cloud_proj=*cluster_plane_clouds[0];
 
-					//ROS_INFO("Search of the centroid of the point cloud");
+					if (debugging==1){
+						ROS_INFO("Search of the centroid of the point cloud");
+					}
+
 	  				Eigen::Vector4f c;
 	  				pcl::compute3DCentroid<PointType>(*cloud_proj,c);
 	  
 	  				tf::Vector3 origine(c[0], c[1], c[2]);
 					tf::Vector3 normale;
 				
-					//ROS_INFO("Check on the normal direction");
+					if (debugging==1){
+						ROS_INFO("Check on the normal direction");
+					}
+
 					directionNormal(origine,coeff,normale,k,normal_objects);
 
-					//ROS_INFO("Normal of the plane x= %f y= %f z= %f",normale[0],normale[1],normale[2]);
+					if (debugging==1){
+						ROS_INFO("Normal of the plane x= %f y= %f z= %f",normale[0],normale[1],normale[2]);
+					}
 
 					//Test with the normal of the real reels
 					double product=normale.dot(normal_objects);
@@ -554,14 +606,20 @@ private: //functions
 
 			ROS_INFO("Number of planes found in the cluster %d with correct orientation = %d",j+1,(int)plane_clouds.size());
 	                pcl::PointCloud<PointType>::Ptr object_cloud = pcl::PointCloud<PointType>::Ptr(new pcl::PointCloud<PointType>());
-			//ROS_INFO("Research of a cylinder for every plane found with the correct normal");
+
+			if (debugging==1){			
+				ROS_INFO("Research of a cylinder for every plane found with the correct normal");
+			}
 
 			for (int s=0; s<plane_clouds.size(); s++){
  
 	  			*object_cloud=*plane_clouds[s];
 
 	  			publish_objects(object_cloud);
-	  			//ros::Duration(0.01).sleep();
+				
+				if (debugging==1){
+	  				ros::Duration(0.01).sleep();
+				}
 
 				tf::Vector3 normal=normals[s];
 				tf::Vector3 origin=origins[s];
@@ -579,29 +637,38 @@ private: //functions
 				//Move of the point cloud to the target_pose frame for the diameter analysis
 	  			pcl::transformPointCloud (*cloud_projected, *cloud_transformed, Eigen::Vector3f (-origin[0], -origin[1], -origin[2]),Eigen::Quaternionf (1,0,0,0));
 	  			publish_objects(cloud_transformed);
-				//ros::Duration(0.01).sleep();
+		
+				if (debugging==1){
+					ros::Duration(0.01).sleep();
+				}
+
           			*cloud_projected=*cloud_transformed;
 	  			pcl::transformPointCloud (*cloud_projected, *cloud_transformed, Eigen::Vector3f (0, 0, 0),Eigen::Quaternionf (qi[3],qi[0],qi[1],qi[2]));
 	  			publish_objects(cloud_transformed);
-				//ros::Duration(0.01).sleep();
+				
+				if (debugging==1){
+					ros::Duration(0.01).sleep();
+				}
 
 				//Searcing for dyameter
 				double diameter, standard_dev, c_x, c_y, height;
 
 				findDiameter(cloud_transformed,diameter, standard_dev, c_x, c_y);
 
-	    			//ROS_INFO("Diameter =%f",diameter);
-	    			//ROS_INFO("Standard deviation =%f",standard_dev);
-				//ROS_INFO("Coordinate x of the center =%f",c_x);
-				//ROS_INFO("Coordinate y of the center =%f",c_y);
+				if (debugging==1){
+
+	    				ROS_INFO("Diameter =%f",diameter);
+	    				ROS_INFO("Standard deviation =%f",standard_dev);
+					ROS_INFO("Coordinate x of the center =%f",c_x);
+					ROS_INFO("Coordinate y of the center =%f",c_y);
+				}
 
 				if (standard_dev*100<1){
 
 					findHeight2 (clouds_projected[s], diameter, c_x, c_y, normal, origin, q, height,coefficients_base);
-cout<<"\nATTENTION!!!!!!     FOUND A CIRCLE"<<endl;
+					ROS_INFO("\nATTENTION!!!!!!     FOUND A CIRCLE");
 					ROS_INFO("Diameter =%f",diameter);
 					ROS_INFO("Distance of the plane containing the circle from the vertical base =%f",height);
-cout<<""<<endl;
 
 					cylinder_found.resize(n_cylinder+1);
 				
@@ -790,7 +857,10 @@ cout<<""<<endl;
 
 			ROS_INFO("Position face of object detected %s with respect to the base_link",object.getName().c_str());
 			ROS_INFO("x= %f y= %f z= %f", position_stamped[0], position_stamped[1], position_stamped[2]);
-    			//ROS_INFO("Orientation of the face of the object detected with respect to the target r= %f p= %f y= %f",  cylinder.orientation[0], cylinder.orientation[1], cylinder.orientation[2]);
+		
+			if (debugging==1){
+    				ROS_INFO("Orientation of the face of the object detected with respect to the target r= %f p= %f y= %f",  cylinder.orientation[0], cylinder.orientation[1], cylinder.orientation[2]);
+			}
 			
 			for (int k=0;k<markers.size();k++){
 
@@ -891,7 +961,7 @@ cout<<""<<endl;
 
 
 
-	void comparison_imageRGB(std::vector<Cylinder> &detected_cylinder,Eigen::VectorXf &coefficients_base, Object &reel_object,double &distance_from_base){
+	void comparison_imageRGB(std::vector<Cylinder> &detected_cylinder,Eigen::VectorXf &coefficients_base, Object &reel_object, Object &pin_object,double &distance_from_base){
 
 		int cnt=0;
 		Cylinder cylinder;
@@ -909,8 +979,6 @@ cout<<""<<endl;
 			}
 		}
 		
-
-		//std::cout<<"Reels presence "<<reel_presence<<endl;
 		if (cnt==0){
 			ROS_INFO("No reel found with the analysis of the point cloud");
 			if (reel_presence==false){
@@ -947,15 +1015,64 @@ cout<<""<<endl;
 				}
 			}
 		}else{
-		ROS_INFO("Reel already found with the analysis of the point cloud => analysis of the RGB image not necessary");
+			ROS_INFO("Reel already found with the analysis of the point cloud => analysis of the RGB image not necessary");
 		}
+		
+		cnt=0;
+
+		for (int i=0;i<detected_cylinder.size();i++){
+
+			if (detected_cylinder[i].name.compare("pin_0")==0){
+				cnt++;
+			}
+		}
+		
+		if (cnt==0){
+
+			ROS_INFO("No pin found with the analysis of the point cloud");
+
+			Box object_box = pin_object.getBox();
+			cylinder.size[0]=object_box.size[0];
+			cylinder.size[1]=object_box.size[1];
+			tf::Vector3 pose;
+
+			for (int k=0;k<markers.size();k++){
+
+				if (markers[k].marker_id==5){
+				
+						
+					tf::Vector3 cross=markers[k].position.dot(normal)*normal;
+					tf::Vector3 height_marker=markers[k].position-cross;
+					tf::Vector3 distance_base=coefficients_base[3]*normal+height_marker;
+					tf::Vector3 pin=distance_base-object_box.size[2]*normal;
+					pose=pin;
+					position_correct=pose+object_box.size[2]/2*normal;
+					cylinder.position[0]=position_correct[0];
+					cylinder.position[1]=position_correct[1];
+					cylinder.position[2]=position_correct[2];
+					cylinder.orientation[0]=roll;
+					cylinder.orientation[1]=pitch;
+					cylinder.orientation[2]=yaw;
+					cylinder.size[2]=object_box.size[2];
+					cylinder.name=pin_object.getName().c_str();
+					detected_cylinder.push_back(cylinder);
+					detected_cylinder.back().set_number(0);
+				}
+			}
+
+		}else{
+
+			ROS_INFO("Pin already found with the analysis of the point cloud");
+
+		}
+
+
 	}
 
 //FUNCTION THE SEGMENTATION/CLUSTERIZATION
 
 	void segmentation(pcl::PointCloud<PointType>::Ptr  cloud,  std::vector<pcl::PointCloud<PointType>::Ptr> &objects_clouds){
 
-	    //cout<<"Big Segmentation"<<endl;
 	    std::vector <pcl::PointIndices> clusters;
 	    //set up the euclidean Cluster objects
 	    pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
@@ -970,8 +1087,11 @@ cout<<""<<endl;
 	    ec.setInputCloud (cloud);
 	    ec.extract (clusters);
 
-	    	//extract the clustern into their own pointclouds
-	    	//ROS_INFO("%d clusters found ", (int)clusters.size());
+		if (debugging==1){
+	    		//extract the clustern into their own pointclouds
+	    		ROS_INFO("%d clusters found ", (int)clusters.size());
+		}
+
 	    	objects_clouds.clear();
 
 	    	for(int i = 0; i < clusters.size(); i++){
@@ -988,7 +1108,6 @@ cout<<""<<endl;
 
 	void segmentation1(pcl::PointCloud<PointType>::Ptr  cloud,  std::vector<pcl::PointCloud<PointType>::Ptr> &objects_clouds){
 
-            //cout<<"Small Segmentation"<<endl;
 	    std::vector <pcl::PointIndices> clusters;
 	    //set up the euclidean Cluster objects
 	    pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
@@ -1003,8 +1122,11 @@ cout<<""<<endl;
 	    ec.setInputCloud (cloud);
 	    ec.extract (clusters);
 
-	    	//extract the clustern into their own pointclouds
-	    	//ROS_INFO("%d clusters found ", (int)clusters.size());
+		if (debugging==1){
+	    		//extract the clustern into their own pointclouds
+	    		ROS_INFO("%d clusters found ", (int)clusters.size());
+		}
+
 	    	objects_clouds.clear();
 
 	    	for(int i = 0; i < clusters.size(); i++){
@@ -1043,6 +1165,7 @@ private: //member variables
 	tf::Matrix3x3 rotation_direct_target;
 
 	bool reel_presence;
+	bool debugging;
 };
 
 namespace robin_odlib{

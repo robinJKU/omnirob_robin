@@ -12,9 +12,22 @@
 #include "tf/transform_datatypes.h"
 #include <ctime>
 
+//include necessary for the analysis of the RGB image
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+
+/**
+*The code implements the analysis of the RGB image that is done through the color segmentation.
+*Three different algorithms are tested for the diameter estimation:
+*The Hough transformation for circle implemented in openCV
+*The RANSAC algorithm for circles
+*The RANSAC algorithm for ellipses
+ */
+
 using namespace cv;
 
-//static const std::string OPENCV_WINDOW = "Image window";
 
 class ImageProcessor{
 
@@ -23,20 +36,16 @@ class ImageProcessor{
 	std::vector<double> D;
   	Mat Image;
 	bool reel_presence;
+	bool debugging;
+	sensor_msgs::Image im;
   
 public:
 
   	ImageProcessor() {
 
-    	//namedWindow(OPENCV_WINDOW, CV_WINDOW_NORMAL );
 	reel_presence=false;
 
   	}
-
-  	/*~ImageProcessor(){
-
-    		destroyWindow(OPENCV_WINDOW);
-  	}*/
 
 	void set_markers(AR_Marker &marker){
 
@@ -57,6 +66,11 @@ public:
 	        Image=ImageIn;
 	}
 
+	void get_image_msg(sensor_msgs::Image &image_ellipse){
+
+	        image_ellipse=im;
+	}
+
 	void get_reel_presence(bool &reel_presence_in){
 
 	        reel_presence_in=reel_presence;
@@ -66,8 +80,13 @@ public:
 
 	void elaboration(){
 
-		//imshow(OPENCV_WINDOW, Image);
-    		//waitKey(1000);
+		ros::param::get("/debugging", debugging);
+
+		/*if (debugging==1){
+			imshow("START IMAGE", Image);
+    			waitKey(1000);
+		}*/
+
 		ROS_INFO("Read the position of the markers 3, 4, 5");
 		tf::Vector3 position3,position4,position5;
 		getMarkerPosition(position3,position4,position5);
@@ -84,8 +103,11 @@ public:
 		Rect myROI(u_3, v_3, width, height);
 		Mat croppedImage = Image(myROI);
 
-		//imshow("Cropped_image", croppedImage);
-    		//waitKey(3000);
+		/*if (debugging==1){
+			imshow("Cropped_image", croppedImage);
+    			waitKey(1000);
+		}*/
+
 		Mat dst;
 		
 		//Application of a Gaussian blurring (with increasing size of the kernel)
@@ -93,7 +115,10 @@ public:
 	   	for (int i=1; i<7; i=i+2){ 
 
 			GaussianBlur( croppedImage, dst, Size( i, i ), 0, 0 );
-      			//imshow( "Smoothing with Gaussian Kernel", dst );
+
+			/*if (debugging==1){
+      				imshow( "Smoothing with Gaussian Kernel", dst );
+			}*/
 
    		}
 
@@ -111,18 +136,27 @@ public:
 		iHighH=38; //highest value of yellow's hue
 
   		inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-		//imshow( "Yellow", imgThresholded );
-		//waitKey(1000);
+
+		/*if (debugging==1){
+			imshow( "Yellow", imgThresholded );
+			waitKey(1000);
+		}*/
 
 		erode(imgThresholded,imgThresholded,getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
 		dilate(imgThresholded,imgThresholded,getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-		//imshow( "Open", imgThresholded );
-		//waitKey(1000);
+		
+		/*if (debugging==1){
+			imshow( "Open", imgThresholded );
+			waitKey(1000);
+		}*/
 
 		dilate(imgThresholded,imgThresholded,getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
 		erode(imgThresholded,imgThresholded,getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-		//imshow( "Close", imgThresholded );
-		//waitKey(1000);
+
+		/*if (debugging==1){
+			imshow( "Close", imgThresholded );
+			waitKey(1000);
+		}*/
 
 		int n_yellow=0;
 
@@ -138,9 +172,9 @@ public:
 			}
                 } 
 
-		//ROS_INFO("Number of yellow pixels after opening and closing= %d",n_yellow);
+		ROS_INFO("Number of yellow pixels after opening and closing= %d",n_yellow);
 
-		if (n_yellow>0){
+		if (n_yellow>500){
 		
 			reel_presence=true;			
 			
@@ -153,10 +187,12 @@ public:
     			bitwise_not(im_floodfill, im_floodfill_inv);
 
 			Mat im_out = (imgThresholded | im_floodfill_inv);
- 		
-			//imshow("Floodfilled Image", im_floodfill);
-    			//imshow("Inverted Floodfilled Image that is the pin", im_floodfill_inv);
-			//imshow("Final image", im_out);
+ 			
+			/*if (debugging==1){
+				imshow("Floodfilled Image", im_floodfill);
+    				imshow("Inverted Floodfilled Image that is the pin", im_floodfill_inv);
+				imshow("Final image", im_out);
+			}*/
 		
 			vector<Vec3f> circles_reel, circles_pin;
 			Mat croppedImage_2= croppedImage.clone();
@@ -169,8 +205,10 @@ public:
 			houghCircle (im_out, circles_reel);//Reel
 			clock_t time_b = clock();
 
-			//ROS_INFO("Number of circle of type pin = %d",(int)circles_pin.size());
-			//ROS_INFO("Number of circle of type pin = %d",(int)circles_reel.size());
+			/*if (debugging==1){
+				ROS_INFO("Number of circle of type pin = %d",(int)circles_pin.size());
+				ROS_INFO("Number of circle of type pin = %d",(int)circles_reel.size());
+			}*/
 
 			if(circles_pin.size()==0){
 				ROS_INFO("No circle found of type pin");
@@ -180,12 +218,14 @@ public:
 			}
 			
 			for (int i=0;i<circles_pin.size();i++){
+	
+				/*if (debugging==1){
+				ROS_INFO("Center of the circle pin (pixel) x = %d y = %d",(int)circles_pin[i][0], (int)circles_pin[i][1]);
+				ROS_INFO("Radius of the circle pin (pixel) r = %d",(int)circles_pin[i][2]);
+				}*/
 
-				//ROS_INFO("Center of the circle pin (pixel) x = %d y = %d",(int)circles_pin[i][0], (int)circles_pin[i][1]);
-				//ROS_INFO("Radius of the circle pin (pixel) r = %d",(int)circles_pin[i][2]);
-std::cout<<"\n---------------------------DIAMETER OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (HOUGH)"<<endl;
+				ROS_INFO("\nDIAMETER OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (HOUGH)");
 				ROS_INFO("Radius of the circle pin (m) r = %f",circles_pin[i][2]/K[0]*position5[2]);
-std::cout<<endl;
    				Point center_pin(cvRound(circles_pin[i][0]), cvRound(circles_pin[i][1]));
    				int radius_pin = cvRound(circles_pin[i][2]);
 
@@ -199,12 +239,13 @@ std::cout<<endl;
 			for (int j=0;j<circles_reel.size();j++){
 
 
+				/*if (debugging==1){
+				ROS_INFO("Center of the circle reel (pixel) x = %d y = %d",(int)circles_reel[j][0], (int)circles_reel[j][1]);
+				ROS_INFO("Radius of the circle reel (pixel) r = %d",(int)circles_reel[j][2]);
+				}*/
 
-				//ROS_INFO("Center of the circle reel (pixel) x = %d y = %d",(int)circles_reel[j][0], (int)circles_reel[j][1]);
-				//ROS_INFO("Radius of the circle reel (pixel) r = %d",(int)circles_reel[j][2]);
-std::cout<<"\n---------------------------DIAMETER OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (HOUGH)"<<endl;
+				ROS_INFO("\nDIAMETER OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (HOUGH)");
 				ROS_INFO("Radius of the circle reel (m) r = %f",circles_reel[j][2]/K[0]*position5[2]);
-std::cout<<endl;
 
    				Point center_reel(cvRound(circles_reel[j][0]), cvRound(circles_reel[j][1]));
    				int radius_reel = cvRound(circles_reel[j][2]);
@@ -216,7 +257,9 @@ std::cout<<endl;
 
  			}
 
-			//imshow( "Circle found with Hough Circle", croppedImage);
+			/*if (debugging==1){
+				imshow( "Circle found with Hough Circle", croppedImage);
+			}*/
 		
 			ROS_INFO("Application of the Ransac algorithm for circles");
     			Point2d bestCircleCenter_reel, bestCircleCenter_pin;
@@ -227,17 +270,21 @@ std::cout<<endl;
 			ransacCircle (im_out, bestCircleCenter_reel, bestCircleRadius_reel, bestCirclePercentage_reel);//Reel
 			clock_t time_d = clock();
 
-			//ROS_INFO("Center of the circle pin (pixel) x = %d y = %d",(int)bestCircleCenter_pin.x, (int)bestCircleCenter_pin.y);
-			//ROS_INFO("Radius of the circle pin (pixel) r = %d",(int)bestCircleRadius_pin);
-std::cout<<"\n---------------------------DIAMETER OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC CIRCLE)"<<endl;
-			ROS_INFO("Radius of the circle pin (m) r = %f",bestCircleRadius_pin/K[0]*position5[2]);
-std::cout<<endl;
+			/*if (debugging==1){
+			ROS_INFO("Center of the circle pin (pixel) x = %d y = %d",(int)bestCircleCenter_pin.x, (int)bestCircleCenter_pin.y);
+			ROS_INFO("Radius of the circle pin (pixel) r = %d",(int)bestCircleRadius_pin);
+			}*/
 
-			//ROS_INFO("Center of the circle reel (pixel) x = %d y = %d",(int)bestCircleCenter_reel.x, (int)bestCircleCenter_reel.y);
-			//ROS_INFO("Radius of the circle reel (pixel) r = %d",(int)bestCircleRadius_reel);
-std::cout<<"\n---------------------------DIAMETER OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC CIRCLE)"<<endl;
+			ROS_INFO("\nDIAMETER OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC CIRCLE)");
+			ROS_INFO("Radius of the circle pin (m) r = %f",bestCircleRadius_pin/K[0]*position5[2]);
+
+			/*if (debugging==1){
+			ROS_INFO("Center of the circle reel (pixel) x = %d y = %d",(int)bestCircleCenter_reel.x, (int)bestCircleCenter_reel.y);
+			ROS_INFO("Radius of the circle reel (pixel) r = %d",(int)bestCircleRadius_reel);
+			}*/
+
+			ROS_INFO("\nDIAMETER OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC CIRCLE)");
 			ROS_INFO("Radius of the circle reel (m) r = %f",bestCircleRadius_reel/K[0]*position5[2]);
-std::cout<<endl;
 
 			Point center_ransac_pin(cvRound(bestCircleCenter_pin.x), cvRound(bestCircleCenter_pin.y));
 			int radius_ransac_pin = cvRound(bestCircleRadius_pin);
@@ -255,7 +302,9 @@ std::cout<<endl;
 			// circle outline reel
 			circle( croppedImage_2, center_ransac_reel, radius_ransac_reel, Scalar(0,0,255), 3, 8, 0 );
 		
-			//imshow( "Ransac Circle", croppedImage_2);
+			/*if (debugging==1){
+				imshow( "Ransac Circle", croppedImage_2);
+			}*/
 
 			ROS_INFO("Application of the Ransac algorithm for ellipses");
     			Point2d bestEllipseCenter_reel, bestEllipseCenter_pin;
@@ -267,27 +316,31 @@ std::cout<<endl;
 			ransacEllipse (im_out, bestEllipseCenter_reel, bestEllipse_a_reel, bestEllipse_b_reel, bestAngle_reel, bestEllipsePercentage_reel);
 			clock_t time_f = clock();
 
-			//ROS_INFO("Center of the ellipse pin (pixel) x = %f y = %f",bestEllipseCenter_pin.x, bestEllipseCenter_pin.y);
-			//ROS_INFO("Semiaxis a of the ellipse pin (pixel) a = %f",bestEllipse_a_pin);
-			//ROS_INFO("Semiaxis a of the ellipse pin (pixel) b = %f",bestEllipse_b_pin);
-std::cout<<"\n---------------------------SEMIAXIS OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC ELLIPSE)"<<endl;
+			/*if (debugging==1){
+			ROS_INFO("Center of the ellipse pin (pixel) x = %f y = %f",bestEllipseCenter_pin.x, bestEllipseCenter_pin.y);
+			ROS_INFO("Semiaxis a of the ellipse pin (pixel) a = %f",bestEllipse_a_pin);
+			ROS_INFO("Semiaxis a of the ellipse pin (pixel) b = %f",bestEllipse_b_pin);
+			}*/
+
+			ROS_INFO("\nSEMIAXIS OF THE PIN FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC ELLIPSE)");
 
 			conversion_semiaxis(bestEllipseCenter_pin,bestEllipse_a_pin,bestEllipse_b_pin,bestAngle_pin,position5[2],a_real_pin,b_real_pin);
 
 			ROS_INFO("Semiaxis a of the ellipse pin (m) a = %f",a_real_pin);
 			ROS_INFO("Semiaxis b of the ellipse pin (m) b = %f",b_real_pin);
-std::cout<<endl;
 
-			//ROS_INFO("Center of the ellipse reel (pixel) x = %f y = %f",bestEllipseCenter_reel.x, bestEllipseCenter_reel.y);
-			//ROS_INFO("Semiaxis a of the ellipse reel (pixel) a = %f",bestEllipse_a_reel);
-			//ROS_INFO("Semiaxis a of the ellipse reel (pixel) b = %f",bestEllipse_b_reel);
-std::cout<<"\n---------------------------SEMIAXIS OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC ELLIPSE)"<<endl;
+			/*if (debugging==1){
+			ROS_INFO("Center of the ellipse reel (pixel) x = %f y = %f",bestEllipseCenter_reel.x, bestEllipseCenter_reel.y);
+			ROS_INFO("Semiaxis a of the ellipse reel (pixel) a = %f",bestEllipse_a_reel);
+			ROS_INFO("Semiaxis a of the ellipse reel (pixel) b = %f",bestEllipse_b_reel);
+			}*/
+
+			ROS_INFO("\nSEMIAXIS OF THE REEL FOUND WITH THE ANALYSIS OF THE RGB IMAGE (RANSAC ELLIPSE)");
 
 			conversion_semiaxis(bestEllipseCenter_reel,bestEllipse_a_reel,bestEllipse_b_reel,bestAngle_reel,position5[2],a_real_reel,b_real_reel);
 
 			ROS_INFO("Semiaxis a of the ellipse reel (m) a = %f",a_real_reel);
 			ROS_INFO("Semiaxis b of the ellipse reel (m) b = %f",b_real_reel);
-std::cout<<endl;
 
 			Point center_ellipse_pin(cvRound(bestEllipseCenter_pin.x), cvRound(bestEllipseCenter_pin.y));
 			int axis_a_pin = cvRound(bestEllipse_a_pin);
@@ -305,8 +358,18 @@ std::cout<<endl;
 			circle( croppedImage_3, center_ellipse_reel, 3, Scalar(0,255,0), -1, 8, 0 );
 			ellipse( croppedImage_3, center_ellipse_reel, Size(axis_a_reel,axis_b_reel),bestAngle_reel*180/M_PI,0.0,360, Scalar(0,0,255), 3, 8, 0);
 
-		
-			//imshow( "Ransac Ellipse", croppedImage_3);
+			/*if (debugging==1){
+				imshow( "Ransac Ellipse", croppedImage_3);
+			}*/
+
+            		// convert OpenCV image to ROS message
+                        ros::Time time = ros::Time::now();
+            		cv_bridge::CvImage cvi;
+            		cvi.header.stamp = time;
+            		cvi.header.frame_id = "image";
+            		cvi.encoding = "bgr8";
+            		cvi.image = croppedImage_3;	            	
+                        cvi.toImageMsg(im);
 
 			double time_hough=(double)(time_b-time_a) / CLOCKS_PER_SEC;
 			double time_RANSAC_circle=(double)(time_d-time_c) / CLOCKS_PER_SEC;
@@ -320,8 +383,11 @@ std::cout<<endl;
 
 			ROS_INFO("No yellow objects found");
 		}
-		//waitKey(1000);
-		//destroyWindow("Image window");
+
+		/*if (debugging==1){
+			waitKey(0);
+			destroyAllWindows();
+		}*/
 
 	}
 
@@ -367,8 +433,11 @@ std::cout<<endl;
 	   	for (int i=1; i<5; i=i+2){ 
       		
 			GaussianBlur( inputImage, outputImage, Size( i, i ), 0, 0 );
-      			//imshow( "Smoothing with Gauss", outputImage );
-      			//waitKey(1000);
+
+			/*if (debugging==1){
+      				imshow( "Smoothing with Gauss", outputImage );
+      				waitKey(1000);
+			}*/
    		}
 
 	}
@@ -384,7 +453,6 @@ std::cout<<endl;
 	 
 		// Apply the Hough Transform to find the circles
   		HoughCircles(blurred_image, circles, CV_HOUGH_GRADIENT, 1, blurred_image.rows/8, 100, 20, 0, 0 );
-		//HoughCircles(inputImage, circles, CV_HOUGH_GRADIENT, 1, inputImage.rows/8, 10, 20, 0, 0 );
 
 	}
 
@@ -400,8 +468,12 @@ std::cout<<endl;
 		Canny( blurred_image, canny, lowThreshold, lowThreshold*ratio, kernel_size );
 		Mat canny_bin;
 		threshold(canny, canny_bin, 0, 255, CV_THRESH_BINARY);
-		//imshow( "canny_bin", canny_bin);
-		//waitKey(3000);
+		
+		/*if (debugging==1){
+			imshow( "canny_bin", canny_bin);
+			waitKey(1000);
+		}*/
+
 	 	std::vector<cv::Point2d> edgePositions;
 
  		for(unsigned int x=0; x<canny_bin.rows; x++){
@@ -418,12 +490,14 @@ std::cout<<endl;
 
 		//--------------Automatic calculus of iteration for rannsac----------
 
-		/*double p=0.9; //probability of success
-		double w=(double)edgePositions.size()/(double)(canny_bin.rows*canny_bin.cols);
-		ROS_INFO("Total number of pixel = %d",(int)canny_bin.rows*canny_bin.cols);
-		ROS_INFO("Total number of inliers = %d",(int)edgePositions.size());
-		double n_iteration=(log(1.0-p)/log(1.0-pow (w,3.0)));
-		ROS_INFO("Automatic number of iteration for RANSAC n = %f",n_iteration);*/
+		/*if (debugging==1){
+			double p=0.9; //probability of success
+			double w=(double)edgePositions.size()/(double)(canny_bin.rows*canny_bin.cols);
+			ROS_INFO("Total number of pixel = %d",(int)canny_bin.rows*canny_bin.cols);
+			ROS_INFO("Total number of inliers = %d",(int)edgePositions.size());
+			double n_iteration=(log(1.0-p)/log(1.0-pow (w,3.0)));
+			ROS_INFO("Automatic number of iteration for RANSAC n = %f",n_iteration);
+		}*/
 		//-------------------------------------------------------------------
 
 
@@ -431,13 +505,19 @@ std::cout<<endl;
     		Mat dt,dist,canny_inv;
 		bitwise_not(canny_bin, canny_inv);
 
-		//imshow( "inv_canny", canny_inv);
-		//waitKey(3000);
+		/*if (debugging==1){
+			imshow( "inv_canny", canny_inv);
+			waitKey(1000);
+		}*/
 
     		distanceTransform(canny_inv, dt,CV_DIST_L1, 3);
 	    	normalize(dt, dist, 0, 1., NORM_MINMAX);
-    		//imshow("Distance Transform Image", dist);
-		//waitKey(3000);
+
+		/*if (debugging==1){
+    			imshow("Distance Transform Image", dist);
+			waitKey(1000);
+		}*/
+
     		double minRadius = 0.0;
 
 		//-------------------------------------------------
@@ -487,8 +567,12 @@ std::cout<<endl;
 		Canny( blurred_image, canny, lowThreshold, lowThreshold*ratio, kernel_size );
 		Mat canny_bin;
 		threshold(canny, canny_bin, 0, 255, CV_THRESH_BINARY);
-		//imshow( "canny_bin", canny_bin);
-		//waitKey(3000);
+
+		/*if (debugging==1){
+			imshow( "canny_bin", canny_bin);
+			waitKey(1000);
+		}*/
+
 	 	std::vector<cv::Point2d> edgePositions;
 
  		for(unsigned int x=0; x<canny_bin.rows; x++){
@@ -505,12 +589,14 @@ std::cout<<endl;
 
 		//--------------Automatic calculus of iteration for rannsac----------
 
-		/*double p=0.9; //probability of success
-		double w=(double)edgePositions.size()/(double)(canny_bin.rows*canny_bin.cols);
-		ROS_INFO("Total number of pixel = %d",(int)canny_bin.rows*canny_bin.cols);
-		ROS_INFO("Total number of inliers = %d",(int)edgePositions.size());
-		double n_iteration=(log(1.0-p)/log(1.0-pow (w,5.0)));
-		ROS_INFO("Automatic number of iteration for RANSAC n = %f",n_iteration);*/
+		/*if (debugging==1){
+			double p=0.9; //probability of success
+			double w=(double)edgePositions.size()/(double)(canny_bin.rows*canny_bin.cols);
+			ROS_INFO("Total number of pixel = %d",(int)canny_bin.rows*canny_bin.cols);
+			ROS_INFO("Total number of inliers = %d",(int)edgePositions.size());
+			double n_iteration=(log(1.0-p)/log(1.0-pow (w,5.0)));
+			ROS_INFO("Automatic number of iteration for RANSAC n = %f",n_iteration);
+		}*/
 		//-------------------------------------------------------------------
 
 
@@ -518,13 +604,19 @@ std::cout<<endl;
     		Mat dt,dist,canny_inv;
 		bitwise_not(canny_bin, canny_inv);
 
-		//imshow( "inv_canny", canny_inv);
-		//waitKey(3000);
+		/*if (debugging==1){
+			imshow( "inv_canny", canny_inv);
+			waitKey(1000);
+		}*/
 
     		distanceTransform(canny_inv, dt,CV_DIST_L1, 3);
-	    	//normalize(dt, dist, 0, 1., NORM_MINMAX);
-    		//imshow("Distance Transform Image", dist);
-		//waitKey(3000);
+	
+		/*if (debugging==1){
+	    		normalize(dt, dist, 0, 1., NORM_MINMAX);
+    			imshow("Distance Transform Image", dist);
+			waitKey(1000);
+		}*/
+
     		double min_simi_axis = 0.0;
 
 		//-------------------------------------------------
