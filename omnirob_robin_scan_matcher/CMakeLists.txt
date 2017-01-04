@@ -50,10 +50,16 @@ add_executable(write_scan src/write_scan.cpp)
 target_link_libraries( write_scan omnirob_robin_scan_matcher )
 
 add_executable(broadcaster src/broadcaster.cpp)
-target_link_libraries( broadcaster omnirob_robin_scan_matcher )
+target_link_libraries( broadcaster ${catkin_LIBRARIES} )
 
 add_executable(save_scan src/save_scan.cpp)
 target_link_libraries( save_scan omnirob_robin_scan_matcher )
+
+add_executable(save_local_plan src/save_local_plan.cpp)
+target_link_libraries( save_local_plan omnirob_robin_scan_matcher )
+
+add_executable(save_global_plan src/save_global_plan.cpp)
+target_link_libraries( save_global_plan omnirob_robin_scan_matcher )
 
 #Install library
 #install(TARGETS omnirob_robin_scan_matcher laser_scan_matcher_nodelet

@@ -713,13 +713,15 @@ void LaserScanMatcher::processScan(LDP& curr_ldp_scan, const ros::Time& time)
 	std::cout<<gsl_matrix_get(output_.cov_x_m, 0, 1)<<std::endl;
 	std::cout<<gsl_matrix_get(output_.cov_x_m, 0, 2)<<std::endl;*/
 
-        pose_with_covariance_stamped_msg->pose.covariance = boost::assign::list_of
+        /*pose_with_covariance_stamped_msg->pose.covariance = boost::assign::list_of
           (0)  (0)  (0)  (0)  (0)  (0)
           (0)  (0)  (0)  (0)  (0)  (0)
           (0)  (0)  (0)  (0)  (0)  (0)
           (0)  (0)  (0)  (0)  (0)  (0)
           (0)  (0)  (0)  (0)  (0)  (0)
-          (0)  (0)  (0)  (0)  (0)  (0);
+          (0)  (0)  (0)  (0)  (0)  (0);*/
+
+	pose_with_covariance_stamped_msg->pose.covariance=last_used_amcl_msg_.pose.covariance;
       }
       else
       {

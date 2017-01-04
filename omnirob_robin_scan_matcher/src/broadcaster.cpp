@@ -15,7 +15,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "BroadCaster");
+  ros::init(argc, argv, "broadcaster");
 
   ros::NodeHandle n;
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	ros::Rate r(50);
 	while(ros::ok){
 
-		broadcaster.sendTransform(tf::StampedTransform(base_to_target_pose, ros::Time::now(), "map", "perfect_goal"));
+		broadcaster.sendTransform(tf::StampedTransform(base_to_target_pose, ros::Time::now(), "/map", "/perfect_goal"));
 		r.sleep();
 		ros::spinOnce();
 	}

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  	<node pkg="omnirob_robin_scan_matcher" type="broadcaster" name="broadcaster" output="screen"/>
+
+    <!--<node pkg="tf" type="static_transform_publisher" name="calibration_frame_publisher" args="0.3372403 0.1330963 1.0101598 0.0036 -0.0078 -0.0248 /base_link /calibration_frame 10" />-->
+
+    	<rosparam command="load" file="$(find omnirob_robin_scan_matcher)/data/scan_ref_1.yaml" />
+
+</launch>

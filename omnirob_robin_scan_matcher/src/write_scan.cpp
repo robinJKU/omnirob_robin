@@ -41,7 +41,7 @@ void LaserLineFilterNode_callback (const sensor_msgs::LaserScan::ConstPtr& _msg)
 
   	map_to_base_=map_to_base;
 
-        ofstream myfile("/home/aless/catkin_ws/src/omnirob_robin/omnirob_robin_scan_matcher/data/scan_ref_2.yaml", ios::out);
+        ofstream myfile("/home/omnirob/catkin_ws/src/omnirob_robin/omnirob_robin_scan_matcher/data/scan_ref_amcl_test.yaml", ios::out);
 	myfile.precision(17);
 	myfile << "header:\n";
 	myfile << "  seq: "<<_msg->header.seq<<endl;

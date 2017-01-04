@@ -4,9 +4,8 @@
 
   	<node pkg="omnirob_robin_scan_matcher" type="broadcaster" name="broadcaster" />
 
-    	<rosparam command="load" file="$(find omnirob_robin_scan_matcher)/data/scan_ref_1.yaml" />
+    	<rosparam command="load" file="$(find omnirob_robin_scan_matcher)/data/scan_ref_amcl_test.yaml" />
 
-	<param name="/use_sim_time" value="true"/>  
 	<node pkg="omnirob_robin_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">  
   
 	<param name="max_iterations" type="int" value="1000"/><!--DO NOT TOUCH-->
