@@ -13,11 +13,14 @@ import rospkg
 import rospy
 import genpy
 import rosservice
+import tf_conversions
 
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 from urdf_parser_py.urdf import URDF
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Quaternion
 
 
 class OmnirobDashboardWidget(QWidget):
@@ -76,10 +79,14 @@ class OmnirobDashboardWidget(QWidget):
                 if joint.name == 'gripper/finger_left_joint':
                     self.gripper_goal.setMinimum(joint.limit.lower*1000*2)
                     self.gripper_goal.setMaximum(joint.limit.upper*1000*2)
-               
+                    
+        self.auto = 0
+        self.counter = 0 
+        self.mode = 0             
         self._twist = Twist() 
         self.base_activated = False
-        self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1) 
+        self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1)
+        self._goal_pub =  rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size = 1)
         self._lwa_state_callback_count = 0
         
         self._lwa_goal_had_focus = [False for i in range(7)]
@@ -113,6 +120,7 @@ class OmnirobDashboardWidget(QWidget):
     def _timer_update(self):
         self._publish_twist()
         self._update_goals()
+        self._auto_move()
         
     def _update_goals(self):
         
@@ -196,7 +204,25 @@ class OmnirobDashboardWidget(QWidget):
                
         if self.base_activated:
             self._pub.publish(self._twist)
-                   
+         
+    def _auto_move(self):
+        self.counter = self.counter + 1        
+        if self.auto == 1:
+            self.auto_timer.setText("{:.3f}".format(30-self.counter/100.0)) 
+            if self.counter > 3000:        
+                if self.mode == 0:
+                    self._move_base_pose(0.8, 0.8, 0)  #ecke hinten
+                elif self.mode == 1:
+                    self._move_base_pose(1.5, 1.5, 1.57)   #mitte
+                elif self.mode == 2:
+                    self._move_base_pose(2.8, 2.8, 1.57)  #vorne ecke           
+                elif self.mode == 3:
+                    self._move_base_pose(2.7, 1.0, 1.57+3.14)   #tisch             
+                elif self.mode == 4:
+                    self._move_base_pose(1.7, 2.9, 1.57)  #gruener kasten 
+                self.counter = 0
+                self.mode = self.mode + 1
+                self.mode = self.mode % 5
  
     def lwa_state_callback(self, data):        
         self.lwa_state_1.setText("{:.3f}".format(data.data[0]))
@@ -244,6 +270,19 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_demo_detect_clicked(self):
         self.call_service('/omnirob_robin/detect_objects_srv')
+        
+    @Slot()
+    def on_demo_move_center_clicked(self):
+        self._move_base_pose(1.5, 1.5, -1.57)
+        
+    @Slot()
+    def on_demo_start_auto_clicked(self):
+        self.auto = 1
+        self.counter = 6000;
+        
+    @Slot()
+    def on_demo_stop_auto_clicked(self):
+        self.auto = 0
             
 ##### Base
     def _base_move(self, x, y, yaw):
@@ -259,6 +298,15 @@ class OmnirobDashboardWidget(QWidget):
 	self.base_activated = False
         self._base_move(0.0, 0.0, 0.0)
 	self._pub.publish(self._twist)
+    
+    def _move_base_pose(self, x, y, yaw):
+        pose = PoseStamped()
+        pose.header.frame_id = 'map'
+        pose.pose.orientation = Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, 0, yaw))        
+        pose.pose.position.x = x
+        pose.pose.position.y = y
+        pose.pose.position.z = 0
+        self._goal_pub.publish(pose)
 	
         
     @Slot()

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1334</width>
+    <width>1341</width>
     <height>628</height>
    </rect>
   </property>
@@ -156,6 +156,34 @@
         <widget class="QPushButton" name="demo_detect">
          <property name="text">
           <string>Detect</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="demo_move_center">
+         <property name="text">
+          <string>Move Center</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="demo_start_auto">
+         <property name="text">
+          <string>Start Auto</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="demo_stop_auto">
+         <property name="text">
+          <string>Stop Auto</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="auto_timer">
+         <property name="text">
+          <string>State</string>
          </property>
         </widget>
        </item>

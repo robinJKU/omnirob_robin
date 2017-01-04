@@ -1,8 +1,8 @@
 <launch>
   <!-- turtlebot_teleop_key already has its own built in velocity smoother -->
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_keyboard"  output="screen">
-    <param name="scale_linear" value="0.2" type="double"/>
-    <param name="scale_angular" value="0.2" type="double"/>
+    <param name="scale_linear" value="0.03" type="double"/>
+    <param name="scale_angular" value="0.03" type="double"/>
     <remap from="/cmd_vel" to="/omnirob_robin/base/drives/control/cmd_vel"/>
   </node>
 </launch>
