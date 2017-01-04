@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 
-  <node pkg="omnirob_robin_navigation" type="marker_localization_global" name="marker_localization_global" >
-    <rosparam command="load" file="$(find omnirob_robin_navigation)/data/marker_calibration.yaml" />
+  <node pkg="omnirob_robin_navigation" type="marker_localization_global" name="marker_localization_global" output="screen" >
+    <rosparam command="load" file="$(find omnirob_robin_navigation)/data/marker_calibration2.yaml" />
     <rosparam>
       base_link: base_link
     </rosparam>
   </node>
+
+    <include file="$(find omnirob_robin_detection_reels)/launch/detect_ar_marker.launch"></include>
 
 </launch>

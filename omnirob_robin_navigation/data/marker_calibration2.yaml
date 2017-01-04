@@ -1,0 +1,21 @@
+marker_ids: [0, 1]
+marker0:
+  position:
+    x: 1.47
+    y: 0.0
+    z: 1.655
+  orientation:
+    x: -0.706825
+    y: 0.0
+    z: 0.0
+    w: 0.707388
+marker1:
+  position:
+    x: 0.0
+    y: 1.82
+    z: 1.755
+  orientation:
+    x: 0.5
+    y: 0.499602
+    z: 0.5
+    w: 0.500398

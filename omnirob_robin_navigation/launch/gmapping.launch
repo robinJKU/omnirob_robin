@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping">
+<remap from="scan" to="laser_front/scan"/>
+<!--<param name="map_frame" value="map"/>-->
+<!--<param name="odom_frame" value="world"/>-->
+    <param name="xmin" value="-4.0"/>
+    <param name="ymin" value="-4.0"/>
+    <param name="xmax" value="4.0"/>
+    <param name="ymax" value="4.0"/>
+    <param name="delta" value="0.025"/>
+</node>
+
+</launch>

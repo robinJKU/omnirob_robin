@@ -23,11 +23,6 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <ros_common_robin_msgs/localization.h>
 
-#include <iostream>
-#include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include <boost/assign.hpp>
-using namespace std;
-
 // prototypes
 std::string unsigned_int_to_string( unsigned int value );
 
@@ -184,7 +179,6 @@ class AR_Marker_Localization{
 	// services, topics and tf
 	tf::TransformListener *transform_listener;
 	ros::ServiceServer localization_service;
-	ros::Publisher pose_pub;
 	
 	// member variables
 	std::vector<AR_Marker> mark; /**< detected marks */
@@ -202,7 +196,6 @@ class AR_Marker_Localization{
 	AR_Marker_Localization ():
 	last_considered_id(0), node_handle(), private_ns_node_handle("~")
 	{
-	  pose_pub = node_handle.advertise<geometry_msgs::PoseWithCovarianceStamped> ("/initialpose", 10, true);
 	  // parameter: base_link
 	  private_ns_node_handle.getParam("base_link", base_link);
 	  if( base_link.empty() ){
@@ -668,7 +661,6 @@ class AR_Marker_Localization{
 		}
         
         // compute optimal pan angle
-/*
         angle_overlooking_maximum_nr_of_markers = compute_optimal_pan_angle( estimation);
         ROS_INFO("move to %f degree", angle_overlooking_maximum_nr_of_markers*180.0/M_PI);
         
@@ -700,7 +692,6 @@ class AR_Marker_Localization{
 		  ROS_ERROR("%s", res.error_message.c_str());
 		  return true;
 		}
-*/
 
 		// disable ar track alvar node
 		ar_parameters.request.config.bools[0].value=false;
@@ -716,34 +707,6 @@ class AR_Marker_Localization{
 		ROS_INFO("orientation = [%f, %f, %f] (RPY in degree)", roll*180.0/M_PI, pitch*180.0/M_PI, yaw*180.0/M_PI);
         
 	    res.base_link = estimation;
-	    ros::Time time=ros::Time::now();
-
-	    geometry_msgs::PoseWithCovarianceStamped msg;
-	    
-	    msg.header.stamp=time;
-	    msg.header.frame_id="map";
-	    msg.pose.pose.position.x=estimation.position.x;
-	    msg.pose.pose.position.y=estimation.position.y;
-	    msg.pose.pose.position.z=0.0;
-	    msg.pose.pose.orientation.x=estimation.orientation.x;
-	    msg.pose.pose.orientation.y=estimation.orientation.y;
-	    msg.pose.pose.orientation.z=estimation.orientation.z;
-	    msg.pose.pose.orientation.w=estimation.orientation.w;
-	    msg.pose.covariance= boost::assign::list_of
-          (0.2)  (0)  (0)  (0)  (0)  (0)
-          (0)  (0.2)  (0)  (0)  (0)  (0)
-          (0)  (0)  (0)  (0)  (0)  (0)
-          (0)  (0)  (0)  (0)  (0)  (0)
-          (0)  (0)  (0)  (0)  (0)  (0)
-          (0)  (0)  (0)  (0)  (0)  (0.0685);
-
-	      while(pose_pub.getNumSubscribers() == 0 || pose_pub.isLatched()==0){
-	      ROS_ERROR("Waiting for subscibers");
-	      sleep(1);
-	      }
-		
-	    pose_pub.publish(msg);
-		
 	    return true;
 	    
 		

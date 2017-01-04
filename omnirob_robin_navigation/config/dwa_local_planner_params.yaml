@@ -21,8 +21,10 @@ DWAPlannerROS:
   acc_lim_y: 0.2
   
   # Goal Tolerance Parameters
+  #yaw_goal_tolerance: 0.05
+  #xy_goal_tolerance: 0.15
   yaw_goal_tolerance: 0.05
-  xy_goal_tolerance: 0.15
+  xy_goal_tolerance: 0.05
   latch_xy_goal_tolerance: false # xy and theta goal has to be considered
   
   # Forward Simulation Parameters
@@ -35,6 +37,7 @@ DWAPlannerROS:
   path_distance_bias: 10.0 # weighting for how much it should stick to the global path plan
   goal_distance_bias: 40.0 # wighting for how much it should attempt to reach its goal
   occdist_scale: 10.0 # weighting for how much the controller should avoid obstacles
+  variance_weight: 0.0  # the weight for the variance part of the cost function 10000000.0, 5000000.0
   forward_point_distance: 0.5 # distance to the next scoring point
   stop_time_buffer: 0.2 # amount of time that the robot must stop before a collision in order for a trajectory to be considered valid in seconds 
   scaling_speed: 0.25 # absolute velocity at which to start scaling (increasing) the robot's footprint
@@ -42,6 +45,10 @@ DWAPlannerROS:
   
   # Oscillation Prevention Parameters
   oscillation_reset_dist: 0.05 # how far to travel before resetting oscillation flags
+
+  weight_variance_x: 1.0 # weight for the variance in the x-direction 
+  weight_variance_y: 1.0 # weight for the variance in the y-direction
+  weight_variance_th: 1.0 # weight for the variance in the orientation
   
   # Debugging
   publish_traj_pc : true

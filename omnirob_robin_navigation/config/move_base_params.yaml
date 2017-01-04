@@ -1,6 +1,6 @@
 # Move base node parameters
 # control flags
-base_local_planner: "dwa_local_planner/DWAPlannerROS"
+base_local_planner: "omnirob_robin_dwa_local_planner/DWAPlannerROS"
 base_global_planner: "global_planner/GlobalPlanner" # "navfn/NavfnROS"
 
 shutdown_costmaps: false

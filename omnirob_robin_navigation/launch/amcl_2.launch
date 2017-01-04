@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<!-- start amcl node -->
+	<node pkg="amcl" type="amcl" name="amcl" output="screen">
+	
+	<!-- remappings -->
+	<remap from="scan" to="laser_front/scan"/>
+
+	<!-- general -->
+  	<param name="odom_frame_id" value="odom"/>
+  	<param name="use_map_topic" value="true"/>
+
+	<!-- odom model -->
+	<param name="odom_model_type" value="omni"/>
+  	<param name="odom_alpha1" value="0.2"/>
+  	<param name="odom_alpha2" value="0.2"/>
+  	<param name="odom_alpha3" value="0.2"/>
+  	<param name="odom_alpha4" value="0.2"/>
+  	<param name="odom_alpha5" value="0.2"/>
+
+	<!-- laser scan model -->
+  	<param name="laser_model_type" value="likelihood_field"/>
+
+  	<param name="kld_err" value="0.05"/>
+  	<param name="kld_z" value="0.99"/>
+
+	<param name="laser_max_beams" value="361"/>
+	<param name="laser_min_range" value="0.30" /> 
+	<param name="laser_max_range" value="30.0" />
+
+  	<param name="laser_z_hit" value="0.95"/>
+  	<param name="laser_sigma_hit" value="0.2"/>
+  	<param name="laser_z_short" value="0.1"/>
+  	<param name="laser_lambda_short" value="0.1"/>
+  	<param name="laser_z_max" value="0.05"/>
+  	<param name="laser_z_rand" value="0.05"/>
+
+	<!-- problem complexity -->
+  	<param name="min_particles" value="500"/>
+  	<param name="max_particles" value="5000"/>
+
+	<!-- updating -->
+  	<param name="update_min_d" value="0.2"/><!--0.2-->
+  	<param name="update_min_a" value="0.5"/><!--0.5-->
+	<param name="resample_interval" value="1"/>
+	<param name="transform_tolerance" value="0.1"/>
+	<param name="recovery_alpha_slow" value="0.0"/>
+	<param name="recovery_alpha_fast" value="0.0"/>
+
+	<!-- initial guess -->
+  	<param name="initial_pose_x" value="1.0618"/>
+  	<param name="initial_pose_y" value="1.5688"/>
+  	<param name="initial_pose_a" value="-0.7547"/>
+
+	<param name="initial_cov_xx" value="0.2" />
+	<param name="initial_cov_yy" value="0.2" />
+	<param name="initial_cov_aa" value="0.0685" />
+	</node>  
+</launch>
+
