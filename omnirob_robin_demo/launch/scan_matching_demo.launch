@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- start localization nodes -->
+	<include file="$(find omnirob_robin_navigation)/launch/complete_amcl.launch"></include>	
+
+	<!-- start main demo node -->
+	<node pkg="omnirob_robin_demo" type="scan_matching_demo" name="scan_matching_demo" output="screen"></node>   
+    
+        <!-- global localization launch -->
+        <!--<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include> -->
+	
+</launch>

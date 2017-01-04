@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!--<include file="$(find omnirob_robin_scan_matcher)/launch/omnirob_in_stage.launch"></include>-->
+  <!--<param name="use_sim_time" value="true"/>-->
+
+        <param name="STEP_TIME" type="double" value="0.01" />
+
+	<param name="x_distance" type="double" value="-1.0" />
+	<param name="y_distance" type="double" value="1.0" />
+	<param name="ang_distance" type="double" value="-270.0" />
+
+	<param name="max_lin_speed" type="double" value="0.2" />
+	<param name="max_ang_speed" type="double" value="20" />
+	<param name="max_lin_acc" type="double" value="0.1" />
+	<param name="max_ang_acc" type="double" value="10" />
+
+	<node pkg="omnirob_robin_demo" type="parameters_demo" name="parameters_demo" output="screen"></node>   	
+    
+	
+</launch>

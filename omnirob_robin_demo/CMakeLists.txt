@@ -31,3 +31,11 @@ add_dependencies(pick_and_place_demo ros_common_robin_msgs_gencpp omnirob_robin_
 add_executable(base_demo src/base_demo.cpp)
 target_link_libraries(base_demo ${catkin_LIBRARIES})
 add_dependencies(base_demo ros_common_robin_msgs_gencpp omnirob_robin_msgs_gencpp)
+
+add_executable(parameters_demo src/parameters_demo.cpp)
+target_link_libraries(parameters_demo ${catkin_LIBRARIES})
+add_dependencies(parameters_demo ros_common_robin_msgs_gencpp omnirob_robin_msgs_gencpp)
+
+add_executable(scan_matching_demo src/scan_matching_demo.cpp)
+target_link_libraries(scan_matching_demo ${catkin_LIBRARIES})
+add_dependencies(scan_matching_demo ros_common_robin_msgs_gencpp omnirob_robin_msgs_gencpp)
