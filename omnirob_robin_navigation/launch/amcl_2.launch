@@ -42,8 +42,8 @@
   	<param name="max_particles" value="5000"/>
 
 	<!-- updating -->
-  	<param name="update_min_d" value="0.2"/><!--0.2-->
-  	<param name="update_min_a" value="0.5"/><!--0.5-->
+  	<param name="update_min_d" value="0.05"/><!--0.2-->
+  	<param name="update_min_a" value="0.01"/><!--0.5-->
 	<param name="resample_interval" value="1"/>
 	<param name="transform_tolerance" value="0.1"/>
 	<param name="recovery_alpha_slow" value="0.0"/>

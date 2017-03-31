@@ -14,24 +14,26 @@
   	<param name="use_map_topic" value="true"/>
 
 	<!-- odom model -->
-	<!--<param name="odom_model_type" value="omni"/>
+    <!--
+	<param name="odom_model_type" value="omni"/>
   	<param name="odom_alpha1" value="0.2"/>
   	<param name="odom_alpha2" value="0.2"/>
   	<param name="odom_alpha3" value="0.8"/>
   	<param name="odom_alpha4" value="0.2"/>
-  	<param name="odom_alpha5" value="0.1"/>-->
-
+  	<param name="odom_alpha5" value="0.1"/>
+     -->
 	<param name="odom_model_type" value="omni-carapia"/>
   	<param name="odom_alpha1" value="0.00247"/>
-  	<param name="odom_alpha2" value="0.06562"/>
+  	<param name="odom_alpha2" value="0.4"/>
   	<param name="odom_alpha3" value="0.00157"/>
   	<param name="odom_alpha4" value="0.00096"/>
-  	<param name="odom_alpha5" value="0.05174"/>
+  	<param name="odom_alpha5" value="0.4"/>
   	<param name="odom_alpha6" value="0.00133"/>
   	<param name="odom_alpha7" value="0.00195"/>
-  	<param name="odom_alpha8" value="0.00879"/>
+  	<param name="odom_alpha8" value="0.2"/>
   	<param name="odom_alpha9" value="0.00215"/>
   	<param name="odom_SF" value="5.0"/>
+   
 
 	<!-- laser scan model -->
   	<param name="laser_model_type" value="likelihood_field"/>
@@ -55,8 +57,8 @@
   	<param name="max_particles" value="5000"/>
 
 	<!-- updating -->
-  	<param name="update_min_d" value="0.2"/><!--0.05-->
-  	<param name="update_min_a" value="0.5"/><!--0.1-->
+  	<param name="update_min_d" value="0.05"/><!--0.05-->
+  	<param name="update_min_a" value="0.05"/><!--0.1-->
 	<param name="resample_interval" value="1"/>
 	<param name="transform_tolerance" value="0.1"/>
 	<param name="recovery_alpha_slow" value="0.0"/>

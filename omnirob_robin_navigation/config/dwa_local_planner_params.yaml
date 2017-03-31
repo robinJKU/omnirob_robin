@@ -1,10 +1,10 @@
 # Dynamic Window Approach
 DWAPlannerROS:
   # velocity limits
-  max_vel_x: 0.25
-  min_vel_x: -0.25 # no backwards motion, only laser scanner used
-  max_vel_y:  0.25
-  min_vel_y:  -0.25
+  max_vel_x: 0.2
+  min_vel_x: -0.2 # no backwards motion, only laser scanner used
+  max_vel_y:  0.1
+  min_vel_y:  -0.1
   max_trans_vel: 0.3  # choose slightly less than the base's capability
   min_trans_vel: 0.05 # this is the min trans velocity when there is negligible rotational velocity
   trans_stopped_vel: 0.01
@@ -16,9 +16,9 @@ DWAPlannerROS:
   rot_stopped_vel: 0.1
   
   # acceleration limits
-  acc_lim_x: 0.2
-  acc_lim_theta: 0.2
-  acc_lim_y: 0.2
+  acc_lim_x: 0.1
+  acc_lim_theta: 0.1
+  acc_lim_y: 0.1
   
   # Goal Tolerance Parameters
   #yaw_goal_tolerance: 0.05
@@ -34,7 +34,7 @@ DWAPlannerROS:
   vtheta_samples: 30
   
   # Trajectory Scoring Parameters
-  path_distance_bias: 10.0 # weighting for how much it should stick to the global path plan
+  path_distance_bias: 40.0 # weighting for how much it should stick to the global path plan
   goal_distance_bias: 40.0 # wighting for how much it should attempt to reach its goal
   occdist_scale: 10.0 # weighting for how much the controller should avoid obstacles
   variance_weight: 0.0  # the weight for the variance part of the cost function 10000000.0, 5000000.0
@@ -56,4 +56,6 @@ DWAPlannerROS:
   global_frame_id: /odom
   
   holonomic_robot: true
+  prune_plan: true
+  use_dwa: false
   

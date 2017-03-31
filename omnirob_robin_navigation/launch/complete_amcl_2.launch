@@ -6,10 +6,9 @@
      -->   
         <!--start mapping nodes -->
 
-
         <include file="$(find omnirob_robin_navigation)/launch/amcl_2.launch"></include>
 
-        <arg name="map_file" default="$(find omnirob_robin_navigation)/map/map_empty_crop.yaml"/>
+        <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena_packaging_machine.yaml"/>
         <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
         </node>
 
@@ -19,7 +18,9 @@
 
         <!-- start move base-->
         <include file="$(find omnirob_robin_navigation)/launch/move_base.launch"></include> 
-        <!--
-        <node pkg="omnirob_robin_navigation" type="global_localization" name="global_localization" output="screen" />
-        -->
+        
+        <!-- <node pkg="omnirob_robin_navigation" type="global_landmark_localization" name="global_landmark_localization" output="screen" /> -->
+        
+	<include file="$(find omnirob_robin_navigation)/launch/global_landmark_localization.launch"></include>
+
 </launch>
