@@ -211,18 +211,18 @@ class OmnirobDashboardWidget(QWidget):
             self.auto_timer.setText("{:.3f}".format(30-self.counter/100.0)) 
             if self.counter > 3000:        
                 if self.mode == 0:
-                    self._move_base_pose(0.8, 0.8, 0)  #ecke hinten
+                    self._move_base_pose(1.7, 4.4, 0)  #wand
                 elif self.mode == 1:
-                    self._move_base_pose(1.5, 1.5, 1.57)   #mitte
+                    self._move_base_pose(2.8, 4.4, 1.57)   #mitte
                 elif self.mode == 2:
-                    self._move_base_pose(2.8, 2.8, 1.57)  #vorne ecke           
+                    self._move_base_pose(3.6, 3.2, 1.57)  #vorne ecke           
                 elif self.mode == 3:
-                    self._move_base_pose(2.7, 1.0, 1.57+3.14)   #tisch             
+                    self._move_base_pose(3.3, 4.3, 1.57+3.14)  #gruener kasten           
                 elif self.mode == 4:
                     self._move_base_pose(1.7, 2.9, 1.57)  #gruener kasten 
                 self.counter = 0
                 self.mode = self.mode + 1
-                self.mode = self.mode % 5
+                self.mode = self.mode % 4
  
     def lwa_state_callback(self, data):        
         self.lwa_state_1.setText("{:.3f}".format(data.data[0]))
