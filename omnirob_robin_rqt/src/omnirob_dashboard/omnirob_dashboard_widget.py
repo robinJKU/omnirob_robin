@@ -222,7 +222,7 @@ class OmnirobDashboardWidget(QWidget):
                     self._move_base_pose(1.7, 2.9, 1.57)  #gruener kasten 
                 self.counter = 0
                 self.mode = self.mode + 1
-                self.mode = self.mode % 4
+                self.mode = self.mode % 3
  
     def lwa_state_callback(self, data):        
         self.lwa_state_1.setText("{:.3f}".format(data.data[0]))
