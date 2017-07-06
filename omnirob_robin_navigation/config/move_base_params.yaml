@@ -1,13 +1,14 @@
 # Move base node parameters
 # control flags
-#base_local_planner: "teb_local_planner/TebLocalPlannerROS"
-base_local_planner: "dwa_local_planner/DWAPlannerROS"
+base_local_planner: "teb_local_planner/TebLocalPlannerROS"
+#base_local_planner: "dwa_local_planner/DWAPlannerROS"
 base_global_planner: "global_planner/GlobalPlanner" # "navfn/NavfnROS"
 
 shutdown_costmaps: false
 controller_frequency: 5.0 
 oscillation_timeout: 5.0
 oscillation_distance: 0.05
+planner frequency: 1.0
 
 # default recovery behaviour: [{name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},
 #                              {name: rotate_recovery, type: rotate_recovery/RotateRecovery},

@@ -2,9 +2,9 @@ GlobalPlanner:
   allow_unknown: true # Allow planner to plan through unknown space
   default_tolerance: 0.5 # If goal in obstacle, plan to the closest point in radius default_tolerance
   visualize_potential: false
-  use_dijkstra: true # Use dijkstra's (more computation effort, in general more efficient paths) algorithm. Otherwise, A*.
+  use_dijkstra: false # Use dijkstra's (more computation effort, in general more efficient paths) algorithm. Otherwise, A*.
   use_quadratic: true # Use the quadratic approximation of the potential. Otherwise, use a simpler calculation
-  use_grid_path: false # Create a path that follows the grid boundaries. Otherwise, use a gradient descent method
+  use_grid_path: true # Create a path that follows the grid boundaries. Otherwise, use a gradient descent method
   old_navfn_behavior: false # not needed, for details: http://wiki.ros.org/global_planner?distro=indigo
   publish_scale: 100 # Scale by which the published potential gets multiplied, default 100
   lethal_cost: 253 # default 253

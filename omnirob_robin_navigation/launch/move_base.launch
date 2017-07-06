@@ -5,7 +5,7 @@
     <!-- local navigation -->
     <rosparam file="$(find omnirob_robin_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find omnirob_robin_navigation)/config/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find omnirob_robin_navigation)/config/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find omnirob_robin_navigation)/config/teb_local_planner_params.yaml" command="load" />
     
     <!-- global navigation -->
     <rosparam file="$(find omnirob_robin_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
