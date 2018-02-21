@@ -181,6 +181,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="reset_slam">
+         <property name="text">
+          <string>Reset Slam</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="auto_timer">
          <property name="text">
           <string>State</string>

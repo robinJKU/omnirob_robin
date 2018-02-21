@@ -7,7 +7,7 @@ import roslib
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Qt, Slot, qWarning, QTimer, QEvent
-from python_qt_binding.QtGui import QIcon, QMenu, QTreeWidgetItem, QWidget, QLabel, QCheckBox
+from python_qt_binding.QtGui import QIcon, QMenu, QTreeWidgetItem, QWidget, QLabel, QCheckBox, QKeyEvent
 
 import rospkg
 import rospy
@@ -17,6 +17,7 @@ import tf_conversions
 
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 from urdf_parser_py.urdf import URDF
+from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
@@ -86,6 +87,7 @@ class OmnirobDashboardWidget(QWidget):
         self._twist = Twist() 
         self.base_activated = False
         self._pub =  rospy.Publisher('/omnirob_robin/base/drives/control/cmd_vel', Twist, queue_size = 1)
+        self._syscommand_pub = rospy.Publisher('/syscommand', String, queue_size = 1)
         self._goal_pub =  rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size = 1)
         self._lwa_state_callback_count = 0
         
@@ -100,7 +102,7 @@ class OmnirobDashboardWidget(QWidget):
         self._sub_lwa_state = rospy.Subscriber('omnirob_robin/lwa/state/joint_state_array', Float64MultiArray, self.lwa_state_callback)
         self._gripper_lwa_state = rospy.Subscriber('omnirob_robin/pan_tilt/state/joint_state_array', Float64MultiArray, self.pan_tilt_state_callback)
         self._sub_pan_tilt_state = rospy.Subscriber('omnirob_robin/gripper/state/joint_state_array', Float64MultiArray, self.gripper_state_callback)
-        
+    
         
     def start(self):
         self._timer_refresh_state.start(10)                  
@@ -208,16 +210,20 @@ class OmnirobDashboardWidget(QWidget):
     def _auto_move(self):
         self.counter = self.counter + 1        
         if self.auto == 1:
-            self.auto_timer.setText("{:.3f}".format(30-self.counter/100.0)) 
-            if self.counter > 3000:        
+            self.auto_timer.setText("{:.3f}".format(20-self.counter/100.0)) 
+            if self.counter > 1500 and self.counter < 1600:
                 if self.mode == 0:
-                    self._move_base_pose(1.7, 4.4, 0)  #wand
+                    self._reset_slam()
+            
+            if self.counter > 2000:        
+                if self.mode == 0:
+                    self._move_base_pose(1.0, 0.8, 0)  #wand
                 elif self.mode == 1:
-                    self._move_base_pose(2.8, 4.4, 1.57)   #mitte
+                    self._move_base_pose(1.8, 1.7, 1.57)   #mitte
                 elif self.mode == 2:
-                    self._move_base_pose(3.6, 3.2, 1.57)  #vorne ecke           
+                    self._move_base_pose(3.0, 2.9, 1.57)  #vorne ecke           
                 elif self.mode == 3:
-                    self._move_base_pose(3.3, 4.3, 1.57+3.14)  #gruener kasten           
+                    self._move_base_pose(1.4, 2.9, 1.57+3.14)  #gruener kasten           
                 elif self.mode == 4:
                     self._move_base_pose(1.7, 2.9, 1.57)  #gruener kasten 
                 self.counter = 0
@@ -260,6 +266,10 @@ class OmnirobDashboardWidget(QWidget):
             #print(response)
             
     @Slot()
+    def on_reset_slam_clicked(self):
+        self._reset_slam()
+            
+    @Slot()
     def on_demo_move_clicked(self):
         self.call_service('/omnirob_robin/base_demo_detect_srv')
         
@@ -283,6 +293,11 @@ class OmnirobDashboardWidget(QWidget):
     @Slot()
     def on_demo_stop_auto_clicked(self):
         self.auto = 0
+        
+    def _reset_slam(self):
+        self._syscommand_pub.publish("reset")
+    
+    
             
 ##### Base
     def _base_move(self, x, y, yaw):
