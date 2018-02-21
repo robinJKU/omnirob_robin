@@ -6,7 +6,7 @@
 
         <include file="$(find omnirob_robin_navigation)/launch/amcl.launch"></include>
 
-        <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena_packaging_machine.yaml"/>
+        <arg name="map_file" default="$(find omnirob_robin_navigation)/map/arena.yaml"/>
         <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
         </node>
 
